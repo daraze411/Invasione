@@ -73,6 +73,9 @@ button:focus-visible{outline:2px solid var(--paper);outline-offset:2px}
 .stat{border:1px solid var(--line);border-radius:8px;padding:8px 6px;background:var(--panel);display:flex;flex-direction:column;gap:2px;min-width:0}
 .stat b{font-family:var(--mono);font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
 .stat span{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.resume{display:flex;flex-direction:column;gap:3px;text-align:left;border:1px solid var(--paper);background:var(--panel2);border-radius:10px;padding:12px 14px}
+.resume b{font-family:var(--disp);font-size:24px;letter-spacing:.04em;color:var(--paper)}
+.resume span{font-size:12px;color:var(--mute)}
 .nostats{margin:0;font-size:12px;color:var(--mute)}
 @media (prefers-reduced-motion:no-preference){
  .side.on .fl{animation:bob 3.4s ease-in-out infinite}.side.on .fl:nth-of-type(2n){animation-delay:-1.4s}
@@ -620,6 +623,11 @@ const pickQ=old=>{let q;do{q=QUOTES[Math.floor(Math.random()*QUOTES.length)];}wh
 const SK='invasione.stats.v1';
 function loadStats(){const z={g:0,w:0,l:0,d:0,normal:{g:0,w:0},hard:{g:0,w:0},T:{g:0,w:0},A:{g:0,w:0}};try{const v=JSON.parse(localStorage.getItem(SK)||'null');if(v&&typeof v.g==='number')return Object.assign(z,v);}catch(e){}return z;}
 function recordStats(){const st=loadStats(),w=S.winner===H,l=S.winner===1-H,k=diff==='hard'?'hard':'normal',f=S.fac[H];st.g++;if(w)st.w++;else if(l)st.l++;else st.d++;st[k].g++;if(w)st[k].w++;st[f].g++;if(w)st[f].w++;try{localStorage.setItem(SK,JSON.stringify(st));}catch(e){}}
+const SV='invasione.save.v1';
+function saveGame(){if(!S)return;try{if(S.over){localStorage.removeItem(SV);return;}localStorage.setItem(SV,JSON.stringify({v:1,t:Date.now(),diff,S,pops:UI.pops,acc:UI.acc,accOn:UI.accOn,accCont:UI.accCont}));}catch(e){}}
+function loadSave(){try{const d=JSON.parse(localStorage.getItem(SV)||'null');if(d&&d.v===1&&d.S&&!d.S.over&&d.S.pend)return d;}catch(e){}return null;}
+function resumeHTML(){const d=loadSave();if(!d)return '';const g=d.S;
+ return `<button class="resume" data-a="resume"><b>Riprendi la partita</b><span>${g.fac[H]==='T'?'Terrestri':'Alieni'} · ${d.diff==='hard'?'Difficile':'Normale'} · Round ${Math.min(Math.max(g.rd,1),3)}/3 · Tu ${g.pv[H]} – ${g.pv[1-H]} Avv.</span></button>`;}
 const mkUI=sc=>({q:pickQ(),screen:sc,sheet:null,sel:null,grp:null,tsel:null,vsel:null,pops:[],acc:[],accOn:false,accCont:false});
 let S=null,hf='T',diff='normal',UI=mkUI('start'),TG=null,tm=null;
 const VT=[null,['Scarta una tua nave per questo round.','L\'avversario scarta una sua nave per questo round.'],['L\'avversario rilancia una tua nave.','Rilanci una nave dell\'avversario.'],['Se il 5° turno è già passato, il round termina subito. Altrimenti il contatore dei turni va al 5.','Se il 5° turno è già passato, il round termina subito. Altrimenti il contatore dei turni va al 5.'],['Paghi 1 € oppure elimini 2 Tecnologie dal tuo mazzo.','L\'avversario paga 1 € oppure elimina 2 Tecnologie dal suo mazzo.'],['Fino a fine round ogni Virus che prendi vale doppio.','Fino a fine round ogni Virus dell\'avversario vale doppio.'],['Ritiri una tua nave valida da un Fronte e la rilanci.','L\'avversario ritira una sua nave da un Fronte e la rilancia.'],['L\'avversario guadagna 1 €.','Guadagni 1 €.']];
@@ -662,12 +670,12 @@ function startHTML(){
  const aArt=ufo+`<i class="die A sm fl" style="right:70px;bottom:16px;--r:-14deg">5</i><i class="die A sm fl" style="right:34px;bottom:34px;--r:20deg">3</i>`;
  const tArt=`<span class="earth"></span><i class="die T sm fl" style="right:64px;top:16px;--r:12deg">6</i><i class="die T sm fl" style="right:20px;top:44px;--r:-18deg">2</i><i class="die T sm fl" style="right:100px;top:52px;--r:6deg">4</i>`;
  const side=(f,name,art)=>`<button class="side ${f} ${hf===f?'on':''}" data-a="hf" data-v="${f}" aria-pressed="${hf===f}">${art}<b>${name}</b>${hf===f?'<span class="you">La tua fazione</span>':''}</button>`;
- return `<div class="home"><header class="brand"><h1 class="logo">INVASIONE</h1><button class="quote" data-a="q" title="Un'altra frase">“${esc(UI.q)}”<span>Dal regolamento</span></button></header>
+ return `<div class="home"><header class="brand"><h1 class="logo">INVASIONE</h1><button class="quote" data-a="q" title="Un'altra frase">“${esc(UI.q)}”<span>Dal regolamento</span></button></header>${resumeHTML()}
 <div class="opt"><h3>Scegli da che parte stare</h3><div class="arena">${side('A','Alieni',aArt)}<span class="vs">VS</span>${side('T','Terrestri',tArt)}</div></div>
 <div class="opt"><h3>Avversario</h3><div class="seg">
 <button data-a="df" data-v="normal" class="${diff==='normal'?'on':''}"><b>Normale</b></button>
 <button data-a="df" data-v="hard" class="${diff==='hard'?'on':''}"><b>Difficile</b></button></div></div>
-<button class="go" data-a="go">INIZIA</button>
+<button class="go" data-a="go">${loadSave()?'NUOVA PARTITA':'INIZIA'}</button>
 <div class="opt"><h3>Le tue partite</h3>${statsHTML()}</div>
 <div class="links"><button class="link" data-a="tut0">Tutorial</button><button class="link" data-a="help">Regolamento completo</button></div></div>`;}
 function tgtRep(d){if(!TG)return null;for(const x of TG){const v=x.v;if(v.o!==d.p)continue;if(v.i===d.i)return v.i;const r=S.dice[v.o][v.i];if(d.loc==='R'&&r.loc==='R'&&r.v===d.v&&r.fz===d.fz)return v.i;}return null;}
@@ -776,7 +784,8 @@ function sheetHTML(){
  if(UI.pops.length)return popupHTML();
  let body='',ttl='',lead='',cancel=false,tall=false;
  const pd=S&&S.pend;
- if(UI.sheet&&UI.sheet.k==='home'){ttl='Tornare alla home?';body='<p>La partita in corso andrà persa.</p>'+btn('new','','Torna alla home','hi')+btn('close','','Continua a giocare','sec');}
+ if(UI.sheet&&UI.sheet.k==='newconf'){ttl='Iniziare una nuova partita?';body='<p>La partita salvata verrà cancellata.</p>'+btn('gonew','','Nuova partita','hi')+btn('close','','Annulla','sec');}
+ else if(UI.sheet&&UI.sheet.k==='home'){ttl='Tornare alla home?';body='<p>La partita resta salvata: potrai riprenderla dalla schermata iniziale.</p>'+btn('new','','Torna alla home','hi')+btn('close','','Continua a giocare','sec');}
  else if(UI.sheet&&UI.sheet.k==='vconf'&&pd&&pd.p===H&&pd.ctx.then==='main'){const n=UI.sheet.n,u=n*(S.dbl[H]?2:1),v=S.vir[H];
   ttl=n>1?'Prendere '+n+' Virus?':'Prendere 1 Virus?';
   body=`<p style="color:var(--fg)">${esc(UI.sheet.lab)}</p><p>Pescherai ${u>1?u+' carte Virus':'una carta Virus'} e ne applicherai subito l'effetto${S.dbl[H]?' (ogni Virus vale doppio)':''}. Segnalini Virus attuali: ${v}/3.</p>`+(v+u>3?'<p class="vir">Attenzione: raggiungerai il quarto Virus. I segnalini tornano a 0 e pescherai 2 carte Virus.</p>':'')+btn('pickc',UI.sheet.i,'Conferma','hi')+btn('close','','Annulla','sec');}
@@ -824,7 +833,7 @@ function advance(){if(S&&S.over&&!S.rec){S.rec=true;recordStats();}
  if(humanNow&&UI.acc.length){UI.pops.unshift({k:'tech',title:UI.accCont?'Esito':'Mossa dell\'avversario',lines:UI.acc});UI.acc=[];
   const cont=!S.over&&pd&&pd.ctx.then!=='main'&&pd.ctx.then!=='ack';UI.accCont=cont;UI.accOn=cont;}
  else if(humanNow&&!UI.acc.length&&UI.accOn&&!(pd&&pd.ctx.then!=='main')){UI.accOn=false;UI.accCont=false;}
- render();kick();}
+ render();kick();saveGame();}
 function kick(){if(!S||S.over||!S.pend||S.pend.p===H||UI.pops.length)return;clearTimeout(tm);tm=setTimeout(botMove,diff==='hard'?80:420);}
 function botMove(){if(!S||!S.pend||S.pend.p===H||UI.pops.length)return;
  const pd=S.pend,idx=diff==='hard'?BOT.hardChoose(S,{K:8,R:18}):BOT.choose(S,.1),t=pd.opts[idx].v,from=S.log.length;
@@ -842,7 +851,9 @@ function act(i,force){if(!S.pend||S.pend.p!==H)return;
  advance();}
 const HD={
  hf:v=>{hf=v;render();},df:v=>{diff=v;render();},
- go:()=>{clearTimeout(tm);S=INV.newGame({fac:[hf,hf==='T'?'A':'T'],hold:H});UI=mkUI('game');advance();},
+ go:()=>{if(loadSave()){UI.sheet={k:'newconf'};render();return;}HD.gonew();},
+ gonew:()=>{clearTimeout(tm);S=INV.newGame({fac:[hf,hf==='T'?'A':'T'],hold:H});UI=mkUI('game');advance();},
+ resume:()=>{const d=loadSave();if(!d){render();return;}clearTimeout(tm);S=d.S;diff=d.diff==='hard'?'hard':'normal';hf=S.fac[H];UI=mkUI('game');UI.pops=d.pops||[];UI.acc=d.acc||[];UI.accOn=!!d.accOn;UI.accCont=!!d.accCont;advance();},
  new:()=>{clearTimeout(tm);UI=mkUI('start');S=null;render();},
  help:()=>{UI.sheet={k:'help'};render();},
  close:()=>{UI.sheet=null;render();},
@@ -854,12 +865,14 @@ const HD={
  vcancel:()=>{UI.vsel=null;render();},
  vdie:k=>{if(!UI.vsel||!S.pend||S.pend.p!==H)return;const i=info().vd[UI.vsel.c+'/'+UI.vsel.v+'/'+k];UI.vsel=null;if(i===undefined){render();return;}act(i);},
  tut0:()=>{UI.sheet={k:'tut',n:0};render();},tutn:v=>{UI.sheet={k:'tut',n:+v};render();},
- pick:v=>act(v),q:()=>{UI.q=pickQ(UI.q);render();},pickc:v=>act(v,true),homeq:()=>{UI.sheet={k:'home'};render();},tdie:v=>{UI.tsel=v;render();},tback:()=>{UI.tsel=null;render();},pop:()=>{UI.pops.shift();render();kick();},
+ pick:v=>act(v),q:()=>{UI.q=pickQ(UI.q);render();},pickc:v=>act(v,true),homeq:()=>{UI.sheet={k:'home'};render();},tdie:v=>{UI.tsel=v;render();},tback:()=>{UI.tsel=null;render();},pop:()=>{UI.pops.shift();render();kick();saveGame();},
  grp:v=>{UI.grp=v;render();},back:()=>{UI.grp=null;render();}};
 app.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t||t.disabled)return;const f=HD[t.dataset.a];if(f)f(t.dataset.v);});
 app.addEventListener('mouseover',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)showTip(t);else hideTip();});
 app.addEventListener('mouseleave',hideTip);
 window.addEventListener('scroll',hideTip,true);
+window.addEventListener('pagehide',saveGame);
+document.addEventListener&&document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveGame();});
 render();
 })();
 </script>
