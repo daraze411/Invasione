@@ -1,4 +1,4 @@
-const E=require('../src/engine.js'),B=require('../src/bot.js');
+const E=require('./engine.js'),B=require('./bot.js');
 const kinds={
  rnd:s=>Math.floor(Math.random()*s.pend.opts.length),
  norm:s=>B.choose(s,.1),

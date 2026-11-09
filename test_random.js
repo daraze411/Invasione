@@ -1,4 +1,4 @@
-const E=require('../src/engine.js');
+const E=require('./engine.js');
 let ok=0,bad=0,stats={w:[0,0,0],pv:0,turns:0};
 const errs={};
 for(let g=0;g<3000;g++){

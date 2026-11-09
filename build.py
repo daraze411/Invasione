@@ -1,4 +1,4 @@
-"""Ricostruisce index.html a partire dai sorgenti in src/.
+"""Ricostruisce index.html a partire dai sorgenti (engine.js, bot.js, app.html).
 Uso: python3 build.py
 """
 from pathlib import Path
@@ -7,10 +7,10 @@ ROOT = Path(__file__).parent
 GOATCOUNTER = '<script data-goatcounter="https://invasione.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>'
 
 def main():
-    engine = (ROOT / 'src/engine.js').read_text(encoding='utf-8').replace("if(typeof module!=='undefined')module.exports=INV;", "")
-    bot = (ROOT / 'src/bot.js').read_text(encoding='utf-8')
+    engine = (ROOT / 'engine.js').read_text(encoding='utf-8').replace("if(typeof module!=='undefined')module.exports=INV;", "")
+    bot = (ROOT / 'bot.js').read_text(encoding='utf-8')
     bot = bot.replace("if(typeof module!=='undefined')module.exports=BOT;", "").replace("(typeof INV!=='undefined'?INV:require('./engine.js'))", "(INV)")
-    app = (ROOT / 'src/app.html').read_text(encoding='utf-8').replace('/*ENGINE*/', engine).replace('/*BOT*/', bot)
+    app = (ROOT / 'app.html').read_text(encoding='utf-8').replace('/*ENGINE*/', engine).replace('/*BOT*/', bot)
     k = app.index('<div id="app">')
     head = app[:k].replace('<meta name="claude:viewport-fit-sides" content="cover">', '')
     body = app[k:].rstrip()
