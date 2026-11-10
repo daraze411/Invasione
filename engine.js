@@ -24,16 +24,29 @@ const TECH={
 14:{k:'freeze',v:[2,5],t:'Congela una tua nave: non può essere spostata o modificata'},
 15:{k:'swapCond',v:[3,4],t:'Spendi 3 € e scambia due Token Condizione'},
 16:{k:'peek',v:[4,3],t:'Rimuovi 1 Virus e guarda una Tecnologia avversaria'},
-18:{k:'skipG',v:[6,1],t:'L\'avversario salta un turno, ma guadagna 1 €'},
-19:{k:'skipV',v:[1,6],t:'L\'avversario salta un turno, ma rimuove 1 Virus'},
+18:{k:'fac',v:[6,1],t:'Esclusiva'},
+19:{k:'fac',v:[1,6],t:'Esclusiva'},
+25:{k:'fac',v:[],t:'Iniziale'},
+26:{k:'fac',v:[],t:'Iniziale'},
 20:{k:'jolly',v:[1,2,3,4,5,6],t:'Carta jolly (solo per i valori)'},
 22:{k:'special',v:[4,3],t:'Esclusiva'},
 23:{k:'regrow',v:[5,2],t:'Spendi 1 €: scegli una carta dagli scarti e mettila in mano'},
 24:{k:'wipe',v:[6,1],t:'Spendi 2 € e guadagna 1 Virus: scarta tutti i dadi da un fronte'}};
-const WORTH={modSelf2:.9,modOpp2:.9,modSelf1:.8,modOpp1:.8,reroll:.5,moveOpp:.8,trade:.5,resp:.7,gain2:.4,freeze:.3,swapCond:.4,peek:.2,skipG:.5,skipV:.6,jolly:.6,steal:.8,swapShips:.9,regrow:.3,wipe:.7};
+const WORTH={modSelf2:.9,modOpp2:.9,modSelf1:.8,modOpp1:.8,reroll:.5,moveOpp:.8,trade:.5,resp:.7,gain2:.4,freeze:.3,swapCond:.4,peek:.2,reinf:.6,mobil:.7,contagion:.6,mutate:.8,vacc:.3,rerollR:.3,mimic:.3,spore:.3,jolly:.6,steal:.8,swapShips:.9,regrow:.3,wipe:.7};
 const VIRN={1:'Scarta una tua nave per questo round',2:'L\'avversario rilancia una tua nave',3:'Il round termina (o il contatore va al turno 5)',4:'Paga 1 € o elimina 2 Tecnologie dal mazzo',5:'Fino a fine round ogni Virus vale doppio',6:'Ritira una tua nave da un fronte e rilanciala',7:'L\'avversario guadagna 1 €'};
-function tk(s,p,id){return id===22?(s.fac[p]==='T'?'steal':'swapShips'):TECH[id].k;}
-function tt(s,p,id){return id===22?(s.fac[p]==='T'?'Ruba 2 Tecnologie dalla mano dell\'avversario e conservane una':'Scambia una tua nave con una nave avversaria'):TECH[id].t;}
+const FX={18:{T:'reinf',A:'contagion'},19:{T:'mobil',A:'mutate'},22:{T:'steal',A:'swapShips'},25:{T:'vacc',A:'mimic'},26:{T:'rerollR',A:'spore'}};
+const FT={steal:'Ruba 2 Tecnologie dalla mano dell\'avversario e conservane una',swapShips:'Scambia una tua nave con una nave avversaria',
+ reinf:'Rinforzi: recupera una tua nave eliminata o scartata in questo round, rilanciala e rimettila in riserva',
+ mobil:'Mobilitazione: schiera 2 navi con una sola azione',
+ contagion:'Contagio: paga 1 €, l\'avversario prende 1 Virus',
+ mutate:'Mutazione: paga 1 €, capovolgi una nave, tua o avversaria. Se colpisce una nave avversaria può essere respinta',
+ vacc:'Vaccino: rimuovi 1 segnalino Virus e guadagna 1 €',
+ rerollR:'Rilancio tattico: rilancia fino a 2 tue navi in riserva',
+ mimic:'Mimetismo: modifica di ±1 una tua nave in riserva, senza prendere Virus',
+ spore:'Spore: fino a fine round, ogni volta che l\'avversario prende un Virus guadagni 1 €'};
+function tk(s,p,id){const x=FX[id];return x?x[s.fac[p]]:TECH[id].k;}
+function tt(s,p,id){const x=FX[id];return x?FT[x[s.fac[p]]]:TECH[id].t;}
+function isStart(id){return id===25||id===26;}
 function worth(s,p,id){return WORTH[tk(s,p,id)]||.3;}
 /* rng */
 function rnd(s){s.rs=(s.rs+0x6D2B79F5)|0;let t=Math.imul(s.rs^s.rs>>>15,1|s.rs);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}
@@ -85,6 +98,7 @@ function moveOpts(s,owner){const out=[];for(const d of s.dice[owner]){if(d.loc!=
 function ownDice(s,p,hint){const out=[],seen={};for(const d of s.dice[p]){if(d.fz||(d.loc!=='R'&&d.loc!=='F'))continue;if(d.loc==='R'){if(seen[d.v])continue;seen[d.v]=1;}
  let h=0;if(hint){if(d.loc==='F'){const val=validShips(s,d.f,p).includes(d);h=val?(3.5-d.v)*.4-.3:2;}else h=(3.5-d.v)*.5;}
  out.push({l:dlab(s,d),v:{o:p,i:d.i},h});}return out;}
+function placeOpts(s,p){const out=[],seen={};for(const d of s.dice[p]){if(d.loc!=='R')continue;const k0=d.v+'/'+d.fz;for(let g=0;g<3;g++){const k=k0+'/'+g;if(seen[k])continue;if(placeOk(s,p,d,g)){seen[k]=1;out.push({l:'Dado '+d.v+' → '+FR[g]+(s.fr[g].ev===8?' (−1 €)':''),v:{t:'place',d:d.i,f:g},m:[{o:p,i:d.i,set:{loc:'F',f:g,ord:1e9}}]});}}}return out;}
 function tplan(s,p,id){const k=tk(s,p,id),q=1-p,co=s.co[p];let opts=null,ok=true;
  switch(k){
  case'modSelf2':opts=modOpts(s,p,p,[-2,-1,1,2],false,true);ok=opts.length>0;break;
@@ -94,7 +108,15 @@ function tplan(s,p,id){const k=tk(s,p,id),q=1-p,co=s.co[p];let opts=null,ok=true
  case'reroll':opts=ownDice(s,p,true);ok=opts.length>0;break;
  case'moveOpp':ok=co>=1;opts=ok?moveOpts(s,q):[];ok=ok&&opts.length>0;break;
  case'trade':ok=co>=2&&s.hand[p].length>=3;break;
- case'gain2':case'skipG':case'skipV':break;
+ case'gain2':break;
+ case'reinf':{opts=[];const seen={};for(const d of s.dice[p]){if(d.loc!=='X')continue;opts.push({l:'Nave eliminata ('+(d.v>0?'era '+d.v:'distrutta')+')',v:{o:p,i:d.i},h:0});}ok=opts.length>0;break;}
+ case'mobil':opts=placeOpts(s,p);ok=opts.length>0;break;
+ case'contagion':ok=co>=1;break;
+ case'mutate':{opts=[];if(co>=1)for(const o of[p,q]){const seen={};for(const d of s.dice[o]){if(d.fz||(d.loc!=='R'&&d.loc!=='F'))continue;if(d.loc==='R'){if(seen[d.v])continue;seen[d.v]=1;}const nv=7-d.v;if(nv<1||nv>6)continue;opts.push({l:(o===p?'Tua: ':'Avversaria: ')+dlab(s,d)+' → '+nv,v:{o,i:d.i,nv},m:[{o,i:d.i,set:{v:nv}}]});}}ok=opts.length>0;break;}
+ case'vacc':break;
+ case'rerollR':opts=ownDice(s,p,true).filter(o=>s.dice[p][o.v.i].loc==='R');ok=opts.length>0;break;
+ case'mimic':opts=modOpts(s,p,p,[-1,1],false,true).filter(o=>s.dice[p][o.v.i].loc==='R');ok=opts.length>0;break;
+ case'spore':ok=!(s.spore&&s.spore[p]);break;
  case'freeze':opts=ownDice(s,p,false);ok=opts.length>0;break;
  case'swapCond':{opts=[];if(co>=3)for(let a=0;a<3;a++)for(let b=a+1;b<3;b++){if(s.fr[a].flip||s.fr[b].flip)continue;opts.push({l:FR[a]+' ⇄ '+FR[b],v:{a,b},m:[{fr:a,set:{cond:s.fr[b].cond}},{fr:b,set:{cond:s.fr[a].cond}}]});}ok=opts.length>0;break;}
  case'peek':ok=s.hand[q].length>0;break;
@@ -119,9 +141,12 @@ function newGame(o){o=o||{};const s={rs:(o.seed||Date.now())|0,fac:o.fac||['T','
  s.evdeck=shuffle(s,[1,2,3,4,5,7,8,9,10,11,12]);
  for(let i=1;i<=7;i++){s.vdeck.push(i);if(i!==3)s.vdeck.push(i);}shuffle(s,s.vdeck);
  s.st=[{k:'init'}];run(s);return s;}
-TASK.init=s=>{for(let p=0;p<2;p++)s.hand[p]=s.deck[p].splice(0,3);push(s,{k:'keep',p:0},{k:'keep',p:1},{k:'roundStart'});};
-TASK.keep=(s,t)=>{ask(s,t.p,{then:'keep',p:t.p,ttl:'Tieni 2 Tecnologie: quale rimetti nella scatola?'},s.hand[t.p].map((c,i)=>({l:'Rimuovi: '+tt(s,t.p,c),v:i})));};
-FN.keep=(s,c,i)=>{s.hand[c.p].splice(i,1);};
+TASK.init=s=>{push(s,{k:'uni',p:0},{k:'uni',p:1},{k:'draw3',p:0},{k:'draw3',p:1},{k:'roundStart'});};
+TASK.uni=(s,t)=>{ask(s,t.p,{then:'uni',p:t.p,ttl:'Scegli la tua Tecnologia univoca. L\'altra viene eliminata.',noauto:true},[25,26].map(c=>({l:tt(s,t.p,c),v:c,h:worth(s,t.p,c)})));};
+FN.uni=(s,c,id)=>{s.hand[c.p].push(id);};
+TASK.draw3=(s,t)=>{const got=s.deck[t.p].splice(s.deck[t.p].length-3,3);ask(s,t.p,{then:'keep1',p:t.p,got,ttl:'Hai pescato 3 Tecnologie: quale tieni?',noauto:true},got.map((c,i)=>({l:tt(s,t.p,c),v:i,h:worth(s,t.p,c)})));};
+FN.keep1=(s,c,i)=>{const p=c.p,rest=c.got.filter((x,j)=>j!==i);s.hand[p].push(c.got[i]);ask(s,p,{then:'back',p,rest,ttl:'Quale rimetti nel mazzo? L\'altra viene eliminata.',noauto:true},rest.map((x,j)=>({l:tt(s,p,x),v:j,h:worth(s,p,x)})));};
+FN.back=(s,c,j)=>{const p=c.p;s.deck[p].push(c.rest[j]);shuffle(s,s.deck[p]);};
 TASK.roundStart=s=>{s.rd++;
  if(s.rd>=2)for(let p=0;p<2;p++){if(s.vir[p]>0)s.vir[p]--;gain(s,p,1);drawT(s,p);}
  push(s,{k:'setup'});
@@ -129,7 +154,7 @@ TASK.roundStart=s=>{s.rd++;
  else{const dec=s.pv[0]<s.pv[1]?0:s.pv[1]<s.pv[0]?1:s.first;
   ask(s,dec,{then:'first',ttl:'Chi muove per primo nel round '+s.rd+'?'},[{l:'Muovo per primo',v:dec},{l:'Lascio la prima mossa all\'avversario',v:1-dec}]);}};
 FN.first=(s,c,v)=>{s.first=v;};
-TASK.setup=s=>{s.order=[s.first,1-s.first];s.turn=1;s.slot=0;s.pass=[false,false];s.skip=[false,false];s.dbl=[false,false];s.endNow=false;
+TASK.setup=s=>{s.order=[s.first,1-s.first];s.turn=1;s.slot=0;s.pass=[false,false];s.skip=[false,false];s.dbl=[false,false];s.spore=[false,false];s.endNow=false;
  for(let p=0;p<2;p++){s.dice[p]=[];for(let i=0;i<7;i++){s.dice[p].push({i,p,v:1+ri(s,6),loc:'R',f:-1,x:-1,ord:0,fz:0});}}
  if(!s.cdeck)s.cdeck=shuffle(s,['M','M','M','M','B','B','B','B','DH','DH','DL','DL']);
  s.fr=[];for(let f=0;f<3;f++){const ev=s.evdeck.pop();s.fr.push({ev,cond:ev===9?null:s.cdeck.pop(),flip:ev===9,sp:ev===9?[null,null,null,null]:[]});}
@@ -197,11 +222,23 @@ function playTech(s,p,id){const plan=tplan(s,p,id),q=1-p;rem(s.hand[p],id);s.dis
  case'peek':{log(s,fn(s,p)+' guarda una Tecnologia avversaria');if(s.vir[p]>0)s.vir[p]--;if(s.hand[q].length){const c=s.hand[q][ri(s,s.hand[q].length)];log(s,'Vedi una Tecnologia avversaria: '+tt(s,q,c),p);}break;}
  case'steal':{log(s,fn(s,p)+' pesca 2 Tecnologie dalla mano avversaria e ne tiene una');const h=s.hand[q];const n=Math.min(2,h.length);const got=[];for(let i=0;i<n;i++)got.push(h.splice(ri(s,h.length),1)[0]);log(s,'Peschi dalla mano avversaria: '+got.map(c=>tt(s,q,c)).join(' / '),p);
   ask(s,p,{then:'steal',p,got,ttl:'Quale Tecnologia conservi?'},got.map((c,i)=>({l:tt(s,p,c),v:i,h:worth(s,p,c)})));break;}
- case'skipG':s.skip[q]=true;gain(s,q,1);log(s,fn(s,q)+' salta il prossimo turno e guadagna 1 €');break;
- case'skipV':s.skip[q]=true;if(s.vir[q]>0)s.vir[q]--;log(s,fn(s,q)+' salta il prossimo turno'+(s.vir[q]>=0?' e rimuove 1 Virus se ne ha':''));break;
+ case'reinf':ask(s,p,{then:'reinf',p,ttl:'Quale nave recuperi?'},plan.opts);break;
+ case'mobil':push(s,{k:'mob',p,n:2});break;
+ case'contagion':s.co[p]--;log(s,fn(s,q)+' prende 1 Virus');push(s,{k:'vtake',p:q,n:1});break;
+ case'mutate':s.co[p]--;ask(s,p,{then:'mutate',p,ttl:'Quale nave capovolgi?'},plan.opts);break;
+ case'vacc':if(s.vir[p]>0)s.vir[p]--;gain(s,p,1);log(s,fn(s,p)+' rimuove 1 Virus e guadagna 1 €');break;
+ case'rerollR':push(s,{k:'rr',p,n:2});break;
+ case'mimic':ask(s,p,{then:'spMod',p,ttl:'Quale nave in riserva modifichi?'},plan.opts);break;
+ case'spore':if(!s.spore)s.spore=[false,false];s.spore[p]=true;log(s,fn(s,p)+': Spore attive fino a fine round');break;
  case'swapShips':ask(s,p,{then:'techSwap',p,ttl:'Quali navi scambi?'},plan.opts);break;
  case'regrow':s.co[p]--;log(s,fn(s,p)+' recupera una Tecnologia dagli scarti');ask(s,p,{then:'regrow',p,ttl:'Recupera una Tecnologia dagli scarti'},handOpts(s,p,'disc',s.disc[p].length-1));break;
  case'wipe':s.co[p]-=2;push(s,{k:'vtake',p,n:1});ask(s,p,{then:'wipe',p,ttl:'Quale Fronte svuoti?'},plan.opts);break;}}
+FN.reinf=(s,c,v)=>{const d=s.dice[v.o][v.i];d.loc='R';d.f=-1;d.x=-1;d.fz=0;d.v=1+ri(s,6);log(s,fn(s,v.o)+' recupera una nave: dado '+d.v+' in riserva');};
+FN.mutate=(s,c,v)=>{const e={e:'setV',o:v.o,i:v.i,nv:v.nv};if(v.o===c.p)execEff(s,e);else targeted(s,c.p,e,[{o:v.o,i:v.i,set:{v:v.nv}}]);};
+TASK.mob=(s,t)=>{const o=placeOpts(s,t.p);if(!o.length)return;if(t.n<2)o.push({l:'Non schierare altre navi',v:null,h:0});ask(s,t.p,{then:'mob',p:t.p,n:t.n,ttl:t.n===2?'Mobilitazione: schiera la prima nave':'Mobilitazione: schiera la seconda nave'},o);};
+FN.mob=(s,c,v)=>{if(!v)return;if(c.n>1)push(s,{k:'mob',p:c.p,n:c.n-1});doPlace(s,c.p,v);};
+TASK.rr=(s,t)=>{const o=ownDice(s,t.p,true).filter(x=>s.dice[t.p][x.v.i].loc==='R');if(!o.length)return;if(t.n<2)o.push({l:'Basta così',v:null,h:0});ask(s,t.p,{then:'rr',p:t.p,n:t.n,ttl:t.n===2?'Rilancio tattico: prima nave da rilanciare':'Rilancio tattico: seconda nave (facoltativa)'},o);};
+FN.rr=(s,c,v)=>{if(!v)return;const d=s.dice[v.o][v.i],b=d.v;d.v=1+ri(s,6);log(s,fn(s,v.o)+' rilancia: dado '+b+' in riserva → '+d.v);if(c.n>1)push(s,{k:'rr',p:c.p,n:c.n-1});};
 function targeted(s,atk,eff,m){const q=1-atk;
  if((s.hand[q].includes(10)||s.hand[q].includes(11))&&s.co[q]>=1)ask(s,q,{then:'resp',atk,eff,m,ttl:'Respingi l\'attacco?'},[{l:'Respingi (−1 €)',v:true},{l:'Lascia passare',v:false}]);
  else execEff(s,eff);}
@@ -260,7 +297,7 @@ FN.spExtra=(s,c,v)=>{doPlace(s,c.p,v);};
 FN.spMove=(s,c,v)=>{execEff(s,{e:'move',o:v.o,i:v.i,to:v.to});};
 FN.spMod=(s,c,v)=>{execEff(s,{e:'setV',o:v.o,i:v.i,nv:v.nv});};
 /* virus */
-TASK.vtake=(s,t)=>{if(t.n<=0)return;const p=t.p;push(s,{k:'vunit',p,c:s.dbl[p]?2:1},{k:'vtake',p,n:t.n-1});};
+TASK.vtake=(s,t)=>{if(t.n<=0)return;const p=t.p;if(s.spore&&s.spore[1-p]){gain(s,1-p,1);log(s,fn(s,1-p)+' guadagna 1 € (Spore)');}push(s,{k:'vunit',p,c:s.dbl[p]?2:1},{k:'vtake',p,n:t.n-1});};
 TASK.vunit=(s,t)=>{if(t.c<=0)return;const p=t.p,rest={k:'vunit',p,c:t.c-1};
  if(s.vir[p]>=3){s.vir[p]=0;log(s,fn(s,p)+': quarto Virus! Riavvio del sistema, 2 carte Virus.');qev(s,{k:'reboot',p});push(s,{k:'vcard',p},{k:'vcard',p},rest);}
  else{s.vir[p]++;push(s,{k:'vcard',p},rest);}};
@@ -308,6 +345,6 @@ function finish(s){s.over=true;const[a,b]=s.pv;let w=-1,why=null;
   else if(s.vir[0]!==s.vir[1]){w=s.vir[0]<s.vir[1]?0:1;why={k:'vir',v:[s.vir[0],s.vir[1]],r:[ra,rb]};}
   else why={k:'cantina',v:[ra,rb]};}
  s.winner=w;s.why=why;log(s,'Partita conclusa.');}
-return{placeOk,FR,EVN,EVD,CN,SPN,TECH,VIRN,newGame,run,answer,clone,legalMain,validShips,onFront,sumv,tk,tt,worth,rnd,ri,shuffle,pm,um,tplan,winner,fn,finish};
+return{isStart,FX,FT,placeOk,FR,EVN,EVD,CN,SPN,TECH,VIRN,newGame,run,answer,clone,legalMain,validShips,onFront,sumv,tk,tt,worth,rnd,ri,shuffle,pm,um,tplan,winner,fn,finish};
 })();
 if(typeof module!=='undefined')module.exports=INV;

@@ -49,6 +49,14 @@ function playValue(s,p,c,b){
   case'steal':return .22;
   case'skipG':case'skipV':return .08;
   case'regrow':return .0;
+  case'reinf':return .3;
+  case'mobil':{const m=bestOpt(s,p,plan,b);return m<=-9?-9:m+.12-CC;}
+  case'contagion':return (s.vir[1-p]>=3?.4:.22)-.12;
+  case'mutate':{const m=bestOpt(s,p,plan,b);return m<=-9?-9:m-CC-.12;}
+  case'vacc':return s.vir[p]>0?.2:.02;
+  case'rerollR':{const r=s.dice[p].filter(d=>d.loc==='R');const avg=r.reduce((x,d)=>x+d.v,0)/Math.max(1,r.length);return avg<3?.08:-.08;}
+  case'mimic':{const m=bestOpt(s,p,plan,b);return m<=-9?-9:m-.08;}
+  case'spore':return s.turn<=4?.1:-.1;
   default:return -.1;}}
 function scoreMain(s,p,opts,extra){
  const q=1-p,b=evalS(s,p),co=s.co[p],hn=s.hand[p].length;
@@ -74,6 +82,7 @@ function scoreMain(s,p,opts,extra){
 function scoreGeneric(s,p,pd){const c=pd.ctx;
  if(c.then==='keep')return pd.opts.map(o=>-E.worth(s,p,s.hand[p][o.v]));
  if(c.then==='first')return[.01,0];
+ if(c.then==='uni'||c.then==='keep1'||c.then==='back')return pd.opts.map(o=>o.h||0);
  const b=evalS(s,p);
  if(c.then==='resp'){const u=E.pm(s,c.m);const d=evalS(s,p)-b;E.um(u);return d<-.35?[1,0]:[0,1];}
  return pd.opts.map(o=>{let sc=o.h||0;if(o.m){sc+=optGain(s,p,o,b);if(o.v&&o.v.c)sc-=.12;}return sc;});}
