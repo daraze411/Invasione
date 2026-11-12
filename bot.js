@@ -17,8 +17,8 @@ function evalS(s,p){
   x=Math.max(-1.2,Math.min(1.2,x));
   let t=x*(fr.ev===8?2:fr.ev===7?.6:1);
   if(fr.ev!==7){const np=cnt(s,f,p),nq=cnt(s,f,q);
-   if(!np)t-=(rp>0&&!late)?.7:1;
-   if(!nq)t+=(rq>0&&!late)?.7:1;}
+   if(!np&&!(s.cap&&s.fac[p]==='T'))t-=(rp>0&&!late)?.7:1;
+   if(!nq&&!(s.cap&&s.fac[q]==='T'))t+=(rq>0&&!late)?.7:1;}
   v+=t;}
  v+=s.pv[p]-s.pv[q];
  v+=.12*(s.co[p]-s.co[q])+.1*(s.hand[p].length-s.hand[q].length)-.22*(s.vir[p]-s.vir[q]);
@@ -71,7 +71,9 @@ function scoreMain(s,p,opts,extra){
    break;}
   case'sell':{const w=E.worth(s,p,a.c);sc=hn>=4?.18-w*.3:.05-w*.4;if(co>=4)sc-=.1;break;}
   case'buy':sc=(hn<=2?.2:hn===3?.1:-.1)-(co<=2?.1:0);break;
+  case'kar':sc=(hn<=2?.32:hn===3?.22:-.05)-(co<=2?.1:0)+(s.rd>=2?.05:0);break;
   case'sellbuy':{const w=E.worth(s,p,a.c);sc=.12-w*.45+(hn<=3?.05:0);break;}
+  case'karsb':{const w=E.worth(s,p,a.c);sc=.22-w*.45+(hn<=3?.05:0)+(s.rd>=2?.05:0);break;}
   case'play':sc=playValue(s,p,a.c,b);break;
   case'val':{const d=s.dice[p][a.d];const g0=gainPlace(s,p,d);const u=E.pm(s,o.m);const g1=gainPlace(s,p,d);E.um(u);sc=g1-g0-.45;break;}
   case'vcoins':sc=a.n*(co<=1?.15:.02)-a.n*.28;break;
@@ -82,7 +84,7 @@ function scoreMain(s,p,opts,extra){
 function scoreGeneric(s,p,pd){const c=pd.ctx;
  if(c.then==='keep')return pd.opts.map(o=>-E.worth(s,p,s.hand[p][o.v]));
  if(c.then==='first')return[.01,0];
- if(c.then==='uni'||c.then==='keep1'||c.then==='back')return pd.opts.map(o=>o.h||0);
+ if(c.then==='uni'||c.then==='keep1'||c.then==='back'||c.then==='kar')return pd.opts.map(o=>o.h||0);
  const b=evalS(s,p);
  if(c.then==='resp'){const u=E.pm(s,c.m);const d=evalS(s,p)-b;E.um(u);return d<-.35?[1,0]:[0,1];}
  return pd.opts.map(o=>{let sc=o.h||0;if(o.m){sc+=optGain(s,p,o,b);if(o.v&&o.v.c)sc-=.12;}return sc;});}

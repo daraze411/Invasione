@@ -19,6 +19,8 @@ Si gioca contro un automa di livello Normale o Difficile, anche da smartphone.
 | `app.html` | Interfaccia: grafica, schermate, tutorial e regolamento. |
 | `build.py` | Unisce i sorgenti e rigenera `index.html`. |
 | `locandina.jpg`, `locandina-pixel.png` | Locandina originale e versione in pixel art. |
+| `art-*.png` | Illustrazioni delle carte in pixel art (`art-<fazione>-<carta>.png`). |
+| `capitano-T.png`, `capitano-A.png` | Ritratti dei Capitani Mark Platt e Kar Am Oh. |
 | `anteprima.jpg` | Immagine mostrata quando si condivide il link. |
 | `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `favicon-32.png` | Icone dell'app. |
 | `manifest.webmanifest` | Fa aprire il gioco come app quando lo si salva nella schermata Home. |

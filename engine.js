@@ -31,8 +31,10 @@ const TECH={
 20:{k:'jolly',v:[1,2,3,4,5,6],t:'Carta jolly (solo per i valori)'},
 22:{k:'special',v:[4,3],t:'Esclusiva'},
 23:{k:'regrow',v:[5,2],t:'Spendi 1 €: scegli una carta dagli scarti e mettila in mano'},
-24:{k:'wipe',v:[6,1],t:'Spendi 2 € e guadagna 1 Virus: scarta tutti i dadi da un fronte'}};
-const WORTH={modSelf2:.9,modOpp2:.9,modSelf1:.8,modOpp1:.8,reroll:.5,moveOpp:.8,trade:.5,resp:.7,gain2:.4,freeze:.3,swapCond:.4,peek:.2,reinf:.6,mobil:.7,contagion:.6,mutate:.8,vacc:.3,rerollR:.3,mimic:.3,spore:.3,jolly:.6,steal:.8,swapShips:.9,regrow:.3,wipe:.7};
+24:{k:'wipe',v:[6,1],t:'Spendi 2 € e guadagna 1 Virus: scarta tutti i dadi da un fronte'},
+27:{k:'skipG',v:[6,1],t:'L\'avversario salta un turno, ma guadagna 1 €'},
+28:{k:'skipV',v:[1,6],t:'L\'avversario salta un turno, ma rimuove 1 Virus'}};
+const WORTH={modSelf2:.9,modOpp2:.9,modSelf1:.8,modOpp1:.8,reroll:.5,moveOpp:.8,trade:.5,resp:.7,gain2:.4,freeze:.3,swapCond:.4,peek:.2,reinf:.6,mobil:.7,contagion:.6,mutate:.8,vacc:.3,rerollR:.3,mimic:.3,spore:.3,jolly:.6,steal:.8,swapShips:.9,regrow:.3,wipe:.7,skipG:.5,skipV:.6};
 const VIRN={1:'Scarta una tua nave per questo round',2:'L\'avversario rilancia una tua nave',3:'Il round termina (o il contatore va al turno 5)',4:'Paga 1 € o elimina 2 Tecnologie dal mazzo',5:'Fino a fine round ogni Virus vale doppio',6:'Ritira una tua nave da un fronte e rilanciala',7:'L\'avversario guadagna 1 €'};
 const FX={18:{T:'reinf',A:'contagion'},19:{T:'mobil',A:'mutate'},22:{T:'steal',A:'swapShips'},25:{T:'vacc',A:'mimic'},26:{T:'rerollR',A:'spore'}};
 const FT={steal:'Ruba 2 Tecnologie dalla mano dell\'avversario e conservane una',swapShips:'Scambia una tua nave con una nave avversaria',
@@ -108,7 +110,7 @@ function tplan(s,p,id){const k=tk(s,p,id),q=1-p,co=s.co[p];let opts=null,ok=true
  case'reroll':opts=ownDice(s,p,true);ok=opts.length>0;break;
  case'moveOpp':ok=co>=1;opts=ok?moveOpts(s,q):[];ok=ok&&opts.length>0;break;
  case'trade':ok=co>=2&&s.hand[p].length>=3;break;
- case'gain2':break;
+ case'gain2':case'skipG':case'skipV':break;
  case'reinf':{opts=[];const seen={};for(const d of s.dice[p]){if(d.loc!=='X')continue;opts.push({l:'Nave eliminata ('+(d.v>0?'era '+d.v:'distrutta')+')',v:{o:p,i:d.i},h:0});}ok=opts.length>0;break;}
  case'mobil':opts=placeOpts(s,p);ok=opts.length>0;break;
  case'contagion':ok=co>=1;break;
@@ -135,8 +137,8 @@ function push(s){for(let i=arguments.length-1;i>=1;i--)s.st.push(arguments[i]);}
 function run(s){let g=0;while(!s.pend&&!s.over&&g++<20000){if(s.endNow){s.endNow=false;s.st=[{k:'resolve'}];}const t=s.st.pop();if(!t)throw new Error('stack vuoto');TASK[t.k](s,t);}return s;}
 function answer(s,idx){const pd=s.pend;s.pend=null;FN[pd.ctx.then](s,pd.ctx,pd.opts[idx].v);run(s);return s;}
 /* setup */
-function newGame(o){o=o||{};const s={rs:(o.seed||Date.now())|0,fac:o.fac||['T','A'],rd:0,turn:0,slot:0,first:0,order:[0,1],pv:[0,0],co:[1,1],hand:[[],[]],deck:[[],[]],disc:[[],[]],vir:[0,0],dbl:[false,false],skip:[false,false],pass:[false,false],vdeck:[],vdisc:[],evdeck:[],fr:[],dice:[[],[]],ord:0,st:[],pend:null,log:[],over:false,endNow:false,res:null,hold:o.hold,nl:o.nl,winner:-2,q:[]};
- const ids=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24];
+function newGame(o){o=o||{};const s={cap:!!o.cap,bonus:!!o.bonus,karUsed:[false,false],rs:(o.seed||Date.now())|0,fac:o.fac||['T','A'],rd:0,turn:0,slot:0,first:0,order:[0,1],pv:[0,0],co:[1,1],hand:[[],[]],deck:[[],[]],disc:[[],[]],vir:[0,0],dbl:[false,false],skip:[false,false],pass:[false,false],vdeck:[],vdisc:[],evdeck:[],fr:[],dice:[[],[]],ord:0,st:[],pend:null,log:[],over:false,endNow:false,res:null,hold:o.hold,nl:o.nl,winner:-2,q:[]};
+ const ids=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24].concat(o.bonus?[27,28]:[]);
  for(let p=0;p<2;p++)s.deck[p]=shuffle(s,ids.slice());
  s.evdeck=shuffle(s,[1,2,3,4,5,7,8,9,10,11,12]);
  for(let i=1;i<=7;i++){s.vdeck.push(i);if(i!==3)s.vdeck.push(i);}shuffle(s,s.vdeck);
@@ -181,8 +183,8 @@ function legalMain(s,p,extra){const o=[],q=1-p,seen={};
    else{const k=d.v+'/'+d.fz+'/'+f;if(seen[k])continue;if(placeOk(s,p,d,f)){seen[k]=1;o.push({l:'Dado '+d.v+' → '+FR[f],v:{t:'place',d:d.i,f},m:[{o:p,i:d.i,set:{loc:'F',f,ord:1e9}}]});}}}}
  const hs=s.hand[p],ids=uniq(hs);
  if(hs.length)for(const c of ids)o.push({l:'Vendi (+1 €): '+tt(s,p,c),v:{t:'sell',c}});
- if(s.co[p]>=2&&hs.length<5&&s.deck[p].length)o.push({l:'Compra una Tecnologia (−2 €)',v:{t:'buy'}});
- if(hs.length&&s.co[p]>=1&&s.deck[p].length)for(const c of ids)o.push({l:'Vendi e compra: '+tt(s,p,c),v:{t:'sellbuy',c}});
+ if(s.co[p]>=2&&hs.length<5&&s.deck[p].length){o.push({l:'Compra una Tecnologia (−2 €)',v:{t:'buy'}});if(s.cap&&s.fac[p]==='A'&&!s.karUsed[p])o.push({l:'Kar Am Oh: compra scegliendo fra 5 carte (−2 €, una volta per partita)',v:{t:'kar'}});}
+ if(hs.length&&s.co[p]>=1&&s.deck[p].length)for(const c of ids){o.push({l:'Vendi e compra: '+tt(s,p,c),v:{t:'sellbuy',c}});if(s.cap&&s.fac[p]==='A'&&!s.karUsed[p])o.push({l:'Vendi e compra con Kar Am Oh (scegli fra 5): '+tt(s,p,c),v:{t:'karsb',c}});}
  for(const c of ids){const k=tk(s,p,c);if(k==='jolly'||k==='resp')continue;if(tplan(s,p,c).ok)o.push({l:'Gioca: '+tt(s,p,c),v:{t:'play',c}});}
  const rd={};for(const d of s.dice[p]){if(d.loc==='R'&&!d.fz&&!rd[d.v])rd[d.v]=d;}
  for(const c of ids)for(const v of TECH[c].v)for(const k in rd){const d=rd[k];o.push({l:'Usa il valore '+v+' di una carta sul dado '+d.v+' (+1 Virus)',v:{t:'val',c,v,d:d.i},m:[{o:p,i:d.i,set:{v}}]});}
@@ -202,6 +204,8 @@ FN.main=(s,c,a)=>{const p=c.p,q=1-p;
  case'place':doPlace(s,p,a);break;
  case'sell':rem(s.hand[p],a.c);s.disc[p].push(a.c);gain(s,p,1);log(s,fn(s,p)+' vende una Tecnologia');break;
  case'buy':s.co[p]-=2;drawT(s,p);log(s,fn(s,p)+' compra una Tecnologia');break;
+ case'karsb':rem(s.hand[p],a.c);s.disc[p].push(a.c);gain(s,p,1);log(s,fn(s,p)+' vende una Tecnologia');
+ case'kar':{s.co[p]-=2;s.karUsed[p]=true;const n=Math.min(5,s.deck[p].length);const got=s.deck[p].splice(s.deck[p].length-n,n);log(s,fn(s,p)+' usa Kar Am Oh: guarda 5 Tecnologie e ne compra una');ask(s,p,{then:'kar',p,got,ttl:'Kar Am Oh: quale Tecnologia compri? Le altre vanno in fondo al mazzo.',noauto:true},got.map((c,i)=>({l:tt(s,p,c),v:i,h:worth(s,p,c)})));break;}
  case'sellbuy':rem(s.hand[p],a.c);s.disc[p].push(a.c);gain(s,p,1);s.co[p]-=2;drawT(s,p);log(s,fn(s,p)+' vende e compra una Tecnologia');break;
  case'play':playTech(s,p,a.c);break;
  case'val':{rem(s.hand[p],a.c);s.disc[p].push(a.c);s.dice[p][a.d].v=a.v;log(s,fn(s,p)+' usa il valore '+a.v+' di una Tecnologia');push(s,{k:'vtake',p,n:1});break;}
@@ -217,6 +221,8 @@ function playTech(s,p,id){const plan=tplan(s,p,id),q=1-p;rem(s.hand[p],id);s.dis
  case'moveOpp':s.co[p]--;ask(s,p,{then:'techMove',p,ttl:'Quale nave avversaria sposti, e dove?'},plan.opts);break;
  case'trade':s.co[p]-=2;ask(s,p,{then:'trade',p,ttl:'Scegli 2 Tecnologie da scartare'},pairsDiscard(s,p));break;
  case'gain2':gain(s,p,2);log(s,fn(s,p)+' guadagna 2 €');break;
+ case'skipG':s.skip[q]=true;gain(s,q,1);log(s,fn(s,q)+' salta il prossimo turno e guadagna 1 €');break;
+ case'skipV':s.skip[q]=true;if(s.vir[q]>0){s.vir[q]--;log(s,fn(s,q)+' salta il prossimo turno e rimuove 1 Virus');}else log(s,fn(s,q)+' salta il prossimo turno');break;
  case'freeze':ask(s,p,{then:'freeze',p,ttl:'Quale nave congeli?'},plan.opts);break;
  case'swapCond':s.co[p]-=3;ask(s,p,{then:'swapCond',p,ttl:'Quali Fronti scambiano la Condizione?'},plan.opts);break;
  case'peek':{log(s,fn(s,p)+' guarda una Tecnologia avversaria');if(s.vir[p]>0)s.vir[p]--;if(s.hand[q].length){const c=s.hand[q][ri(s,s.hand[q].length)];log(s,'Vedi una Tecnologia avversaria: '+tt(s,q,c),p);}break;}
@@ -233,6 +239,7 @@ function playTech(s,p,id){const plan=tplan(s,p,id),q=1-p;rem(s.hand[p],id);s.dis
  case'swapShips':ask(s,p,{then:'techSwap',p,ttl:'Quali navi scambi?'},plan.opts);break;
  case'regrow':s.co[p]--;log(s,fn(s,p)+' recupera una Tecnologia dagli scarti');ask(s,p,{then:'regrow',p,ttl:'Recupera una Tecnologia dagli scarti'},handOpts(s,p,'disc',s.disc[p].length-1));break;
  case'wipe':s.co[p]-=2;push(s,{k:'vtake',p,n:1});ask(s,p,{then:'wipe',p,ttl:'Quale Fronte svuoti?'},plan.opts);break;}}
+FN.kar=(s,c,i)=>{const p=c.p;s.hand[p].push(c.got[i]);const rest=shuffle(s,c.got.filter((x,j)=>j!==i));s.deck[p].unshift(...rest);};
 FN.reinf=(s,c,v)=>{const d=s.dice[v.o][v.i];d.loc='R';d.f=-1;d.x=-1;d.fz=0;d.v=1+ri(s,6);log(s,fn(s,v.o)+' recupera una nave: dado '+d.v+' in riserva');};
 FN.mutate=(s,c,v)=>{const e={e:'setV',o:v.o,i:v.i,nv:v.nv};if(v.o===c.p)execEff(s,e);else targeted(s,c.p,e,[{o:v.o,i:v.i,set:{v:v.nv}}]);};
 TASK.mob=(s,t)=>{const o=placeOpts(s,t.p);if(!o.length)return;if(t.n<2)o.push({l:'Non schierare altre navi',v:null,h:0});ask(s,t.p,{then:'mob',p:t.p,n:t.n,ttl:t.n===2?'Mobilitazione: schiera la prima nave':'Mobilitazione: schiera la seconda nave'},o);};
@@ -328,7 +335,7 @@ TASK.resolve=s=>{const gp=[0,0];s.res=[];
  for(let f=0;f<3;f++){const fr=s.fr[f];if(fr.flip){s.res.push({f,flip:true});continue;}
   const cnt=[onFront(s,f,0).length,onFront(s,f,1).length],g=[0,0],w=winner(s,f);
   if(w>=0){g[w]+=fr.ev===8?2:1;drawT(s,1-w);}
-  for(let p=0;p<2;p++)if(cnt[p]===0)g[1-p]+=1;
+  for(let p=0;p<2;p++)if(cnt[p]===0&&!(s.cap&&s.fac[p]==='T'))g[1-p]+=1;
   if(fr.ev===7){g[0]=Math.min(g[0],1);g[1]=Math.min(g[1],1);}
   gp[0]+=g[0];gp[1]+=g[1];
   s.res.push({f,ev:fr.ev,cond:fr.cond,sum:[sumv(validShips(s,f,0)),sumv(validShips(s,f,1))],cnt,w,g,vc:[validShips(s,f,0).length,validShips(s,f,1).length],tb:(fr.cond==='DH'||fr.cond==='DL')&&w>=0&&validShips(s,f,0).length===validShips(s,f,1).length});
