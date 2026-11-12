@@ -245,6 +245,28 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 .chip{padding:3px 8px}
 .vs{width:42px;height:42px;font-size:16px;font-weight:700;border-width:2px}
 .nb{border-radius:0!important}
+/* statistiche e salvataggio */
+.sheet .lead{color:var(--fg)}
+.tabw{overflow-x:auto}
+.sheet>*{flex-shrink:0}
+.sttab{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.sttab th,.sttab td{border:2px solid var(--line);padding:7px 8px;text-align:center}
+.sttab td{font-family:var(--pix);font-size:11px;color:var(--fg)}
+.sttab thead th{font-size:11px;color:var(--mute);font-weight:600;letter-spacing:.04em}
+.sttab tbody th{text-align:left;font-family:var(--disp);font-size:16px;font-weight:700;color:var(--fg)}
+.sttab tr.tot th,.sttab tr.tot td{background:var(--panel2);color:var(--paper)}
+.sttab .fT{color:var(--terr)}.sttab .fA{color:var(--ali)}
+.sheet .mh3{margin:10px 0 0;font-family:var(--disp);font-size:20px;font-weight:700;color:var(--paper);display:block}
+.savebox{display:flex;flex-direction:column;gap:9px}
+.savebox p{text-align:justify;hyphens:auto}
+.savebox .reward{color:var(--paper)}
+.savebox .meta{font-size:12px}
+.code{width:100%;font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;padding:8px 10px;border:2px solid var(--line);background:var(--bg);color:var(--fg);resize:vertical;word-break:break-all}
+.opts{display:flex;flex-wrap:wrap;gap:8px}.opts .b{flex:1 1 140px;text-align:center}
+.sheet a.b{display:block;text-decoration:none;color:var(--fg);clip-path:var(--notch)}
+.codemsg{font-weight:700}.codemsg.ok{color:var(--ok)}.codemsg.ko{color:var(--warn)}
+.confirm{display:flex;flex-direction:column;gap:8px;border:2px solid var(--warn);padding:10px}
+.confirm p{color:var(--fg)}
 /* home */
 .home{display:flex;flex-direction:column;gap:14px;padding-top:4px}
 .poster{display:block;width:min(100%,44vh,440px);height:auto;aspect-ratio:1;margin:0 auto;border:2px solid var(--line);background:#000}
@@ -797,8 +819,21 @@ return{evalS,choose,hardChoose,scoreMain};
 const H=0,FR=INV.FR,EVN=INV.EVN,EVD=INV.EVD,CN=INV.CN,SPN=INV.SPN;
 const CD={M:'Vince la somma più alta dei dadi validi.',DH:'Vince chi ha più dadi validi. Parità: somma più alta.',DL:'Vince chi ha più dadi validi. Parità: somma più bassa.',B:'Vince chi arriva a 12 o ci si avvicina di più senza superarlo. Non puoi schierare un dado che ti porti oltre 12.'};
 const SK='invasione.stats.v1';
-function loadStats(){const z={g:0,w:0,l:0,d:0,normal:{g:0,w:0},hard:{g:0,w:0},T:{g:0,w:0},A:{g:0,w:0}};try{const v=JSON.parse(localStorage.getItem(SK)||'null');if(v&&typeof v.g==='number')return Object.assign(z,v);}catch(e){}return z;}
-function recordStats(){const st=loadStats(),w=S.winner===H,l=S.winner===1-H,k=diff==='hard'?'hard':'normal',f=S.fac[H];st.g++;if(w)st.w++;else if(l)st.l++;else st.d++;st[k].g++;if(w)st[k].w++;st[f].g++;if(w)st[f].w++;try{localStorage.setItem(SK,JSON.stringify(st));}catch(e){}}
+const SK2='invasione.stats.v2';
+const zrec=()=>({w:0,l:0,d:0});
+function zst(){return{T:zrec(),A:zrec(),normal:zrec(),hard:zrec()};}
+function okRec(x){return !!x&&['w','l','d'].every(k=>Number.isInteger(x[k])&&x[k]>=0&&x[k]<1e6);}
+function okSt(x){return !!x&&['T','A','normal','hard'].every(k=>okRec(x[k]));}
+function loadStats(){try{const v=JSON.parse(localStorage.getItem(SK2)||'null');if(okSt(v))return v;
+ const o=JSON.parse(localStorage.getItem(SK)||'null');if(o&&typeof o.g==='number'){const z=zst();for(const k of['T','A','normal','hard'])if(o[k]){z[k].w=o[k].w|0;z[k].l=Math.max(0,(o[k].g|0)-(o[k].w|0));}return z;}}catch(e){}return zst();}
+function saveStats(st){try{localStorage.setItem(SK2,JSON.stringify(st));}catch(e){}}
+const games=r=>r.w+r.l+r.d;
+function totSt(st){return{w:st.T.w+st.A.w,l:st.T.l+st.A.l,d:st.T.d+st.A.d};}
+function recordStats(){const st=loadStats(),r=S.winner===H?'w':S.winner===1-H?'l':'d';st[S.fac[H]][r]++;st[diff==='hard'?'hard':'normal'][r]++;saveStats(st);}
+/* codice di salvataggio: INV1- + JSON in base64 */
+function exportCode(){const d={v:1,s:loadStats()};return 'INV1-'+btoa(unescape(encodeURIComponent(JSON.stringify(d)))).replace(/=+$/,'');}
+function importCode(txt){try{const t=String(txt||'').trim().replace(/\s+/g,'');if(!t.startsWith('INV1-'))return false;let b=t.slice(5);while(b.length%4)b+='=';
+ const d=JSON.parse(decodeURIComponent(escape(atob(b))));if(!d||d.v!==1||!okSt(d.s))return false;saveStats(d.s);return true;}catch(e){return false;}}
 const SV='invasione.save.v2';
 function saveGame(){if(!S)return;try{if(S.over){localStorage.removeItem(SV);return;}localStorage.setItem(SV,JSON.stringify({v:1,t:Date.now(),diff,S,pops:UI.pops,acc:UI.acc,accOn:UI.accOn,accCont:UI.accCont}));}catch(e){}}
 function loadSave(){try{const d=JSON.parse(localStorage.getItem(SV)||'null');if(d&&d.v===1&&d.S&&!d.S.over&&d.S.pend)return d;}catch(e){}return null;}
@@ -844,11 +879,13 @@ function techTip(id){const k=INV.tk(S,H,id);const base=TDESC[k]||INV.tt(S,H,id);
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fname=f=>f==='T'?'Terrestri':'Alieni';
 const dk=d=>d.v+'/'+d.fz;
-function statsHTML(){const st=loadStats();if(!st.g)return '<p class="nostats">Le tue statistiche compariranno qui dopo la prima partita.</p>';
- const r=o=>o.g?`${o.w}/${o.g}`:'—';
- return `<div class="stats"><div class="stat"><b>${st.g}</b><span>Partite</span></div><div class="stat"><b>${st.w}</b><span>Vittorie</span></div><div class="stat"><b>${r(st.normal)}</b><span>Normale</span></div><div class="stat"><b>${r(st.hard)}</b><span>Difficile</span></div></div>`;}
-function homeHTML(){const st=loadStats(),sv=loadSave();
- const sub=st.g?`${st.g} ${st.g===1?'partita':'partite'} · ${st.w} ${st.w===1?'vittoria':'vittorie'}`:'Ancora nessuna partita';
+function statsHTML(){const st=loadStats(),t=totSt(st);
+ if(!games(t))return '<p class="nostats">Le tue statistiche compariranno qui dopo la prima partita contro il computer.</p>';
+ const row=(lab,r,c)=>`<tr${c?` class="${c}"`:''}><th scope="row">${lab}</th><td>${r.w}</td><td>${r.l}</td><td>${r.d}</td><td>${games(r)}</td></tr>`;
+ return `<div class="tabw"><table class="sttab"><thead><tr><th></th><th scope="col">Vinte</th><th scope="col">Perse</th><th scope="col">Pari</th><th scope="col">Totale</th></tr></thead><tbody>${row('<span class="fT">Terrestri</span>',st.T)}${row('<span class="fA">Alieni</span>',st.A)}${row('Totale',t,'tot')}</tbody></table></div>
+<div class="tabw"><table class="sttab"><thead><tr><th></th><th scope="col">Vinte</th><th scope="col">Perse</th><th scope="col">Pari</th><th scope="col">Totale</th></tr></thead><tbody>${row('Normale',st.normal)}${row('Difficile',st.hard)}</tbody></table></div>`;}
+function homeHTML(){const st=totSt(loadStats()),sv=loadSave(),ng=games(st);
+ const sub=ng?`${ng} ${ng===1?'partita':'partite'} · ${st.w} ${st.w===1?'vittoria':'vittorie'}`:'Ancora nessuna partita';
  return `<div class="home"><img class="poster" src="locandina-pixel.png" width="192" height="192" alt="Locandina di INVASIONE in pixel art: Terrestri contro Alieni">
 <nav class="menu" aria-label="Menù">${resumeHTML()}<button class="mi main" data-a="setup">${sv?'NUOVA PARTITA':'GIOCA'}</button>
 <button class="mi" data-a="story">Storia</button><button class="mi" data-a="tut0">Tutorial</button>
@@ -1076,8 +1113,22 @@ function sheetHTML(){
  else if(UI.sheet&&UI.sheet.k==='vconf'&&pd&&pd.p===H&&pd.ctx.then==='main'){const n=UI.sheet.n,u=n*(S.dbl[H]?2:1),v=S.vir[H];
   ttl=n>1?'Prendere '+n+' Virus?':'Prendere 1 Virus?';
   body=`<p style="color:var(--fg)">${esc(UI.sheet.lab)}</p><p>Pescherai ${u>1?u+' carte Virus':'una carta Virus'} e ne applicherai subito l'effetto${S.dbl[H]?' (ogni Virus vale doppio)':''}. Segnalini Virus attuali: ${v}/3.</p>`+(v+u>3?'<p class="vir">Attenzione: raggiungerai il quarto Virus. I segnalini tornano a 0 e pescherai 2 carte Virus.</p>':'')+btn('pickc',UI.sheet.i,'Conferma','hi')+btn('close','','Annulla','sec');}
- else if(UI.sheet&&UI.sheet.k==='stats'){const st=loadStats();ttl='Le tue partite';cancel=true;const r=o=>o.g?`${o.w} vinte su ${o.g}`:'nessuna';
-  body=statsHTML()+(st.g?`<p>Con i Terrestri: ${r(st.T)}. Con gli Alieni: ${r(st.A)}. Pareggi: ${st.d}.</p>`:'')+'<p>Le statistiche restano salvate solo su questo dispositivo.</p>';}
+ else if(UI.sheet&&UI.sheet.k==='stats'){ttl='Le tue partite';tall=true;cancel=true;const code=exportCode(),ng=games(totSt(loadStats()));
+  const canShare=typeof navigator!=='undefined'&&!!navigator.share;
+  const wa='https://wa.me/?text='+encodeURIComponent('INVASIONE, il mio codice di salvataggio: '+code);
+  body=`<p class="lead">Le tue partite contro il computer.</p>${statsHTML()}`
+  +(ng?(UI.rst?`<div class="confirm"><p>Azzerare tutte le statistiche? Non si può annullare, a meno che tu non abbia un codice di salvataggio.</p>${btn('rstYes','','Sì, azzera','hi')}${btn('rstNo','','Annulla','sec')}</div>`:btn('rst','','Azzera statistiche','sec')):'')
+  +`<h3 class="mh3">Salva i tuoi progressi</h3><div class="savebox">
+<p><b>Perché te lo chiediamo.</b> Le statistiche restano solo in questo browser: se cambi telefono o browser, o cancelli i dati di navigazione, ripartono da zero. Con il codice di salvataggio le ritrovi in un attimo, ovunque.</p>
+<p class="reward"><b>Tienilo da parte:</b> nelle prossime versioni il codice potrà sbloccare ricompense speciali, e chi ha registrato più partite partirà avvantaggiato.</p>
+<textarea id="code-out" class="code" readonly rows="2" aria-label="Il tuo codice di salvataggio">${code}</textarea>
+<div class="opts">${btn('codeCopy','','Copia codice','hi')}${canShare?btn('codeShare','','Condividi…'):''}<a class="b" href="${esc(wa)}" target="_blank" rel="noopener">Invia su WhatsApp</a></div>
+<p class="meta">Consiglio: salvalo su Google Keep, in una nota del telefono o mandalo a te stesso, così non lo perdi. Il codice cambia ogni volta che giochi: aggiornalo ogni tanto.</p>
+<label class="mh3" for="code-in">Hai già un codice?</label>
+<textarea id="code-in" class="code" rows="2" placeholder="Incolla qui il codice che inizia con INV1-">${esc(UI.codeIn||'')}</textarea>
+<p class="meta">Caricandolo, le statistiche di questo dispositivo vengono sostituite da quelle del codice.</p>
+<div class="opts">${btn('codeLoad','','Carica codice')}</div>
+${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.codeMsg)}</p>`:''}</div>`;}
  else if(UI.sheet&&UI.sheet.k==='help'){ttl='Regolamento';tall=true;body=btn('close','','Chiudi','sec')+rulesHTML();cancel=true;}
  else if(UI.sheet&&UI.sheet.k==='tut'){const n=UI.sheet.n,T=TUT[n];ttl=T.t;tall=true;
   body=`<p class="step">Tutorial · passo ${n+1} di ${TUT.length}</p><div class="mock" aria-hidden="true">${T.v}</div>${T.h}<div class="nav">${n>0?btn('tutn',n-1,'Indietro','sec'):''}${n<TUT.length-1?btn('tutn',n+1,'Avanti','hi'):btn('close','','Ho capito, si gioca','hi')}</div>`;cancel=true;} else if(UI.sheet&&UI.sheet.k==='ev'){const fr=S.fr[UI.sheet.f];ttl=FR[UI.sheet.f];cancel=true;
@@ -1146,7 +1197,13 @@ const HD={
  new:()=>{clearTimeout(tm);UI=mkUI('start');S=null;render();},
  setup:()=>{UI=mkUI('setup');render();},homeback:()=>{UI=mkUI('start');render();},
  endnew:()=>{clearTimeout(tm);S=null;UI=mkUI('setup');render();},recap:()=>{UI.sheet={k:'recap'};render();},
- stats:()=>{UI.sheet={k:'stats'};render();},
+ stats:()=>{UI.sheet={k:'stats'};UI.codeMsg=null;UI.codeIn='';UI.rst=false;render();},
+ rst:()=>{UI.rst=true;render();},rstNo:()=>{UI.rst=false;render();},rstYes:()=>{saveStats(zst());UI.rst=false;UI.codeMsg='Statistiche azzerate.';UI.codeOk=true;render();},
+ codeCopy:()=>{const code=exportCode();const done=(m,ok)=>{UI.codeMsg=m;UI.codeOk=ok;render();if(!ok){const o=document.getElementById('code-out');if(o&&o.select){o.focus();o.select();}}};
+  try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(()=>done('Codice copiato. Ora incollalo dove vuoi conservarlo.',true),()=>done('Copia non disponibile qui: il codice è selezionato, copialo a mano.',false));return;}}catch(e){}
+  done('Copia non disponibile qui: il codice è selezionato, copialo a mano.',false);},
+ codeShare:()=>{try{navigator.share({title:'INVASIONE · codice di salvataggio',text:exportCode()}).then(()=>{UI.codeMsg='Codice condiviso.';UI.codeOk=true;render();},err=>{if(err&&err.name==='AbortError')return;UI.codeMsg='Condivisione non disponibile qui: usa Copia codice.';UI.codeOk=false;render();});}catch(e){UI.codeMsg='Condivisione non disponibile qui: usa Copia codice.';UI.codeOk=false;render();}},
+ codeLoad:()=>{const el=document.getElementById('code-in');const v=el?el.value:'';UI.codeIn=v;if(importCode(v)){UI.codeMsg='Fatto: statistiche ripristinate.';UI.codeOk=true;UI.codeIn='';}else{UI.codeMsg='Codice non valido: controlla di averlo copiato per intero, a partire da INV1-.';UI.codeOk=false;}render();},
  story:()=>{UI.story=reduceMotion()?'static':'crawl';render();},storyStatic:()=>{UI.story='static';render();},storyCrawl:()=>{UI.story='crawl';render();},storyClose:()=>{UI.story=null;render();},
  poster:()=>{UI.poster=true;render();},posterClose:()=>{UI.poster=false;render();},
  help:()=>{UI.sheet={k:'help'};render();},
