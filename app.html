@@ -241,6 +241,18 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 .codemsg{font-weight:700}.codemsg.ok{color:var(--ok)}.codemsg.ko{color:var(--warn)}
 .confirm{display:flex;flex-direction:column;gap:8px;border:2px solid var(--warn);padding:10px}
 .confirm p{color:var(--fg)}
+/* contenuti da sbloccare */
+.lock{width:12px;height:13px;display:inline-block;vertical-align:-1px;image-rendering:pixelated}
+.mi.locked{color:var(--mute)}.mi.locked small{color:var(--mute)}
+.goals{list-style:none!important;padding:0!important;gap:8px}
+.goals li{display:flex;gap:10px;align-items:flex-start;color:var(--fg)}
+.goals .ck{font-family:var(--pix);font-size:12px;color:var(--mute);min-width:16px}
+.goals li.done .ck{color:var(--ok)}
+.goals .fT{color:var(--terr)}.goals .fA{color:var(--ali)}
+.endscr .unlock{margin:0;font-family:var(--pix);font-size:13px;color:var(--paper);border:2px solid var(--paper);padding:8px 12px;background:rgba(0,0,0,.5)}
+@media (prefers-reduced-motion:no-preference){.endscr .unlock{animation:blink 1s steps(2) 3}}
+@keyframes blink{50%{opacity:.25}}
+.endscr .hint2{margin:0;font-size:13px;color:var(--mute);max-width:40ch}
 /* home */
 .home{display:flex;flex-direction:column;gap:14px;padding-top:4px}
 .poster{display:block;width:min(100%,44vh,440px);height:auto;aspect-ratio:1;margin:0 auto;border:2px solid var(--line);background:#000}
@@ -329,7 +341,9 @@ function loadStats(){try{const v=JSON.parse(localStorage.getItem(SK2)||'null');i
 function saveStats(st){try{localStorage.setItem(SK2,JSON.stringify(st));}catch(e){}}
 const games=r=>r.w+r.l+r.d;
 function totSt(st){return{w:st.T.w+st.A.w,l:st.T.l+st.A.l,d:st.T.d+st.A.d};}
-function recordStats(){const st=loadStats(),r=S.winner===H?'w':S.winner===1-H?'l':'d';st[S.fac[H]][r]++;st[diff==='hard'?'hard':'normal'][r]++;saveStats(st);}
+const storyOpen=st=>st.T.w>0&&st.A.w>0;
+function recordStats(){const st=loadStats(),was=storyOpen(st),r=S.winner===H?'w':S.winner===1-H?'l':'d';st[S.fac[H]][r]++;st[diff==='hard'?'hard':'normal'][r]++;saveStats(st);S.unlock=!was&&storyOpen(st);}
+const LOCK='<svg class="lock" viewBox="0 0 8 9" aria-hidden="true"><path fill="currentColor" d="M2 0h4v1H2zM1 1h1v3H1zM6 1h1v3H6zM0 4h8v5H0z"/><path fill="var(--panel)" d="M3 5h2v2H3z"/></svg>';
 /* codice di salvataggio: INV1- + JSON in base64 */
 function exportCode(){const d={v:1,s:loadStats()};return 'INV1-'+btoa(unescape(encodeURIComponent(JSON.stringify(d)))).replace(/=+$/,'');}
 function importCode(txt){try{const t=String(txt||'').trim().replace(/\s+/g,'');if(!t.startsWith('INV1-'))return false;let b=t.slice(5);while(b.length%4)b+='=';
@@ -388,7 +402,7 @@ function homeHTML(){const st=totSt(loadStats()),sv=loadSave(),ng=games(st);
  const sub=ng?`${ng} ${ng===1?'partita':'partite'} · ${st.w} ${st.w===1?'vittoria':'vittorie'}`:'Ancora nessuna partita';
  return `<div class="home"><img class="poster" src="locandina-pixel.png" width="192" height="192" alt="Locandina di INVASIONE in pixel art: Terrestri contro Alieni">
 <nav class="menu" aria-label="Menù">${resumeHTML()}<button class="mi main" data-a="setup">${sv?'NUOVA PARTITA':'GIOCA'}</button>
-<button class="mi" data-a="story">Storia</button><button class="mi" data-a="tut0">Tutorial</button>
+${(()=>{const s2=loadStats();if(storyOpen(s2))return '<button class="mi" data-a="story">Storia</button>';return `<button class="mi locked" data-a="storyLocked"><span>${LOCK} Storia</span><small>${s2.T.w?"✓":"○"} Terrestri · ${s2.A.w?"✓":"○"} Alieni</small></button>`;})()}<button class="mi" data-a="tut0">Tutorial</button>
 <button class="mi" data-a="help">Regolamento</button><button class="mi" data-a="poster">Locandina</button>
 <button class="mi wide" data-a="stats">Le tue partite<small>${sub}</small></button></nav></div>`;}
 function setupHTML(){
@@ -474,7 +488,7 @@ function render(){hideTip();
 const ENDTXT={trees:['HAI VINTO!','LA TERRA È SALVA.','w'],ruins:['HAI VINTO!','LA TERRA È TUA: FANNE BUON USO.','w'],earth:['HAI PERSO:','DAVVERO HAI PENSATO DI POTER BATTERE GLI ALIENI?','l'],fireworks:['HAI PERSO:','HOLLYWOOD NON TI HA INSEGNATO NIENTE.','l'],draw:['TANTO RUMORE PER NULLA.','','d']};
 function endKind(){const w=S.winner,f=S.fac[H];if(w===-1)return 'draw';if(w===H)return f==='T'?'trees':'ruins';return f==='T'?'earth':'fireworks';}
 function endHTML(){const t=ENDTXT[endKind()];
- return `<div class="endscr" role="dialog" aria-label="Fine partita"><canvas id="endcv" width="160" height="100" aria-hidden="true"></canvas><h1 class="${t[2]}">${t[0]}</h1>${t[1]?`<p class="msg">${t[1]}</p>`:''}<p class="sc">TU ${S.pv[H]} – ${S.pv[1-H]} AVV.</p>${S.why?`<div class="why">${whyHTML()}</div>`:''}<div class="row">${btn('recap','','Riepilogo')}${btn('endnew','','Nuova partita','hi')}${btn('new','','Home','sec')}</div></div>`;}
+ return `<div class="endscr" role="dialog" aria-label="Fine partita"><canvas id="endcv" width="160" height="100" aria-hidden="true"></canvas><h1 class="${t[2]}">${t[0]}</h1>${t[1]?`<p class="msg">${t[1]}</p>`:''}<p class="sc">TU ${S.pv[H]} – ${S.pv[1-H]} AVV.</p>${S.why?`<div class="why">${whyHTML()}</div>`:''}${(()=>{if(S.unlock)return '<p class="unlock">STORIA SBLOCCATA!</p>';const st=loadStats();if(storyOpen(st))return '';const miss=!st.T.w&&!st.A.w?'una vittoria con i Terrestri e una con gli Alieni':(!st.T.w?'una vittoria con i Terrestri':'una vittoria con gli Alieni');return `<p class="hint2">${LOCK} Per sbloccare la Storia ti manca ${miss}.</p>`;})()}<div class="row">${S.unlock?btn('storyEnd','','Leggi la Storia','hi'):''}${btn('recap','','Riepilogo')}${btn('endnew','','Nuova partita',S.unlock?'':'hi')}${btn('new','','Home','sec')}</div></div>`;}
 /* --- animazioni pixel (160x100) --- */
 const EW=160,EH=100;
 function erng(seed){let a=seed|0;return()=>{a=(a+0x6D2B79F5)|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
@@ -613,6 +627,9 @@ function sheetHTML(){
  else if(UI.sheet&&UI.sheet.k==='vconf'&&pd&&pd.p===H&&pd.ctx.then==='main'){const n=UI.sheet.n,u=n*(S.dbl[H]?2:1),v=S.vir[H];
   ttl=n>1?'Prendere '+n+' Virus?':'Prendere 1 Virus?';
   body=`<p style="color:var(--fg)">${esc(UI.sheet.lab)}</p><p>Pescherai ${u>1?u+' carte Virus':'una carta Virus'} e ne applicherai subito l'effetto${S.dbl[H]?' (ogni Virus vale doppio)':''}. Segnalini Virus attuali: ${v}/3.</p>`+(v+u>3?'<p class="vir">Attenzione: raggiungerai il quarto Virus. I segnalini tornano a 0 e pescherai 2 carte Virus.</p>':'')+btn('pickc',UI.sheet.i,'Conferma','hi')+btn('close','','Annulla','sec');}
+ else if(UI.sheet&&UI.sheet.k==='storyLocked'){const st=loadStats();ttl='Storia da sbloccare';cancel=true;
+  const r=(f,n)=>`<li class="${st[f].w?'done':''}"><span class="ck">${st[f].w?'✓':'○'}</span><span>Vinci una partita con <b class="f${f}">${n}</b>${st[f].w?' — fatto':''}</span></li>`;
+  body=`<p class="lead">Come sono iniziati i guai fra Terrestri e Impronunciabili? Per scoprirlo devi aver combattuto da entrambe le parti.</p><ul class="goals">${r('T','i Terrestri')}${r('A','gli Alieni')}</ul><p>Vale qualsiasi difficoltà. Le vittorie restano anche nel codice di salvataggio.</p>`+btn('setup','','Gioca una partita','hi');}
  else if(UI.sheet&&UI.sheet.k==='stats'){ttl='Le tue partite';tall=true;cancel=true;const code=exportCode(),ng=games(totSt(loadStats()));
   const canShare=typeof navigator!=='undefined'&&!!navigator.share;
   const wa='https://wa.me/?text='+encodeURIComponent('INVASIONE, il mio codice di salvataggio: '+code);
@@ -620,7 +637,7 @@ function sheetHTML(){
   +(ng?(UI.rst?`<div class="confirm"><p>Azzerare tutte le statistiche? Non si può annullare, a meno che tu non abbia un codice di salvataggio.</p>${btn('rstYes','','Sì, azzera','hi')}${btn('rstNo','','Annulla','sec')}</div>`:btn('rst','','Azzera statistiche','sec')):'')
   +`<h3 class="mh3">Salva i tuoi progressi</h3><div class="savebox">
 <p><b>Perché te lo chiediamo.</b> Le statistiche restano solo in questo browser: se cambi telefono o browser, o cancelli i dati di navigazione, ripartono da zero. Con il codice di salvataggio le ritrovi in un attimo, ovunque.</p>
-<p class="reward"><b>Tienilo da parte:</b> nelle prossime versioni il codice potrà sbloccare ricompense speciali, e chi ha registrato più partite partirà avvantaggiato.</p>
+<p class="reward"><b>Tienilo da parte:</b> il codice conserva anche i contenuti che hai sbloccato, come la Storia. Nelle prossime versioni potrà sbloccare altre ricompense, e chi ha registrato più partite partirà avvantaggiato.</p>
 <textarea id="code-out" class="code" readonly rows="2" aria-label="Il tuo codice di salvataggio">${code}</textarea>
 <div class="opts">${btn('codeCopy','','Copia codice','hi')}${canShare?btn('codeShare','','Condividi…'):''}<a class="b" href="${esc(wa)}" target="_blank" rel="noopener">Invia su WhatsApp</a></div>
 <p class="meta">Consiglio: salvalo su Google Keep, in una nota del telefono o mandalo a te stesso, così non lo perdi. Il codice cambia ogni volta che giochi: aggiornalo ogni tanto.</p>
@@ -704,7 +721,9 @@ const HD={
   done('Copia non disponibile qui: il codice è selezionato, copialo a mano.',false);},
  codeShare:()=>{try{navigator.share({title:'INVASIONE · codice di salvataggio',text:exportCode()}).then(()=>{UI.codeMsg='Codice condiviso.';UI.codeOk=true;render();},err=>{if(err&&err.name==='AbortError')return;UI.codeMsg='Condivisione non disponibile qui: usa Copia codice.';UI.codeOk=false;render();});}catch(e){UI.codeMsg='Condivisione non disponibile qui: usa Copia codice.';UI.codeOk=false;render();}},
  codeLoad:()=>{const el=document.getElementById('code-in');const v=el?el.value:'';UI.codeIn=v;if(importCode(v)){UI.codeMsg='Fatto: statistiche ripristinate.';UI.codeOk=true;UI.codeIn='';}else{UI.codeMsg='Codice non valido: controlla di averlo copiato per intero, a partire da INV1-.';UI.codeOk=false;}render();},
- story:()=>{UI.story=reduceMotion()?'static':'crawl';render();},storyStatic:()=>{UI.story='static';render();},storyCrawl:()=>{UI.story='crawl';render();},storyClose:()=>{UI.story=null;render();},
+ story:()=>{if(!storyOpen(loadStats())){UI.sheet={k:'storyLocked'};render();return;}UI.story=reduceMotion()?'static':'crawl';render();},
+ storyLocked:()=>{UI.sheet={k:'storyLocked'};render();},
+ storyEnd:()=>{clearTimeout(tm);S=null;UI=mkUI('start');UI.story=reduceMotion()?'static':'crawl';render();},storyStatic:()=>{UI.story='static';render();},storyCrawl:()=>{UI.story='crawl';render();},storyClose:()=>{UI.story=null;render();},
  poster:()=>{UI.poster=true;render();},posterClose:()=>{UI.poster=false;render();},
  help:()=>{UI.sheet={k:'help'};render();},
  close:()=>{UI.sheet=null;render();},
