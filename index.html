@@ -267,6 +267,49 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 .codemsg{font-weight:700}.codemsg.ok{color:var(--ok)}.codemsg.ko{color:var(--warn)}
 .confirm{display:flex;flex-direction:column;gap:8px;border:2px solid var(--warn);padding:10px}
 .confirm p{color:var(--fg)}
+/* audio */
+.sndb{display:inline-grid;place-items:center;width:32px;height:30px;padding:0;border:2px solid var(--line);background:var(--panel);color:var(--mute)}
+.sndb svg{width:16px;height:14px}
+.sndb.on{color:var(--paper);border-color:var(--paper)}
+.pwrap{position:relative;width:min(100%,44vh,440px);margin:0 auto}
+.pwrap .poster{width:100%}
+.pwrap .sndb{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.7)}
+.bar .sndb{margin-left:auto}
+/* promemoria del codice */
+.endscr .remind{display:flex;flex-direction:column;align-items:center;gap:6px;max-width:40ch;font-size:13px;color:var(--mute)}
+.endscr .remind p{margin:0}
+.endscr .remind.hot{border:2px solid var(--paper);padding:10px 12px;background:rgba(0,0,0,.55);color:var(--fg)}
+.endscr .codemsg{font-size:13px}
+/* carte richiudibili e schermata compatta su telefono */
+.handtog{display:none;margin-left:auto;border:2px solid var(--line);border-bottom-width:3px;background:var(--panel);color:var(--fg);font-family:var(--pix);font-size:9px;padding:5px 7px}
+.rl{font-size:11px;color:var(--mute);min-width:44px}
+.opp .sh{display:none}
+@media (max-width:999px){.opp .lg{display:none}.opp .sh{display:inline}}
+@media (max-width:999px){
+ .top{padding-bottom:6px;gap:6px 8px;flex-wrap:wrap}
+ .top .t{font-size:15px}.top .m{margin-top:2px}
+ .top .score{font-size:10px}
+ .top .chip{font-size:10px;padding:3px 6px}
+ .top .sndb,.top .icon{width:28px;height:28px}
+ .opp{flex-direction:row;flex-wrap:wrap;align-items:center;gap:2px 10px}
+ .opp .res{min-height:0}.opp .res .lab{display:none}
+ .board,.fronts{gap:8px}
+ .front{padding:6px 8px;gap:4px}
+ .fh{gap:4px 8px}.fh b{font-size:16px}
+ .chip{font-size:10px;padding:2px 6px}
+ .fr{min-height:32px;gap:4px}.fr.mine{padding-top:4px}
+ .fr .die{width:30px;height:30px;font-size:12px}
+ .fr .empty{display:none}
+ .rl{min-width:32px}
+ .drop{padding:7px}
+ .dock{gap:5px;padding-top:5px}
+ .dock .pl{flex-wrap:wrap;gap:4px 8px;min-width:0}
+ .dock .techst{display:none}
+ .handtog{display:inline-block}
+ .dock:not(.hopen) .hand,.dock:not(.hopen) .nohand{display:none}
+ .status{padding:5px 8px;font-size:12px}
+ .acts{gap:5px}.acts button{padding:7px 9px;font-size:12.5px}
+}
 /* contenuti da sbloccare */
 .lock{width:12px;height:13px;display:inline-block;vertical-align:-1px;image-rendering:pixelated}
 .mi.locked{color:var(--mute)}.mi.locked small{color:var(--mute)}
@@ -900,14 +943,14 @@ function statsHTML(){const st=loadStats(),t=totSt(st);
 <div class="tabw"><table class="sttab"><thead><tr><th></th><th scope="col">Vinte</th><th scope="col">Perse</th><th scope="col">Pari</th><th scope="col">Totale</th></tr></thead><tbody>${row('Normale',st.normal)}${row('Difficile',st.hard)}</tbody></table></div>`;}
 function homeHTML(){const st=totSt(loadStats()),sv=loadSave(),ng=games(st);
  const sub=ng?`${ng} ${ng===1?'partita':'partite'} · ${st.w} ${st.w===1?'vittoria':'vittorie'}`:'Ancora nessuna partita';
- return `<div class="home"><img class="poster" src="locandina-pixel.png" width="192" height="192" alt="Locandina di INVASIONE in pixel art: Terrestri contro Alieni">
+ return `<div class="home"><div class="pwrap"><img class="poster" src="locandina-pixel.png" width="192" height="192" alt="Locandina di INVASIONE in pixel art: Terrestri contro Alieni">${sndBtn()}</div>
 <nav class="menu" aria-label="Menù">${resumeHTML()}<button class="mi main" data-a="setup">${sv?'NUOVA PARTITA':'GIOCA'}</button>
 ${(()=>{const s2=loadStats();if(storyOpen(s2))return '<button class="mi" data-a="story">Storia</button>';return `<button class="mi locked" data-a="storyLocked"><span>${LOCK} Storia</span><small>${s2.T.w?"✓":"○"} Terrestri · ${s2.A.w?"✓":"○"} Alieni</small></button>`;})()}<button class="mi" data-a="tut0">Tutorial</button>
 <button class="mi" data-a="help">Regolamento</button><button class="mi" data-a="poster">Locandina</button>
 <button class="mi wide" data-a="stats">Le tue partite<small>${sub}</small></button></nav></div>`;}
 function setupHTML(){
  const side=(f,name)=>`<button class="side ${f} ${hf===f?'on':''}" data-a="hf" data-v="${f}" aria-pressed="${hf===f}"><b>${name}</b>${hf===f?'<span class="you">La tua fazione</span>':''}</button>`;
- return `<div class="setup"><div class="bar"><button class="back" data-a="homeback">← Home</button><h1>Nuova partita</h1></div>
+ return `<div class="setup"><div class="bar"><button class="back" data-a="homeback">← Home</button><h1>Nuova partita</h1>${sndBtn()}</div>
 <div class="opt"><h3>Scegli da che parte stare</h3><div class="arena">${side('A','Alieni')}<span class="vs">VS</span>${side('T','Terrestri')}</div></div>
 <div class="opt"><h3>Avversario</h3><div class="seg">
 <button data-a="df" data-v="normal" class="${diff==='normal'?'on':''}"><b>Normale</b></button>
@@ -933,12 +976,14 @@ function info(){const o=S.pend.opts,r={place:{},plays:{},sells:{},sb:{},vals:{},
   case'buy':r.buy=i;break;case'vcoins':r.vc.push({i,n:a.n});break;case'vextra':r.vx=i;break;
   case'pass':case'none':r.pass=i;break;}});return r;}
 function sideInfo(p){const s=S,me=p===H;
- return `<span class="st" data-tip="${esc('Monete: massimo 5. Servono per comprare Tecnologie (2 €) e per molte carte.')}">€ ${s.co[p]}</span><span class="st ${s.vir[p]>=2?'warn':''}" data-tip="${esc((s.dbl[p]?'Virus doppio fino a fine round.\n\n':'')+VIRTIP)}">Virus ${s.vir[p]}/3${s.dbl[p]?' ×2':''}</span><span class="st" data-tip="${esc(me?'Tecnologie in mano: massimo 5. Passa il mouse o tocca una carta per leggerla.':'Tecnologie in mano all\'avversario (massimo 5). Le carte sono segrete.')}">Tecnologie ${s.hand[p].length}</span>${s.skip[p]?'<span class="warn" data-tip="Salta il prossimo momento d\'azione.">salta il turno</span>':''}`;}
+ return `<span class="st" data-tip="${esc('Monete: massimo 5. Servono per comprare Tecnologie (2 €) e per molte carte.')}">€ ${s.co[p]}</span><span class="st ${s.vir[p]>=2?'warn':''}" data-tip="${esc((s.dbl[p]?'Virus doppio fino a fine round.\n\n':'')+VIRTIP)}">Virus ${s.vir[p]}/3${s.dbl[p]?' ×2':''}</span><span class="st ${me?'techst':''}" data-tip="${esc(me?'Tecnologie in mano: massimo 5. Passa il mouse o tocca una carta per leggerla.':'Tecnologie in mano all\'avversario (massimo 5). Le carte sono segrete.')}">Tecnologie ${s.hand[p].length}</span>${s.skip[p]?'<span class="warn" data-tip="Salta il prossimo momento d\'azione.">salta il turno</span>':''}`;}
 function reserveHTML(p,inf){const ds=S.dice[p].filter(d=>d.loc==='R');
  if(p!==H)return `<div class="res"><span class="lab">Riserva</span>${ds.map(d=>dieHTML(d,'sm')).join('')||'<span class="lab">vuota</span>'}</div>`;
  return `<div class="res"><span class="lab">Riserva</span>${ds.map(d=>{const k=dk(d),vs=UI.vsel,can=vs?(inf&&inf.vd[vs.c+'/'+vs.v+'/'+k]!==undefined):(inf&&inf.place[k]);return dieHTML(d,(can?'can ':'')+(!vs&&UI.sel===k?'sel':'')+(d.fz?' fz':''),'button',can?`data-a="${vs?'vdie':'die'}" data-v="${k}"`:'disabled');}).join('')||'<span class="lab">vuota</span>'}</div>`;}
+const EVS={1:'Solo pari',2:'Solo dispari',3:'Solo 1, 2, 3',4:'Solo 4, 5, 6',5:'Scala',6:'Stesso valore',7:'Combattimento',8:'Paga 1 € · 2 PV',9:'Spazi azione',10:'Dal più alto',11:'Modifica di 1',12:'Nessun effetto'};
+const CNS={M:'Valore massimo',DH:'Più dadi · Σ alta',DL:'Più dadi · Σ bassa',B:'Bersaglio 12'};
 function frontHTML(f,inf){const fr=S.fr[f],q=1-H;
- let h=`<section class="front"><div class="fh"><b>${FR[f]}</b><span style="display:flex;gap:6px;flex-wrap:wrap"><button class="chip ev" data-a="ev" data-v="${f}" data-tip="${esc(EVN[fr.ev]+'\n'+EVD[fr.ev])}">${esc(EVN[fr.ev])}</button>${fr.cond?`<button class="chip" data-a="ev" data-v="${f}" data-tip="${esc(CN[fr.cond]+'\n'+CD[fr.cond])}">${CN[fr.cond]}</button>`:''}</span></div>`;
+ let h=`<section class="front"><div class="fh"><b>${FR[f]}</b><span style="display:flex;gap:6px;flex-wrap:wrap"><button class="chip ev" data-a="ev" data-v="${f}" data-tip="${esc(EVN[fr.ev]+'\n'+EVD[fr.ev])}">${esc(EVS[fr.ev])}</button>${fr.cond?`<button class="chip" data-a="ev" data-v="${f}" data-tip="${esc(CN[fr.cond]+'\n'+CD[fr.cond])}">${CNS[fr.cond]}</button>`:''}</span></div>`;
  const place=inf&&UI.sel?inf.place[UI.sel]:null;
  if(fr.flip){h+='<div class="spaces">';for(let x=0;x<4;x++){const o=fr.sp[x],pl=place&&place.find(e=>e.f===f&&e.x===x);
   const d=o?S.dice[o.o][o.i]:null;
@@ -947,12 +992,12 @@ function frontHTML(f,inf){const fr=S.fr[f],q=1-H;
   h+='</div>';}
  else{
   const row=(p)=>{const sh=S.dice[p].filter(d=>d.loc==='F'&&d.f===f).sort((a,b)=>a.ord-b.ord),val=INV.validShips(S,f,p);
-   return `<div class="fr ${p===H?'mine':''}"><span class="lab" style="font-size:11px;color:var(--mute);min-width:44px">${p===H?'Tu':'Avv.'}</span>${sh.map(d=>dieHTML(d,(val.includes(d)?'':'nul ')+(d.fz?'fz':''))).join('')||'<span class="empty">nessuna nave</span>'}<span class="sum">${val.length} · Σ${INV.sumv(val)}</span></div>`;};
+   return `<div class="fr ${p===H?'mine':''}"><span class="lab rl">${p===H?'Tu':'Avv.'}</span>${sh.map(d=>dieHTML(d,(val.includes(d)?'':'nul ')+(d.fz?'fz':''))).join('')||'<span class="empty">nessuna nave</span>'}<span class="sum">${val.length} · Σ${INV.sumv(val)}</span></div>`;};
   h+=row(q)+row(H);
   const pl=place&&place.find(e=>e.f===f);
   if(pl)h+=`<button class="drop" data-a="pick" data-v="${pl.i}">Schiera qui${fr.ev===8?' (−1 €)':''}</button>`;}
  return h+'</section>';}
-function topHTML(){const s=S;return `<div class="top"><div><div class="t">Round ${Math.min(s.rd,3)}/3</div><div class="m">Turno ${Math.min(s.turn,10)}/10</div></div><div class="score"><span class="me">Tu ${s.pv[H]}</span> – <span class="op">${s.pv[1-H]} Avv.</span></div><span style="display:flex;gap:6px;align-items:center"><button class="chip" data-a="homeq">Home</button><button class="icon" data-a="help" aria-label="Regole">?</button></span></div>`;}
+function topHTML(){const s=S;return `<div class="top"><div><div class="t">Round ${Math.min(s.rd,3)}/3</div><div class="m">Turno ${Math.min(s.turn,10)}/10</div></div><div class="score"><span class="me">Tu ${s.pv[H]}</span> – <span class="op">${s.pv[1-H]} Avv.</span></div><span style="display:flex;gap:6px;align-items:center">${sndBtn()}<button class="chip" data-a="homeq">Home</button><button class="icon" data-a="help" aria-label="Regole">?</button></span></div>`;}
 function handHTML(){const h=S.hand[H];if(!h.length)return '<div class="nohand">Nessuna Tecnologia in mano.</div>';
  return `<div class="hand">${h.map(id=>{return `<button class="card ${S.fac[H]}" data-a="card" data-v="${id}" data-tip="${esc(techTip(id))}"><span>${esc(INV.tt(S,H,id))}</span></button>`;}).join('')}</div>`;}
 function logHTML(){const L=S.log.filter(e=>e.to===null||e.to===H).slice(-40).reverse();
@@ -966,7 +1011,7 @@ function render(){hideTip();
  if(pd&&pd.p===H&&pd.ctx.then!=='main'&&!UI.pops.length&&pd.opts.length&&pd.opts.every(x=>x.v&&typeof x.v==='object'&&x.v.o!==undefined&&x.v.i!==undefined)){
   TG=pd.opts;if(!s.dice[0].concat(s.dice[1]).some(d=>(d.loc==='R'||d.loc==='F')&&tgtRep(d)!==null))TG=null;}
  let h='<div class="board">'+topHTML();
- h+=`<div class="opp"><div class="pl"><span class="fac ${s.fac[q]}">${fname(s.fac[q])} · Avversario</span>${sideInfo(q)}</div>`+reserveHTML(q)+'</div>';
+ h+=`<div class="opp"><div class="pl"><span class="fac ${s.fac[q]}">${fname(s.fac[q])}<span class="lg"> · Avversario</span><span class="sh"> · Avv.</span></span>${sideInfo(q)}</div>`+reserveHTML(q)+'</div>';
  h+='<div class="fronts">';if(s.fr.length&&s.dice[0].length)for(let f=0;f<3;f++)h+=frontHTML(f,inf);h+='</div>';
  h+=logHTML()+'<div class="credit">Gioco di Daniele Radavero · © 2026 Tutti i diritti riservati</div></div>';
  let st='';
@@ -975,7 +1020,7 @@ function render(){hideTip();
  else if(TG)st=(pd.ctx.ttl||'Scegli una nave')+': tocca un dado illuminato.';
  else if(mine&&UI.vsel)st='Valore '+UI.vsel.v+': tocca un dado illuminato in riserva (prendi 1 Virus).';
  else if(mine)st=UI.sel?'Scegli dove schierare il dado.':(pd.ctx.extra?'Azione extra: scegli o rinuncia.':'Tocca a te: scegli un dado, una carta o un\'azione.');
- h+=`<div class="dock"><div class="pl"><span class="fac ${s.fac[H]}">${fname(s.fac[H])} · Tu</span>${sideInfo(H)}</div>`+reserveHTML(H,inf)+handHTML()+`<div class="status ${mine?'me':''}">${st}</div>`;
+ h+=`<div class="dock ${UI.handOpen?'hopen':''}"><div class="pl"><span class="fac ${s.fac[H]}">${fname(s.fac[H])} · Tu</span>${sideInfo(H)}<button class="handtog" data-a="hand" aria-expanded="${!!UI.handOpen}">Carte ${s.hand[H].length} ${UI.handOpen?'▴':'▾'}</button></div>`+reserveHTML(H,inf)+handHTML()+`<div class="status ${mine?'me':''}">${st}</div>`;
  if(mine){h+='<div class="acts">';
   if(inf.buy>=0)h+=`<button data-a="pick" data-v="${inf.buy}">Compra (−2 €)</button>`;
   if(inf.vc.length)h+=`<button class="vir" data-a="vc">Virus → €</button>`;
@@ -985,10 +1030,53 @@ function render(){hideTip();
  app.className='game';
  app.innerHTML=h;
  if(s.over)startEnd();}
+/* ---------- audio chiptune: suoni generati dal browser, spenti all'inizio ---------- */
+const SND={on:false,ctx:null,master:null};
+try{SND.on=localStorage.getItem('invasione.audio')==='1';}catch(e){}
+function actx(){try{if(!SND.ctx){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;SND.ctx=new C();SND.master=SND.ctx.createGain();SND.master.gain.value=.55;SND.master.connect(SND.ctx.destination);}
+ if(SND.ctx.state==='suspended')SND.ctx.resume();return SND.ctx;}catch(e){return null;}}
+function tone(c,f,t0,dur,o){o=o||{};const os=c.createOscillator(),g=c.createGain();os.type=o.w||'square';os.frequency.setValueAtTime(f,t0);
+ if(o.to)os.frequency.exponentialRampToValueAtTime(o.to,t0+dur);const v=o.v||.07;g.gain.setValueAtTime(v,t0);g.gain.setValueAtTime(v,t0+dur*.7);g.gain.linearRampToValueAtTime(0.0001,t0+dur);
+ os.connect(g);g.connect(SND.master);os.start(t0);os.stop(t0+dur+.02);}
+function noise(c,t0,dur,v){const n=Math.floor(c.sampleRate*dur),b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);let last=0;for(let i=0;i<n;i++){if(i%6===0)last=Math.random()*2-1;d[i]=last*(1-i/n);}
+ const src=c.createBufferSource(),g=c.createGain();src.buffer=b;g.gain.value=v||.08;src.connect(g);g.connect(SND.master);src.start(t0);}
+const NF=n=>440*Math.pow(2,(n-69)/12);
+function seq(c,notes,step,o){let t=c.currentTime+.01;for(const n of notes){if(n!==null)tone(c,NF(n),t,step*.95,o);t+=step;}}
+const SFX={
+ click:c=>tone(c,1320,c.currentTime,.03,{v:.035}),
+ place:c=>tone(c,660,c.currentTime,.07,{to:990,v:.06}),
+ place2:c=>tone(c,440,c.currentTime,.07,{to:620,v:.045,w:'triangle'}),
+ card:c=>seq(c,[72,79],.055,{v:.05}),
+ card2:c=>seq(c,[67,60],.06,{v:.045,w:'triangle'}),
+ coin:c=>{const t=c.currentTime;tone(c,988,t,.06,{v:.05});tone(c,1319,t+.06,.2,{v:.05});},
+ virus:c=>{const t=c.currentTime;tone(c,420,t,.32,{to:90,w:'sawtooth',v:.05});tone(c,433,t,.32,{to:95,v:.03});noise(c,t+.05,.18,.05);},
+ reboot:c=>{const t=c.currentTime;for(let k=0;k<4;k++)tone(c,300-k*55,t+k*.09,.08,{w:'sawtooth',v:.05});noise(c,t,.4,.07);},
+ combat:c=>{const t=c.currentTime;noise(c,t,.16,.09);tone(c,240,t,.16,{to:70,v:.06});},
+ shield:c=>seq(c,[84,88,91],.04,{v:.04,w:'triangle'}),
+ pop:c=>seq(c,[69,64],.05,{v:.04}),
+ round:c=>seq(c,[67,72,76],.09,{v:.05}),
+ win:c=>{seq(c,[72,76,79,84,null,79,84],.11,{v:.06});seq(c,[48,52,55,60,null,55,60],.11,{v:.07,w:'triangle'});},
+ lose:c=>{seq(c,[67,66,65,64,null,52],.19,{v:.055});seq(c,[43,42,41,40,null,28],.19,{v:.07,w:'triangle'});},
+ draw:c=>seq(c,[72,null,72,67],.14,{v:.05}),
+ unlock:c=>seq(c,[72,76,79,83,86,91],.06,{v:.05})};
+function sfx(n){if(!SND.on)return;const c=actx();if(!c)return;try{SFX[n](c);}catch(e){}}
+/* lettore di musiche: {bpm, loop, tracks:[{w:'square'|'triangle', v, notes:'C5:1 E5:.5 R:.5 ...'}]} */
+const MUSIC={};let musicTimer=0,musicName='';
+function parseNotes(str){const out=[];for(const tok of String(str).trim().split(/\s+/)){const [n,d]=tok.split(':');const beats=parseFloat(d||'1');
+ if(/^R$/i.test(n)){out.push([null,beats]);continue;}const m=/^([A-Ga-g])([#b]?)(-?\d)$/.exec(n);if(!m)continue;
+ const base={c:0,d:2,e:4,f:5,g:7,a:9,b:11}[m[1].toLowerCase()]+(m[2]==='#'?1:m[2]==='b'?-1:0);out.push([12*(+m[3]+1)+base,beats]);}return out;}
+function stopMusic(){clearTimeout(musicTimer);musicTimer=0;musicName='';}
+function playMusic(name){const song=MUSIC[name];if(!song||!SND.on){stopMusic();return;}if(musicName===name)return;stopMusic();const c=actx();if(!c)return;musicName=name;
+ const spb=60/(song.bpm||120),tracks=song.tracks.map(t=>({t,n:parseNotes(t.notes)}));let len=0;for(const t of tracks)len=Math.max(len,t.n.reduce((a,x)=>a+x[1],0));
+ const run=()=>{if(musicName!==name)return;const t0=c.currentTime+.05;for(const {t,n} of tracks){let at=t0;for(const [m,b] of n){if(m!==null)tone(c,NF(m),at,b*spb*.92,{w:t.w||'square',v:t.v||.04});at+=b*spb;}}
+  if(song.loop)musicTimer=setTimeout(run,len*spb*1000-60);else musicName='';};run();}
+const SPK_ON='<svg viewBox="0 0 12 10" aria-hidden="true"><path fill="currentColor" d="M0 3h3l3-3h1v10H6L3 7H0zM8 3h1v4H8zM10 1h1v8h-1z"/></svg>';
+const SPK_OFF='<svg viewBox="0 0 12 10" aria-hidden="true"><path fill="currentColor" d="M0 3h3l3-3h1v10H6L3 7H0zM8 2h1v1H8zM11 2h1v1h-1zM9 3h2v1H9zM9 6h2v1H9zM8 7h1v1H8zM11 7h1v1h-1zM9.5 4h1v2h-1z"/></svg>';
+const sndBtn=()=>`<button class="sndb ${SND.on?'on':''}" data-a="snd" aria-pressed="${SND.on}" aria-label="${SND.on?'Disattiva l\'audio':'Attiva l\'audio'}" title="${SND.on?'Audio attivo':'Audio spento'}">${SND.on?SPK_ON:SPK_OFF}</button>`;
 const ENDTXT={trees:['HAI VINTO!','LA TERRA È SALVA.','w'],ruins:['HAI VINTO!','LA TERRA È TUA: FANNE BUON USO.','w'],earth:['HAI PERSO:','DAVVERO HAI PENSATO DI POTER BATTERE GLI ALIENI?','l'],fireworks:['HAI PERSO:','HOLLYWOOD NON TI HA INSEGNATO NIENTE.','l'],draw:['TANTO RUMORE PER NULLA.','','d']};
 function endKind(){const w=S.winner,f=S.fac[H];if(w===-1)return 'draw';if(w===H)return f==='T'?'trees':'ruins';return f==='T'?'earth':'fireworks';}
 function endHTML(){const t=ENDTXT[endKind()];
- return `<div class="endscr" role="dialog" aria-label="Fine partita"><canvas id="endcv" width="160" height="100" aria-hidden="true"></canvas><h1 class="${t[2]}">${t[0]}</h1>${t[1]?`<p class="msg">${t[1]}</p>`:''}<p class="sc">TU ${S.pv[H]} – ${S.pv[1-H]} AVV.</p>${S.why?`<div class="why">${whyHTML()}</div>`:''}${(()=>{if(S.unlock)return '<p class="unlock">STORIA SBLOCCATA!</p>';const st=loadStats();if(storyOpen(st))return '';const miss=!st.T.w&&!st.A.w?'una vittoria con i Terrestri e una con gli Alieni':(!st.T.w?'una vittoria con i Terrestri':'una vittoria con gli Alieni');return `<p class="hint2">${LOCK} Per sbloccare la Storia ti manca ${miss}.</p>`;})()}<div class="row">${S.unlock?btn('storyEnd','','Leggi la Storia','hi'):''}${btn('recap','','Riepilogo')}${btn('endnew','','Nuova partita',S.unlock?'':'hi')}${btn('new','','Home','sec')}</div></div>`;}
+ return `<div class="endscr" role="dialog" aria-label="Fine partita"><canvas id="endcv" width="160" height="100" aria-hidden="true"></canvas><h1 class="${t[2]}">${t[0]}</h1>${t[1]?`<p class="msg">${t[1]}</p>`:''}<p class="sc">TU ${S.pv[H]} – ${S.pv[1-H]} AVV.</p>${S.why?`<div class="why">${whyHTML()}</div>`:''}${(()=>{if(S.unlock)return '<p class="unlock">STORIA SBLOCCATA!</p>';const st=loadStats();if(storyOpen(st))return '';const miss=!st.T.w&&!st.A.w?'una vittoria con i Terrestri e una con gli Alieni':(!st.T.w?'una vittoria con i Terrestri':'una vittoria con gli Alieni');return `<p class="hint2">${LOCK} Per sbloccare la Storia ti manca ${miss}.</p>`;})()}<div class="remind ${S.unlock?'hot':''}"><p>${S.unlock?'Hai sbloccato un contenuto: salva il nuovo codice per non perderlo.':'Ricordati di aggiornare il codice di salvataggio.'}</p>${btn('endCopy','','Copia il nuovo codice',S.unlock?'hi':'')}${UI.endMsg?`<p class="codemsg ${UI.endOk?'ok':'ko'}" role="status">${esc(UI.endMsg)}</p>`:''}</div><div class="row">${S.unlock?btn('storyEnd','','Leggi la Storia','hi'):''}${btn('recap','','Riepilogo')}${btn('endnew','','Nuova partita',S.unlock?'':'hi')}${btn('new','','Home','sec')}</div></div>`;}
 /* --- animazioni pixel (160x100) --- */
 const EW=160,EH=100;
 function erng(seed){let a=seed|0;return()=>{a=(a+0x6D2B79F5)|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
@@ -1182,12 +1270,13 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
  else return '';
  return `<div class="ov"><div class="sheet ${tall?'tall':''}" role="dialog"><h2>${esc(ttl)}</h2>${lead?`<p>${esc(lead)}</p>`:''}${body}${cancel?btn('close','','Chiudi','sec'):''}</div></div>`;}
 function pub(from){const me=fname(S.fac[H]);return S.log.slice(from).filter(e=>e.to===null||e.to===H).map(e=>e.t).filter(t=>t.charAt(0)!=='—'&&t.charAt(0)!=='☣'&&t.indexOf(' PV)')<0&&t.indexOf('Entrambi passano')<0&&t.indexOf('Partita conclusa')<0).map(t=>t.replace(/\b(Terrestri|Alieni)\b/g,m=>m===me?'Tu':'Avversario'));}
-function drain(){if(S.q&&S.q.length){S.q.forEach(x=>UI.pops.push(x));S.q=[];}}
-function advance(){if(S&&S.over&&!S.rec){S.rec=true;recordStats();}
+function drain(){if(S.q&&S.q.length){if(S.q.some(x=>x.k==='reboot'))sfx('reboot');else if(S.q.some(x=>x.k==='virus'))sfx('virus');S.q.forEach(x=>UI.pops.push(x));S.q=[];}}
+function advance(){if(S&&S.over&&!S.rec){S.rec=true;recordStats();sfx(S.winner===H?'win':S.winner===-1?'draw':'lose');if(S.unlock)setTimeout(()=>sfx('unlock'),1300);}
+ if(S&&!S.over&&S.pend&&S.pend.ctx.then==='ack'&&UI.ackRd!==S.rd){UI.ackRd=S.rd;sfx('round');}
  UI.sel=null;UI.grp=null;UI.tsel=null;UI.vsel=null;
  drain();
  const pd=S.pend,humanNow=S.over||!pd||pd.p===H;
- if(humanNow&&UI.acc.length){UI.pops.unshift({k:'tech',title:UI.accCont?'Esito':'Mossa dell\'avversario',lines:UI.acc});UI.acc=[];
+ if(humanNow&&UI.acc.length){sfx('pop');UI.pops.unshift({k:'tech',title:UI.accCont?'Esito':'Mossa dell\'avversario',lines:UI.acc});UI.acc=[];
   const cont=!S.over&&pd&&pd.ctx.then!=='main'&&pd.ctx.then!=='ack';UI.accCont=cont;UI.accOn=cont;}
  else if(humanNow&&!UI.acc.length&&UI.accOn&&!(pd&&pd.ctx.then!=='main')){UI.accOn=false;UI.accCont=false;}
  render();kick();saveGame();}
@@ -1197,13 +1286,18 @@ function botMove(){if(!S||!S.pend||S.pend.p===H||UI.pops.length)return;
  const mod=pd.ctx.then==='main'&&t&&(t.t==='play'||t.t==='val'||(t.t==='place'&&(S.fr[t.f].ev===7||S.fr[t.f].ev===11||S.fr[t.f].flip)));
  if(mod||(pd.ctx.then==='resp'&&t===true)){UI.accOn=true;UI.accCont=false;}
  INV.answer(S,idx);
+ if(pd.ctx.then==='main'&&t){if(t.t==='place')sfx('place2');else if(t.t==='play'||t.t==='val')sfx('card2');}
+ for(const e of S.log.slice(from)){if(e.t.indexOf('Combattimento')===0)sfx('combat');if(e.t.indexOf('respinge')>=0)sfx('shield');}
  if(UI.accOn)UI.acc.push(...pub(from));
  advance();}
 function virusN(o){const a=o&&o.v;if(!a)return 0;if(a.t==='vcoins')return a.n;if(a.t==='vextra'||a.t==='val')return 1;if(a.t==='play'){const k=INV.tk(S,H,a.c);if(k==='trade'||k==='wipe')return 1;}return 0;}
+function actSound(pd,v,from){let n='click';if(pd.ctx.then==='main'&&v){n={place:'place',play:'card',val:'card',sell:'coin',buy:'coin',sellbuy:'coin',vcoins:'coin'}[v.t]||'click';}
+ for(const e of S.log.slice(from)){if(e.t.indexOf('Combattimento')===0)n='combat';if(e.t.indexOf('respinge')>=0)n='shield';}sfx(n);}
 function act(i,force){if(!S.pend||S.pend.p!==H)return;
  if(!force&&S.pend.ctx.then==='main'){const n=virusN(S.pend.opts[+i]);if(n>0){UI.sheet={k:'vconf',i:+i,n,lab:S.pend.opts[+i].l};render();return;}}
- UI.sheet=null;const from=S.log.length;
+ UI.sheet=null;const from=S.log.length,pd0=S.pend,v0=pd0.opts[+i]&&pd0.opts[+i].v;
  try{INV.answer(S,+i);}catch(e){console.error(e);}
+ actSound(pd0,v0,from);
  if(UI.accOn)UI.acc.push(...pub(from));
  advance();}
 const HD={
@@ -1231,14 +1325,20 @@ const HD={
  die:v=>{UI.sel=UI.sel===v?null:v;render();},
  card:v=>{UI.sheet={k:'card',id:+v};render();},
  vc:()=>{UI.sheet={k:'vc'};render();},
+ hand:()=>{UI.handOpen=!UI.handOpen;render();},
+ endCopy:()=>{const code=exportCode();const no=()=>{UI.sheet={k:'stats'};UI.codeMsg='Copia non disponibile qui: il codice è selezionato, copialo a mano.';UI.codeOk=false;render();const o=document.getElementById('code-out');if(o&&o.select){o.focus();o.select();}};
+  try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(()=>{UI.endMsg='Copiato! Incollalo dove conservi il codice.';UI.endOk=true;render();},no);return;}}catch(e){}no();},
  vsel:v=>{const p=v.split(':');UI.vsel={c:+p[0],v:+p[1]};UI.sheet=null;UI.sel=null;render();},
  vcancel:()=>{UI.vsel=null;render();},
  vdie:k=>{if(!UI.vsel||!S.pend||S.pend.p!==H)return;const i=info().vd[UI.vsel.c+'/'+UI.vsel.v+'/'+k];UI.vsel=null;if(i===undefined){render();return;}act(i);},
  tut0:()=>{UI.sheet={k:'tut',n:0};render();},tutn:v=>{UI.sheet={k:'tut',n:+v};render();},
+ snd:()=>{SND.on=!SND.on;try{localStorage.setItem('invasione.audio',SND.on?'1':'0');}catch(e){}if(SND.on){actx();sfx('click');}else stopMusic();render();},
  pick:v=>act(v),pickc:v=>act(v,true),homeq:()=>{UI.sheet={k:'home'};render();},tdie:v=>{UI.tsel=v;render();},tback:()=>{UI.tsel=null;render();},pop:()=>{UI.pops.shift();render();kick();saveGame();},
  grp:v=>{UI.grp=v;render();},back:()=>{UI.grp=null;render();}};
-app.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t||t.disabled)return;const f=HD[t.dataset.a];if(f)f(t.dataset.v);});
-app.addEventListener('mouseover',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t)showTip(t);else hideTip();});
+const CLICKS={setup:1,go:1,gonew:1,hf:1,df:1,story:1,storyLocked:1,tut0:1,tutn:1,help:1,poster:1,stats:1,homeback:1,new:1,endnew:1,recap:1,resume:1,close:1,homeq:1,die:1,card:1,hand:1,vsel:1,tdie:1,ev:1};
+app.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t||t.disabled)return;if(CLICKS[t.dataset.a])sfx('click');const f=HD[t.dataset.a];if(f)f(t.dataset.v);});
+app.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse'){hideTip();return;}const t=e.target.closest&&e.target.closest('[data-tip]');if(t)showTip(t);else hideTip();});
+app.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse')hideTip();});
 app.addEventListener('mouseleave',hideTip);
 document.addEventListener&&document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(UI.story){UI.story=null;render();}else if(UI.poster){UI.poster=false;render();}else if(UI.sheet){UI.sheet=null;render();}});
 window.addEventListener('scroll',hideTip,true);
