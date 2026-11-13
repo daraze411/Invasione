@@ -292,7 +292,7 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 .rcard .dv{position:absolute;bottom:10px;width:26px;height:26px;color:var(--ink);background:#fff}
 .rcard .dv svg{width:100%;height:100%;display:block}
 .rcard .dv.l{left:12px}.rcard .dv.r{right:12px}
-.rcard .dv.any{left:50%;transform:translateX(-50%);width:auto;padding:4px 8px;border:1px solid var(--ink);font-family:var(--pix);font-size:9px;background:transparent}
+.rcard .dvs{position:absolute;bottom:10px;display:flex;gap:3px;color:var(--ink)}.rcard .dvs svg{width:21px;height:21px;background:#fff;display:block}.rcard .dvs.l{left:10px}.rcard .dvs.r{right:10px}
 .sheet .ctip{font-size:13px}
 @media (prefers-reduced-motion:no-preference){.rcard{animation:flipin .38s steps(6) both}}
 @keyframes flipin{from{transform:perspective(700px) rotateY(88deg)}to{transform:perspective(700px) rotateY(0)}}
@@ -1089,15 +1089,15 @@ function frontHTML(f,inf){const fr=S.fr[f],q=1-H;
   if(pl)h+=`<button class="drop" data-a="pick" data-v="${pl.i}">Schiera qui${fr.ev===8?' (−1 €)':''}</button>`;}
  return h+'</section>';}
 function topHTML(){const s=S;return `<div class="top"><div><div class="t">Round ${Math.min(s.rd,3)}/3</div><div class="m">Turno ${Math.min(s.turn,10)}/10</div></div><div class="score"><span class="me">Tu ${s.pv[H]}</span> – <span class="op">${s.pv[1-H]} Avv.</span></div><span style="display:flex;gap:6px;align-items:center">${sndBtn()}<button class="chip" data-a="homeq">Home</button><button class="icon" data-a="help" aria-label="Regole">?</button></span></div>`;}
-const ART={'T-gain2':1,'A-gain2':1,'T-skipG':1,'T-steal':1,'T-regrow':1,'T-moveOpp':1};
+const ART={'A-1':1,'A-10':1,'A-11':1,'A-12':1,'A-13':1,'A-14':1,'A-15':1,'A-16':1,'A-17':1,'A-18':1,'A-19':1,'A-2':1,'A-20':1,'A-21':1,'A-22':1,'A-23':1,'A-24':1,'A-25':1,'A-26':1,'A-27':1,'A-28':1,'A-3':1,'A-4':1,'A-5':1,'A-6':1,'A-7':1,'A-8':1,'A-9':1,'T-1':1,'T-10':1,'T-11':1,'T-12':1,'T-13':1,'T-14':1,'T-15':1,'T-16':1,'T-17':1,'T-18':1,'T-19':1,'T-2':1,'T-20':1,'T-21':1,'T-22':1,'T-23':1,'T-24':1,'T-25':1,'T-26':1,'T-27':1,'T-28':1,'T-3':1,'T-4':1,'T-5':1,'T-6':1,'T-7':1,'T-8':1,'T-9':1};
 const PIPS={1:[[1,1]],2:[[0,0],[2,2]],3:[[0,0],[1,1],[2,2]],4:[[0,0],[2,0],[0,2],[2,2]],5:[[0,0],[2,0],[1,1],[0,2],[2,2]],6:[[0,0],[2,0],[0,1],[2,1],[0,2],[2,2]]};
 function pipSVG(v){return `<svg viewBox="0 0 13 13" aria-label="${v}"><rect x=".75" y=".75" width="11.5" height="11.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1"/>${(PIPS[v]||[]).map(([x,y])=>`<circle cx="${3.5+x*3}" cy="${3.5+y*3}" r="1.15" fill="currentColor"/>`).join('')}</svg>`;}
 function cardFace(o){/* o: {fac, art, title, text, v:[a,b], tag, wide} */
  const art=o.art?`<img src="${o.art}" alt="">`:`<div class="ph ${o.fac||''}"><span>Illustrazione<br>in arrivo</span></div>`;
- const dv=o.v&&o.v.length===2?`<span class="dv l">${pipSVG(o.v[0])}</span><span class="dv r">${pipSVG(o.v[1])}</span>`:o.v&&o.v.length>2?'<span class="dv any">1–6</span>':'';
+ const dv=o.v&&o.v.length===2?`<span class="dv l">${pipSVG(o.v[0])}</span><span class="dv r">${pipSVG(o.v[1])}</span>`:o.v&&o.v.length>2?`<span class="dvs l">${[1,2,3].map(pipSVG).join('')}</span><span class="dvs r">${[4,5,6].map(pipSVG).join('')}</span>`:'';
  return `<div class="rcard ${o.fac||'N'} ${o.wide?'wide':''} ${o.noart?'noart':''}">${o.noart?'':`<div class="art">${art}</div>`}<div class="txt">${o.tag?`<span class="tag">${esc(o.tag)}</span>`:''}${o.title?`<b>${esc(o.title)}</b>`:''}<p>${esc(o.text)}</p></div>${dv}</div>`;}
 function techFace(id){const f=S.fac[H],k=INV.tk(S,H,id),t=INV.tt(S,H,id),ci=t.indexOf(': '),named=!!INV.FX[id]&&ci>0&&ci<20;
- return cardFace({fac:f,art:ART[f+'-'+k]?`art-${f}-${k}.png`:null,title:named?t.slice(0,ci):'',text:named?t.charAt(ci+2).toUpperCase()+t.slice(ci+3):t,v:INV.isStart(id)?null:INV.TECH[id].v,tag:INV.isStart(id)?'Univoca':INV.FX[id]?'Esclusiva':''});}
+ return cardFace({fac:f,art:ART[f+'-'+id]?`art-${f}-${id}.png`:null,title:named?t.slice(0,ci):'',text:named?t.charAt(ci+2).toUpperCase()+t.slice(ci+3):t,v:INV.isStart(id)?null:INV.TECH[id].v,tag:INV.isStart(id)?'Univoca':INV.FX[id]?'Esclusiva':''});}
 function handHTML(){const h=S.hand[H];if(!h.length)return '<div class="nohand">Nessuna Tecnologia in mano.</div>';
  return `<div class="hand">${h.map(id=>{return `<button class="card ${S.fac[H]}" data-a="card" data-v="${id}" data-tip="${esc(techTip(id))}"><span>${esc(INV.tt(S,H,id))}</span></button>`;}).join('')}</div>`;}
 function logHTML(){const L=S.log.filter(e=>e.to===null||e.to===H).slice(-40).reverse();
