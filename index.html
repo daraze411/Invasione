@@ -36,7 +36,7 @@
  color-scheme:dark}
 *{box-sizing:border-box}
 html,body{background:var(--bg)}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.4;
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.4;font-variant-ligatures:none;font-feature-settings:'liga' 0,'clig' 0;
  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 12px}
 #app{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
 button{font:inherit;color:inherit;cursor:pointer}
@@ -210,7 +210,8 @@ button.chip{cursor:pointer}
 @keyframes pl{50%{box-shadow:0 0 0 2px var(--bg),0 0 0 6px rgba(234,217,168,.35)}}
 
 /* ===== Pixel art: caratteri pixel per titoli, pulsanti e numeri; testi lunghi in IBM Plex Sans ===== */
-:root{--disp:'Pixelify Sans','Courier New',monospace;--pix:'Press Start 2P','Courier New',monospace;--mono:var(--pix);
+@font-face{font-family:'EuroPix';src:url(data:font/ttf;base64,AAEAAAAKAIAAAwAgT1MvMmXxZQ4AAAEoAAAAYGNtYXAADCD/AAABkAAAADRnbHlm7a3QqAAAAcwAAADaaGVhZC/3d/wAAACsAAAANmhoZWEGLgJbAAAA5AAAACRobXR4BMQAKAAAAYgAAAAIbG9jYQBtAAAAAAHEAAAABm1heHAAGABWAAABCAAAACBuYW1lY1dn4wAAAqgAAABgcG9zdHZ4c0UAAAMIAAAAKwABAAAAAQAA08VBLl8PPPUAAwPoAAAAAOccmjAAAAAA5xyaMAAoAAACgAK8AAAAAwACAAAAAAAAAAEAAAOE/zgAAALQACgAUAKAAAEAAAAAAAAAAAAAAAAAAAACAAEAAAACAFQAFQAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAwJiAZAABQAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAPz8/PwAAIKwgrAOE/zgAAAOEAMgAAAAAAAAAAAAAAAAAAAAgAAAB9AAAAtAAKAAAAAIAAAADAAAAFAADAAEAAAAUAAQAIAAAAAQABAABAAAgrP//AAAgrP//31UAAQAAAAAAAAAAAG0AAAAVACgAAAKAArwAAwAHAAsADwATABcAGwAfACMAJwArAC8AMwA3ADsAPwBDAEcASwBPAFMAABM1MxUxNTMVMTUzFTE1MxUFNTMVBzUzFTE1MxUxNTMVMTUzFTE1MxUFNTMVBzUzFTE1MxUxNTMVMTUzFTE1MxUFNTMVFTUzFTE1MxUxNTMVMTUzFfBkZGRk/gxkyGRkZGRk/nBkyGRkZGRk/nBkZGRkZAJYZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkAAAAAAAEADYAAQAAAAAAAQAHAAAAAQAAAAAAAgAHAAcAAwABBAkAAQAOAA4AAwABBAkAAgAOABxFdXJvUGl4UmVndWxhcgBFAHUAcgBvAFAAaQB4AFIAZQBnAHUAbABhAHIAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAABAgRFdXJvAA==) format('truetype');unicode-range:U+20AC}
+:root{--disp:'EuroPix','Pixelify Sans','Courier New',monospace;--pix:'Press Start 2P','Courier New',monospace;--mono:var(--pix);
  --notch:polygon(0 4px,4px 4px,4px 0,calc(100% - 4px) 0,calc(100% - 4px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 4px) calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 4px),0 calc(100% - 4px))}
 *,*::before,*::after{border-radius:0!important}
 body{background:var(--bg) url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAA00lEQVR4Xu3cMQ6CMBQAUHB28JyexdlDeAhP4ujowOCOk4maIAQotPz3ZkKb//spND9UFUk1z/b8b4Bd0tGDewe/LwkkJPgzax+X68y3BIBy2RghvNu9OYUPQm4kJRibMQAAABTH53w3Z1tMp0/m26KdcTrFMqACAAAAAAAAAAAAAGLTl1+AIUkack22ip48jBKll3/N6q67MvMZ/MO+Po7KINNEqQB+rPlIgPSs8IUJeA8BApiFv71kqOikFD15AAAA4nHSzDZZ2QAAi/DaBQBsygvgUG6JzxaG8gAAAABJRU5ErkJggg==) repeat;background-size:192px 192px;image-rendering:pixelated}
@@ -245,6 +246,13 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 .chip{padding:3px 8px}
 .vs{width:42px;height:42px;font-size:16px;font-weight:700;border-width:2px}
 .nb{border-radius:0!important}
+/* carattere pixel per i comandi */
+.slot,.acts button,.sheet .b,.chip,.hint,.status,.seg button,.back,.endscr .b,.story .b,.resume,.tg .tx small,.mi small,.log summary,.dock .pl,.side,.sheet .ctip,.sheet .meta,.codemsg,.tro small{font-family:var(--disp)}
+.acts button,.sheet .b{font-size:15px;letter-spacing:.01em}
+.chip{font-size:12px}.hint{font-size:12.5px}.mi small{font-size:12px}
+.ico{width:16px;height:16px;display:block;image-rendering:pixelated}
+.menu .mi small,.credit,.front .who,.res-l{font-family:var(--disp)}
+.icon .ico{margin:auto}.back .ico{width:18px;height:18px}
 /* trofei, opzioni, capitani */
 .trol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .tro{display:flex;gap:10px;align-items:flex-start;border:2px solid var(--line);padding:10px;background:var(--panel2)}
@@ -274,7 +282,7 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 .capchip.T{color:var(--terr)}.capchip.A{color:var(--ali)}
 .acts .karb{border-color:var(--ali);color:var(--ali)}
 /* carta "vera" */
-.rcard{--ink:#2b20a8;position:relative;align-self:center;width:min(230px,62vw);aspect-ratio:2/3;background:#f7f1e3;color:var(--ink);border:3px solid #070b10;box-shadow:6px 6px 0 rgba(0,0,0,.45);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.rcard{--ink:#2b20a8;position:relative;align-self:center;width:min(230px,62vw);aspect-ratio:2/3;background:#f7f1e3;color:var(--ink);border:3px solid #070b10;box-shadow:6px 6px 0 rgba(0,0,0,.45);display:flex;flex-direction:column;flex-shrink:0}
 .rcard.A{--ink:#2e8f55}.rcard.N{--ink:#5a3d14}
 .rcard.wide{width:min(300px,82vw);aspect-ratio:auto}
 .rcard.noart{aspect-ratio:auto;min-height:170px;width:min(260px,76vw)}
@@ -283,7 +291,10 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 .rcard .art img{width:100%;height:100%;object-fit:cover;display:block;image-rendering:pixelated}
 .rcard .ph{width:100%;height:100%;display:grid;place-items:center;text-align:center;font-family:var(--pix);font-size:9px;line-height:1.6;color:#fff;text-shadow:2px 2px 0 #000;background:#0b1017}
 .rcard .ph.T{background:#08182e}.rcard .ph.A{background:#0a1b0d}
-.rcard .txt{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px 14px 40px;text-align:center}
+.rcard .txt{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px 12px 44px;text-align:center}
+.rcard.nodice .txt{padding-bottom:14px}
+.rcard.s1 .txt p{font-size:22px}.rcard.s3 .txt p{font-size:15px;line-height:1.2}.rcard.s4 .txt p{font-size:13.5px;line-height:1.2}
+.rcard.s3 .txt b,.rcard.s4 .txt b{font-size:20px}
 .rcard.wide .txt{padding-bottom:16px}
 .rcard.noart .txt{padding:22px 16px 26px}
 .rcard .txt b{font-family:var(--disp);font-weight:700;font-size:24px;line-height:1.1}
@@ -377,7 +388,7 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 .home{display:flex;flex-direction:column;gap:14px;padding-top:4px}
 .poster{display:block;width:min(100%,44vh,440px);height:auto;aspect-ratio:1;margin:0 auto;border:2px solid var(--line);background:#000}
 .menu{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:8px}
-.mi{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;text-align:left;padding:11px 12px;background:var(--panel);border:2px solid var(--line);border-bottom:5px solid #070b10;color:var(--fg);font-size:19px;font-weight:600;min-height:54px}
+.mi{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;padding:11px 12px;background:var(--panel);border:2px solid var(--line);border-bottom:5px solid #070b10;color:var(--fg);font-size:19px;font-weight:600;min-height:54px}
 .mi small{font-family:var(--body);font-size:11px;font-weight:400;color:var(--mute)}
 .mi.wide{grid-column:1/-1}
 .mi.main{grid-column:1/-1;align-items:center;background:var(--paper);color:#1a1608;border-color:#a8955f;border-bottom-color:#6e5f35;font-size:24px;font-weight:700;letter-spacing:.08em}
@@ -495,9 +506,11 @@ const FT={steal:'Ruba 2 Tecnologie dalla mano dell\'avversario e conservane una'
  rerollR:'Rilancio tattico: rilancia fino a 2 tue navi in riserva',
  mimic:'Mimetismo: modifica di ±1 una tua nave in riserva, senza prendere Virus',
  spore:'Spore: fino a fine round, ogni volta che l\'avversario prende un Virus guadagni 1 €'};
-function tk(s,p,id){const x=FX[id];return x?x[s.fac[p]]:TECH[id].k;}
-function tt(s,p,id){const x=FX[id];return x?FT[x[s.fac[p]]]:TECH[id].t;}
-function isStart(id){return id===25||id===26;}
+/* le carte aliene hanno id +100: una carta resta la stessa anche quando cambia mano */
+const cb=id=>id%100,cf=id=>id>100?'A':'T';
+function tk(s,p,id){const x=FX[cb(id)];return x?x[cf(id)]:TECH[cb(id)].k;}
+function tt(s,p,id){const x=FX[cb(id)];return x?FT[x[cf(id)]]:TECH[cb(id)].t;}
+function isStart(id){return cb(id)===25||cb(id)===26;}
 function worth(s,p,id){return WORTH[tk(s,p,id)]||.3;}
 /* rng */
 function rnd(s){s.rs=(s.rs+0x6D2B79F5)|0;let t=Math.imul(s.rs^s.rs>>>15,1|s.rs);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}
@@ -588,12 +601,12 @@ function answer(s,idx){const pd=s.pend;s.pend=null;FN[pd.ctx.then](s,pd.ctx,pd.o
 /* setup */
 function newGame(o){o=o||{};const s={cap:!!o.cap,bonus:!!o.bonus,karUsed:[false,false],rs:(o.seed||Date.now())|0,fac:o.fac||['T','A'],rd:0,turn:0,slot:0,first:0,order:[0,1],pv:[0,0],co:[1,1],hand:[[],[]],deck:[[],[]],disc:[[],[]],vir:[0,0],dbl:[false,false],skip:[false,false],pass:[false,false],vdeck:[],vdisc:[],evdeck:[],fr:[],dice:[[],[]],ord:0,st:[],pend:null,log:[],over:false,endNow:false,res:null,hold:o.hold,nl:o.nl,winner:-2,q:[]};
  const ids=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24].concat(o.bonus?[27,28]:[]);
- for(let p=0;p<2;p++)s.deck[p]=shuffle(s,ids.slice());
+ for(let p=0;p<2;p++)s.deck[p]=shuffle(s,ids.map(i=>s.fac[p]==='A'?i+100:i));
  s.evdeck=shuffle(s,[1,2,3,4,5,7,8,9,10,11,12]);
  for(let i=1;i<=7;i++){s.vdeck.push(i);if(i!==3)s.vdeck.push(i);}shuffle(s,s.vdeck);
  s.st=[{k:'init'}];run(s);return s;}
 TASK.init=s=>{push(s,{k:'uni',p:0},{k:'uni',p:1},{k:'draw3',p:0},{k:'draw3',p:1},{k:'roundStart'});};
-TASK.uni=(s,t)=>{ask(s,t.p,{then:'uni',p:t.p,ttl:'Scegli la tua Tecnologia univoca. L\'altra viene eliminata.',noauto:true},[25,26].map(c=>({l:tt(s,t.p,c),v:c,h:worth(s,t.p,c)})));};
+TASK.uni=(s,t)=>{ask(s,t.p,{then:'uni',p:t.p,ttl:'Scegli la tua Tecnologia univoca. L\'altra viene eliminata.',noauto:true},[25,26].map(c=>s.fac[t.p]==='A'?c+100:c).map(c=>({l:tt(s,t.p,c),v:c,h:worth(s,t.p,c)})));};
 FN.uni=(s,c,id)=>{s.hand[c.p].push(id);};
 TASK.draw3=(s,t)=>{const got=s.deck[t.p].splice(s.deck[t.p].length-3,3);ask(s,t.p,{then:'keep1',p:t.p,got,ttl:'Hai pescato 3 Tecnologie: quale tieni?',noauto:true},got.map((c,i)=>({l:tt(s,t.p,c),v:i,h:worth(s,t.p,c)})));};
 FN.keep1=(s,c,i)=>{const p=c.p,rest=c.got.filter((x,j)=>j!==i);s.hand[p].push(c.got[i]);ask(s,p,{then:'back',p,rest,ttl:'Quale rimetti nel mazzo? L\'altra viene eliminata.',noauto:true},rest.map((x,j)=>({l:tt(s,p,x),v:j,h:worth(s,p,x)})));};
@@ -636,7 +649,7 @@ function legalMain(s,p,extra){const o=[],q=1-p,seen={};
  if(hs.length&&s.co[p]>=1&&s.deck[p].length)for(const c of ids){o.push({l:'Vendi e compra: '+tt(s,p,c),v:{t:'sellbuy',c}});if(s.cap&&s.fac[p]==='A'&&!s.karUsed[p])o.push({l:'Vendi e compra con Kar Am Oh (scegli fra 5): '+tt(s,p,c),v:{t:'karsb',c}});}
  for(const c of ids){const k=tk(s,p,c);if(k==='jolly'||k==='resp')continue;if(tplan(s,p,c).ok)o.push({l:'Gioca: '+tt(s,p,c),v:{t:'play',c}});}
  const rd={};for(const d of s.dice[p]){if(d.loc==='R'&&!d.fz&&!rd[d.v])rd[d.v]=d;}
- for(const c of ids)for(const v of TECH[c].v)for(const k in rd){const d=rd[k];o.push({l:'Usa il valore '+v+' di una carta sul dado '+d.v+' (+1 Virus)',v:{t:'val',c,v,d:d.i},m:[{o:p,i:d.i,set:{v}}]});}
+ for(const c of ids)for(const v of TECH[cb(c)].v)for(const k in rd){const d=rd[k];o.push({l:'Usa il valore '+v+' di una carta sul dado '+d.v+' (+1 Virus)',v:{t:'val',c,v,d:d.i},m:[{o:p,i:d.i,set:{v}}]});}
  for(let n=1;n<=5-s.co[p];n++)o.push({l:'Prendi '+n+' Virus → +'+n+' €',v:{t:'vcoins',n}});
  if(!extra)o.push({l:'Prendi 1 Virus per un\'azione extra',v:{t:'vextra'}});
  o.push(extra?{l:'Nessuna azione extra',v:{t:'none'}}:{l:'Passa',v:{t:'pass'}});
@@ -693,8 +706,11 @@ FN.reinf=(s,c,v)=>{const d=s.dice[v.o][v.i];d.loc='R';d.f=-1;d.x=-1;d.fz=0;d.v=1
 FN.mutate=(s,c,v)=>{const e={e:'setV',o:v.o,i:v.i,nv:v.nv};if(v.o===c.p)execEff(s,e);else targeted(s,c.p,e,[{o:v.o,i:v.i,set:{v:v.nv}}]);};
 TASK.mob=(s,t)=>{const o=placeOpts(s,t.p);if(!o.length)return;if(t.n<2)o.push({l:'Non schierare altre navi',v:null,h:0});ask(s,t.p,{then:'mob',p:t.p,n:t.n,ttl:t.n===2?'Mobilitazione: schiera la prima nave':'Mobilitazione: schiera la seconda nave'},o);};
 FN.mob=(s,c,v)=>{if(!v)return;if(c.n>1)push(s,{k:'mob',p:c.p,n:c.n-1});doPlace(s,c.p,v);};
-TASK.rr=(s,t)=>{const o=ownDice(s,t.p,true).filter(x=>s.dice[t.p][x.v.i].loc==='R');if(!o.length)return;if(t.n<2)o.push({l:'Basta così',v:null,h:0});ask(s,t.p,{then:'rr',p:t.p,n:t.n,ttl:t.n===2?'Rilancio tattico: prima nave da rilanciare':'Rilancio tattico: seconda nave (facoltativa)'},o);};
-FN.rr=(s,c,v)=>{if(!v)return;const d=s.dice[v.o][v.i],b=d.v;d.v=1+ri(s,6);log(s,fn(s,v.o)+' rilancia: dado '+b+' in riserva → '+d.v);if(c.n>1)push(s,{k:'rr',p:c.p,n:c.n-1});};
+TASK.rr=(s,t)=>{const done=t.done||[],seen={},o=[];for(const d of s.dice[t.p]){if(d.loc!=='R'||d.fz||done.includes(d.i)||seen[d.v])continue;seen[d.v]=1;o.push({l:'dado '+d.v+' in riserva',v:{o:t.p,i:d.i}});}
+ if(!o.length)return;if(t.n<2)o.push({l:'Basta così',v:null,h:0});ask(s,t.p,{then:'rr',p:t.p,n:t.n,done,ttl:t.n===2?'Rilancio tattico: prima nave da rilanciare':'Rilancio tattico: seconda nave (facoltativa)'},o);};
+FN.rr=(s,c,v)=>{if(!v)return;const d=s.dice[v.o][v.i],b=d.v;d.v=1+ri(s,6);log(s,fn(s,v.o)+' rilancia: dado '+b+' in riserva → '+d.v);
+ qev(s,{k:'msg',p:c.p,title:'Rilancio tattico',lines:['Hai rilanciato il '+b+': ora vale '+d.v+'.'+(d.v===b?' Stesso numero: capita una volta su sei.':'')]});
+ if(c.n>1)push(s,{k:'rr',p:c.p,n:c.n-1,done:(c.done||[]).concat(d.i)});};
 function targeted(s,atk,eff,m){const q=1-atk;
  if((s.hand[q].includes(10)||s.hand[q].includes(11))&&s.co[q]>=1)ask(s,q,{then:'resp',atk,eff,m,ttl:'Respingi l\'attacco?'},[{l:'Respingi (−1 €)',v:true},{l:'Lascia passare',v:false}]);
  else execEff(s,eff);}
@@ -801,7 +817,7 @@ function finish(s){s.over=true;const[a,b]=s.pv;let w=-1,why=null;
   else if(s.vir[0]!==s.vir[1]){w=s.vir[0]<s.vir[1]?0:1;why={k:'vir',v:[s.vir[0],s.vir[1]],r:[ra,rb]};}
   else why={k:'cantina',v:[ra,rb]};}
  s.winner=w;s.why=why;log(s,'Partita conclusa.');}
-return{isStart,FX,FT,placeOk,FR,EVN,EVD,CN,SPN,TECH,VIRN,newGame,run,answer,clone,legalMain,validShips,onFront,sumv,tk,tt,worth,rnd,ri,shuffle,pm,um,tplan,winner,fn,finish};
+return{cb,cf,isStart,FX,FT,placeOk,FR,EVN,EVD,CN,SPN,TECH,VIRN,newGame,run,answer,clone,legalMain,validShips,onFront,sumv,tk,tt,worth,rnd,ri,shuffle,pm,um,tplan,winner,fn,finish};
 })();
 
 
@@ -971,7 +987,7 @@ function exportCode(){const d={v:1,s:loadStats(),u:syncTro(),o:loadOpt()};return
 function importCode(txt){try{const t=String(txt||'').trim().replace(/\s+/g,'');if(!t.startsWith('INV1-'))return false;let b=t.slice(5);while(b.length%4)b+='=';
  const d=JSON.parse(decodeURIComponent(escape(atob(b))));if(!d||d.v!==1||!okSt(d.s))return false;if(d.u!==undefined&&(!Array.isArray(d.u)||!d.u.every(x=>TRID.includes(x))))return false;
  saveStats(d.s);try{localStorage.setItem(TRK,JSON.stringify(Array.isArray(d.u)?d.u:[]));}catch(e){}syncTro();if(d.o&&typeof d.o==='object')saveOpt(d.o);return true;}catch(e){return false;}}
-const SV='invasione.save.v2';
+const SV='invasione.save.v3';
 function saveGame(){if(!S)return;try{if(S.over){localStorage.removeItem(SV);return;}localStorage.setItem(SV,JSON.stringify({v:1,t:Date.now(),diff,S,pops:UI.pops,acc:UI.acc,accOn:UI.accOn,accCont:UI.accCont}));}catch(e){}}
 function loadSave(){try{const d=JSON.parse(localStorage.getItem(SV)||'null');if(d&&d.v===1&&d.S&&!d.S.over&&d.S.pend)return d;}catch(e){}return null;}
 function resumeHTML(){const d=loadSave();if(!d)return '';const g=d.S;
@@ -1020,7 +1036,7 @@ const CAP={T:{n:'Mark Platt',ab:'I Fronti scoperti non regalano un punto in più
   long:'Una volta per partita. Vale anche con Vendi e compra e costa i soliti 2 €.'}};
 function capChip(p){if(!S.cap)return '';const f=S.fac[p],used=f==='A'&&S.karUsed&&S.karUsed[p];
  return `<button class="capchip ${f}" data-a="capv" data-v="${f}" data-tip="${esc(CAP[f].n+': '+CAP[f].ab+(used?' (già usata)':''))}"><img src="capitano-${f}.png" alt="">${CAP[f].n.split(' ')[0]}${used?' ✓':''}</button>`;}
-function techTip(id){const k=INV.tk(S,H,id);const base=TDESC[k]||INV.tt(S,H,id);if(INV.isStart(id))return base+'\n\nTecnologia univoca: non ha valori in basso.';const val=id===20?'Valori: qualsiasi da 1 a 6.':'Valori in basso: '+INV.TECH[id].v.join(' oppure ')+'.';return base+'\n\n'+val+' Come azione puoi scartare la carta, dare quel valore a una tua nave in riserva e prendere 1 Virus.';}
+function techTip(id){const k=INV.tk(S,H,id);const base=TDESC[k]||INV.tt(S,H,id);if(INV.isStart(id))return base+'\n\nTecnologia univoca: non ha valori in basso.';const val=INV.cb(id)===20?'Valori: qualsiasi da 1 a 6.':'Valori in basso: '+INV.TECH[INV.cb(id)].v.join(' oppure ')+'.';return base+'\n\n'+val+' Come azione puoi scartare la carta, dare quel valore a una tua nave in riserva e prendere 1 Virus.';}
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fname=f=>f==='T'?'Terrestri':'Alieni';
 const dk=d=>d.v+'/'+d.fz;
@@ -1038,7 +1054,7 @@ ${storyOpen()?'<button class="mi" data-a="story">Storia</button>':''}<button cla
 <button class="mi ${storyOpen()?'':'wide'}" data-a="stats">Le tue partite<small>${sub}</small></button></nav></div>`;}
 function setupHTML(){
  const side=(f,name)=>`<button class="side ${f} ${hf===f?'on':''}" data-a="hf" data-v="${f}" aria-pressed="${hf===f}"><b>${name}</b>${hf===f?'<span class="you">La tua fazione</span>':''}</button>`;
- return `<div class="setup"><div class="bar"><button class="back" data-a="homeback">← Home</button><h1>Nuova partita</h1>${sndBtn()}</div>
+ return `<div class="setup"><div class="bar"><button class="back" data-a="homeback" aria-label="Torna alla home" title="Home"><svg class="ico" viewBox="0 0 8 8" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="M3 0h2v1h1v1h1v1h1v1H7v4H5V5H3v3H1V4H0V3h1V2h1V1h1z"/></svg></button><h1>Nuova partita</h1>${sndBtn()}</div>
 <div class="opt"><h3>Scegli da che parte stare</h3><div class="arena">${side('A','Alieni')}<span class="vs">VS</span>${side('T','Terrestri')}</div></div>
 <div class="opt"><h3>Avversario</h3><div class="seg">
 <button data-a="df" data-v="normal" class="${diff==='normal'?'on':''}"><b>Normale</b></button>
@@ -1088,18 +1104,19 @@ function frontHTML(f,inf){const fr=S.fr[f],q=1-H;
   const pl=place&&place.find(e=>e.f===f);
   if(pl)h+=`<button class="drop" data-a="pick" data-v="${pl.i}">Schiera qui${fr.ev===8?' (−1 €)':''}</button>`;}
  return h+'</section>';}
-function topHTML(){const s=S;return `<div class="top"><div><div class="t">Round ${Math.min(s.rd,3)}/3</div><div class="m">Turno ${Math.min(s.turn,10)}/10</div></div><div class="score"><span class="me">Tu ${s.pv[H]}</span> – <span class="op">${s.pv[1-H]} Avv.</span></div><span style="display:flex;gap:6px;align-items:center">${sndBtn()}<button class="chip" data-a="homeq">Home</button><button class="icon" data-a="help" aria-label="Regole">?</button></span></div>`;}
+function topHTML(){const s=S;return `<div class="top"><div><div class="t">Round ${Math.min(s.rd,3)}/3</div><div class="m">Turno ${Math.min(s.turn,10)}/10</div></div><div class="score"><span class="me">Tu ${s.pv[H]}</span> – <span class="op">${s.pv[1-H]} Avv.</span></div><span style="display:flex;gap:6px;align-items:center">${sndBtn()}<button class="icon" data-a="homeq" aria-label="Torna alla home" title="Home"><svg class="ico" viewBox="0 0 8 8" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="M3 0h2v1h1v1h1v1h1v1H7v4H5V5H3v3H1V4H0V3h1V2h1V1h1z"/></svg></button><button class="icon" data-a="help" aria-label="Regole">?</button></span></div>`;}
 const ART={'A-1':1,'A-10':1,'A-11':1,'A-12':1,'A-13':1,'A-14':1,'A-15':1,'A-16':1,'A-17':1,'A-18':1,'A-19':1,'A-2':1,'A-20':1,'A-21':1,'A-22':1,'A-23':1,'A-24':1,'A-25':1,'A-26':1,'A-27':1,'A-28':1,'A-3':1,'A-4':1,'A-5':1,'A-6':1,'A-7':1,'A-8':1,'A-9':1,'T-1':1,'T-10':1,'T-11':1,'T-12':1,'T-13':1,'T-14':1,'T-15':1,'T-16':1,'T-17':1,'T-18':1,'T-19':1,'T-2':1,'T-20':1,'T-21':1,'T-22':1,'T-23':1,'T-24':1,'T-25':1,'T-26':1,'T-27':1,'T-28':1,'T-3':1,'T-4':1,'T-5':1,'T-6':1,'T-7':1,'T-8':1,'T-9':1};
 const PIPS={1:[[1,1]],2:[[0,0],[2,2]],3:[[0,0],[1,1],[2,2]],4:[[0,0],[2,0],[0,2],[2,2]],5:[[0,0],[2,0],[1,1],[0,2],[2,2]],6:[[0,0],[2,0],[0,1],[2,1],[0,2],[2,2]]};
 function pipSVG(v){return `<svg viewBox="0 0 13 13" aria-label="${v}"><rect x=".75" y=".75" width="11.5" height="11.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1"/>${(PIPS[v]||[]).map(([x,y])=>`<circle cx="${3.5+x*3}" cy="${3.5+y*3}" r="1.15" fill="currentColor"/>`).join('')}</svg>`;}
 function cardFace(o){/* o: {fac, art, title, text, v:[a,b], tag, wide} */
  const art=o.art?`<img src="${o.art}" alt="">`:`<div class="ph ${o.fac||''}"><span>Illustrazione<br>in arrivo</span></div>`;
  const dv=o.v&&o.v.length===2?`<span class="dv l">${pipSVG(o.v[0])}</span><span class="dv r">${pipSVG(o.v[1])}</span>`:o.v&&o.v.length>2?`<span class="dvs l">${[1,2,3].map(pipSVG).join('')}</span><span class="dvs r">${[4,5,6].map(pipSVG).join('')}</span>`:'';
- return `<div class="rcard ${o.fac||'N'} ${o.wide?'wide':''} ${o.noart?'noart':''}">${o.noart?'':`<div class="art">${art}</div>`}<div class="txt">${o.tag?`<span class="tag">${esc(o.tag)}</span>`:''}${o.title?`<b>${esc(o.title)}</b>`:''}<p>${esc(o.text)}</p></div>${dv}</div>`;}
-function techFace(id){const f=S.fac[H],k=INV.tk(S,H,id),t=INV.tt(S,H,id),ci=t.indexOf(': '),named=!!INV.FX[id]&&ci>0&&ci<20;
- return cardFace({fac:f,art:ART[f+'-'+id]?`art-${f}-${id}.png`:null,title:named?t.slice(0,ci):'',text:named?t.charAt(ci+2).toUpperCase()+t.slice(ci+3):t,v:INV.isStart(id)?null:INV.TECH[id].v,tag:INV.isStart(id)?'Univoca':INV.FX[id]?'Esclusiva':''});}
+ const L=(o.text||'').length,sz=L<=32?'s1':L<=58?'s2':L<=90?'s3':'s4';
+ return `<div class="rcard ${o.fac||'N'} ${sz} ${o.wide?'wide':''} ${o.noart?'noart':''} ${o.v?'':'nodice'}">${o.noart?'':`<div class="art">${art}</div>`}<div class="txt">${o.tag?`<span class="tag">${esc(o.tag)}</span>`:''}${o.title?`<b>${esc(o.title)}</b>`:''}<p>${esc(o.text)}</p></div>${dv}</div>`;}
+function techFace(id){const f=INV.cf(id),b=INV.cb(id),t=INV.tt(S,H,id),ci=t.indexOf(': '),named=!!INV.FX[b]&&ci>0&&ci<20;
+ return cardFace({fac:f,art:ART[f+'-'+b]?`art-${f}-${b}.png`:null,title:named?t.slice(0,ci):'',text:named?t.charAt(ci+2).toUpperCase()+t.slice(ci+3):t,v:INV.isStart(id)?null:INV.TECH[b].v,tag:INV.isStart(id)?'Univoca':INV.FX[b]?'Esclusiva':''});}
 function handHTML(){const h=S.hand[H];if(!h.length)return '<div class="nohand">Nessuna Tecnologia in mano.</div>';
- return `<div class="hand">${h.map(id=>{return `<button class="card ${S.fac[H]}" data-a="card" data-v="${id}" data-tip="${esc(techTip(id))}"><span>${esc(INV.tt(S,H,id))}</span></button>`;}).join('')}</div>`;}
+ return `<div class="hand">${h.map(id=>{return `<button class="card ${INV.cf(id)}" data-a="card" data-v="${id}" data-tip="${esc(techTip(id))}"><span>${esc(INV.tt(S,H,id))}</span></button>`;}).join('')}</div>`;}
 function logHTML(){const L=S.log.filter(e=>e.to===null||e.to===H).slice(-40).reverse();
  return `<details class="log"><summary>Registro della partita</summary><ol>${L.map(e=>`<li class="${e.t.charAt(0)==='—'?'h':''}">${esc(e.t)}</li>`).join('')}</ol></details>`;}
 function render(){hideTip();
@@ -1108,8 +1125,9 @@ function render(){hideTip();
  if(UI.screen==='setup'){app.className='setup';app.innerHTML=setupHTML()+CREDIT+sheetHTML();return;}
  const s=S,q=1-H,pd=s.pend,mine=pd&&pd.p===H&&pd.ctx.then==='main'&&!UI.pops.length,inf=mine?info():null;
  TG=null;
- if(pd&&pd.p===H&&pd.ctx.then!=='main'&&!UI.pops.length&&pd.opts.length&&pd.opts.every(x=>x.v&&typeof x.v==='object'&&x.v.o!==undefined&&x.v.i!==undefined)){
-  TG=pd.opts;if(!s.dice[0].concat(s.dice[1]).some(d=>(d.loc==='R'||d.loc==='F')&&tgtRep(d)!==null))TG=null;}
+ const isD=x=>x.v&&typeof x.v==='object'&&x.v.o!==undefined&&x.v.i!==undefined;
+ if(pd&&pd.p===H&&pd.ctx.then!=='main'&&!UI.pops.length&&pd.opts.some(isD)&&pd.opts.every(x=>isD(x)||x.v===null)&&pd.opts.filter(x=>x.v===null).length<=1){
+  TG=pd.opts.filter(isD);if(!s.dice[0].concat(s.dice[1]).some(d=>(d.loc==='R'||d.loc==='F')&&tgtRep(d)!==null))TG=null;}
  let h='<div class="board">'+topHTML();
  h+=`<div class="opp"><div class="pl"><span class="fac ${s.fac[q]}">${fname(s.fac[q])}<span class="lg"> · Avversario</span><span class="sh"> · Avv.</span></span>${sideInfo(q)}</div>`+reserveHTML(q)+'</div>';
  h+='<div class="fronts">';if(s.fr.length&&s.dice[0].length)for(let f=0;f<3;f++)h+=frontHTML(f,inf);h+='</div>';
@@ -1121,6 +1139,7 @@ function render(){hideTip();
  else if(mine&&UI.vsel)st='Valore '+UI.vsel.v+': tocca un dado illuminato in riserva (prendi 1 Virus).';
  else if(mine)st=UI.sel?'Scegli dove schierare il dado.':(pd.ctx.extra?'Azione extra: scegli o rinuncia.':'Tocca a te: scegli un dado, una carta o un\'azione.');
  h+=`<div class="dock ${UI.handOpen?'hopen':''}"><div class="pl"><span class="fac ${s.fac[H]}">${fname(s.fac[H])} · Tu</span>${sideInfo(H)}<button class="handtog" data-a="hand" aria-expanded="${!!UI.handOpen}">Carte ${s.hand[H].length} ${UI.handOpen?'▴':'▾'}</button></div>`+reserveHTML(H,inf)+handHTML()+`<div class="status ${mine?'me':''}">${st}</div>`;
+ if(TG){const si=pd.opts.findIndex(x=>x.v===null);if(si>=0)h+=`<div class="acts"><button class="pass" data-a="pick" data-v="${si}">${esc(pd.opts[si].l)}</button></div>`;}
  if(mine){h+='<div class="acts">';
   if(inf.buy>=0)h+=`<button data-a="pick" data-v="${inf.buy}">Compra (−2 €)</button>`;
   if(inf.kar>=0)h+=`<button class="karb" data-a="pick" data-v="${inf.kar}">Compra con Kar Am Oh</button>`;
@@ -1365,9 +1384,9 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
    if(c.then==='resp'||c.then==='first')lead=recent.join(' · ');
    if(TG){if(!UI.tsel)return '';
     const th=c.then,lab=l=>{const k=l.indexOf(' → ');if(k<0)return l;const r=l.slice(k+3);return th==='techMove'||th==='spMove'?'Sposta su '+r:'Nuovo valore: '+r;};
-    const o2=pd.opts;const first=o2.find(x=>x.v.o+':'+x.v.i===UI.tsel);
+    const o2=pd.opts;const first=o2.find(x=>x.v&&x.v.o+':'+x.v.i===UI.tsel);
     lead=first?first.l.split(' → ')[0]:'';
-    body=o2.map((x,i)=>x.v.o+':'+x.v.i===UI.tsel?btn('pick',i,lab(x.l)):'').join('')+btn('tback','','Scegli un\'altra nave','sec');
+    body=o2.map((x,i)=>x.v&&x.v.o+':'+x.v.i===UI.tsel?btn('pick',i,th==='rr'?'Rilancia questa nave':lab(x.l)):'').join('')+btn('tback','','Scegli un\'altra nave','sec');
     return `<div class="ov"><div class="sheet" role="dialog"><h2>${esc(ttl)}</h2><p>${esc(lead)}</p>${body}</div></div>`;}
    const o=pd.opts;let items=o.map((x,i)=>({i,l:x.l}));
    const grp=o.length>8&&o.every(x=>x.v&&x.v.o!==undefined&&x.v.i!==undefined&&x.l.indexOf(' → ')>0);
@@ -1380,7 +1399,7 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
  else return '';
  return `<div class="ov"><div class="sheet ${tall?'tall':''}" role="dialog"><h2>${esc(ttl)}</h2>${lead?`<p>${esc(lead)}</p>`:''}${body}${cancel?btn('close','','Chiudi','sec'):''}</div></div>`;}
 function pub(from){const me=fname(S.fac[H]);return S.log.slice(from).filter(e=>e.to===null||e.to===H).map(e=>e.t).filter(t=>t.charAt(0)!=='—'&&t.charAt(0)!=='☣'&&t.indexOf(' PV)')<0&&t.indexOf('Entrambi passano')<0&&t.indexOf('Partita conclusa')<0).map(t=>t.replace(/\b(Terrestri|Alieni)\b/g,m=>m===me?'Tu':'Avversario'));}
-function drain(){if(S.q&&S.q.length){if(S.q.some(x=>x.k==='reboot'))sfx('reboot');else if(S.q.some(x=>x.k==='virus'))sfx('virus');S.q.forEach(x=>UI.pops.push(x));S.q=[];}}
+function drain(){if(S.q&&S.q.length){if(S.q.some(x=>x.k==='reboot'))sfx('reboot');else if(S.q.some(x=>x.k==='virus'))sfx('virus');S.q.forEach(x=>{if(x.k==='msg'&&x.p!==H)return;UI.pops.push(x);});S.q=[];}}
 function advance(){if(S&&S.over&&!S.rec){S.rec=true;recordStats();sfx(S.winner===H?'win':S.winner===-1?'draw':'lose');if(unl().length)setTimeout(()=>sfx('unlock'),1300);}
  if(S&&!S.over&&S.pend&&S.pend.ctx.then==='ack'&&UI.ackRd!==S.rd){UI.ackRd=S.rd;sfx('round');}
  UI.sel=null;UI.grp=null;UI.tsel=null;UI.vsel=null;
