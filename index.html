@@ -246,6 +246,17 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 .chip{padding:3px 8px}
 .vs{width:42px;height:42px;font-size:16px;font-weight:700;border-width:2px}
 .nb{border-radius:0!important}
+/* crediti */
+.credits{display:flex;flex-direction:column;gap:6px;text-align:center}
+.cr-t{margin:4px 0 0;font-family:var(--pix);font-size:20px;color:var(--paper);letter-spacing:.06em}
+.cr-s{margin:0;font-family:var(--disp);color:var(--mute)}
+.credits .mh3{margin-top:14px}
+.crl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.crl li{display:flex;flex-direction:column;gap:1px}
+.cr-r{font-size:12px;color:var(--mute);font-family:var(--disp)}
+.cr-n{font-family:var(--disp);font-size:18px;color:var(--fg)}
+.credits .meta{text-align:center}
+.cr-c{margin-top:16px;font-family:var(--disp);font-size:12px;color:var(--mute)}
 /* carattere pixel per i comandi */
 .slot,.acts button,.sheet .b,.chip,.hint,.status,.seg button,.back,.endscr .b,.story .b,.resume,.tg .tx small,.mi small,.log summary,.dock .pl,.side,.sheet .ctip,.sheet .meta,.codemsg,.tro small{font-family:var(--disp)}
 .acts button,.sheet .b{font-size:15px;letter-spacing:.01em}
@@ -1050,8 +1061,8 @@ function homeHTML(){const st=totSt(loadStats()),sv=loadSave(),ng=games(st);
  return `<div class="home"><div class="pwrap"><img class="poster" src="locandina-pixel.png" width="192" height="192" alt="Locandina di INVASIONE in pixel art: Terrestri contro Alieni">${sndBtn()}</div>
 <nav class="menu" aria-label="Menù">${resumeHTML()}<button class="mi main" data-a="setup">${sv?'NUOVA PARTITA':'GIOCA'}</button>
 ${storyOpen()?'<button class="mi" data-a="story">Storia</button>':''}<button class="mi" data-a="tro">Trofei</button><button class="mi" data-a="tut0">Tutorial</button>
-<button class="mi" data-a="help">Regolamento</button><button class="mi" data-a="poster">Locandina</button>
-<button class="mi ${storyOpen()?'':'wide'}" data-a="stats">Le tue partite<small>${sub}</small></button></nav></div>`;}
+<button class="mi" data-a="help">Regolamento</button><button class="mi" data-a="poster">Locandina</button><button class="mi" data-a="credits">Crediti</button>
+<button class="mi ${storyOpen()?'wide':''}" data-a="stats">Le tue partite<small>${sub}</small></button></nav></div>`;}
 function setupHTML(){
  const side=(f,name)=>`<button class="side ${f} ${hf===f?'on':''}" data-a="hf" data-v="${f}" aria-pressed="${hf===f}"><b>${name}</b>${hf===f?'<span class="you">La tua fazione</span>':''}</button>`;
  return `<div class="setup"><div class="bar"><button class="back" data-a="homeback" aria-label="Torna alla home" title="Home"><svg class="ico" viewBox="0 0 8 8" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="M3 0h2v1h1v1h1v1h1v1H7v4H5V5H3v3H1V4H0V3h1V2h1V1h1z"/></svg></button><h1>Nuova partita</h1>${sndBtn()}</div>
@@ -1119,7 +1130,7 @@ function handHTML(){const h=S.hand[H];if(!h.length)return '<div class="nohand">N
  return `<div class="hand">${h.map(id=>{return `<button class="card ${INV.cf(id)}" data-a="card" data-v="${id}" data-tip="${esc(techTip(id))}"><span>${esc(INV.tt(S,H,id))}</span></button>`;}).join('')}</div>`;}
 function logHTML(){const L=S.log.filter(e=>e.to===null||e.to===H).slice(-40).reverse();
  return `<details class="log"><summary>Registro della partita</summary><ol>${L.map(e=>`<li class="${e.t.charAt(0)==='—'?'h':''}">${esc(e.t)}</li>`).join('')}</ol></details>`;}
-function render(){hideTip();
+function render(){hideTip();setTimeout(syncMusic,0);
  const CREDIT='<div class="credit end">Gioco di Daniele Radavero · © 2026 Tutti i diritti riservati</div>';
  if(UI.screen==='start'){app.className='home';app.innerHTML=homeHTML()+CREDIT+(UI.story?storyHTML():'')+(UI.poster?posterHTML():'')+sheetHTML();return;}
  if(UI.screen==='setup'){app.className='setup';app.innerHTML=setupHTML()+CREDIT+sheetHTML();return;}
@@ -1180,16 +1191,16 @@ const SFX={
  draw:c=>seq(c,[72,null,72,67],.14,{v:.05}),
  unlock:c=>seq(c,[72,76,79,83,86,91],.06,{v:.05})};
 function sfx(n){if(!SND.on)return;const c=actx();if(!c)return;try{SFX[n](c);}catch(e){}}
-/* lettore di musiche: {bpm, loop, tracks:[{w:'square'|'triangle', v, notes:'C5:1 E5:.5 R:.5 ...'}]} */
-const MUSIC={};let musicTimer=0,musicName='';
-function parseNotes(str){const out=[];for(const tok of String(str).trim().split(/\s+/)){const [n,d]=tok.split(':');const beats=parseFloat(d||'1');
- if(/^R$/i.test(n)){out.push([null,beats]);continue;}const m=/^([A-Ga-g])([#b]?)(-?\d)$/.exec(n);if(!m)continue;
- const base={c:0,d:2,e:4,f:5,g:7,a:9,b:11}[m[1].toLowerCase()]+(m[2]==='#'?1:m[2]==='b'?-1:0);out.push([12*(+m[3]+1)+base,beats]);}return out;}
-function stopMusic(){clearTimeout(musicTimer);musicTimer=0;musicName='';}
-function playMusic(name){const song=MUSIC[name];if(!song||!SND.on){stopMusic();return;}if(musicName===name)return;stopMusic();const c=actx();if(!c)return;musicName=name;
- const spb=60/(song.bpm||120),tracks=song.tracks.map(t=>({t,n:parseNotes(t.notes)}));let len=0;for(const t of tracks)len=Math.max(len,t.n.reduce((a,x)=>a+x[1],0));
- const run=()=>{if(musicName!==name)return;const t0=c.currentTime+.05;for(const {t,n} of tracks){let at=t0;for(const [m,b] of n){if(m!==null)tone(c,NF(m),at,b*spb*.92,{w:t.w||'square',v:t.v||.04});at+=b*spb;}}
-  if(song.loop)musicTimer=setTimeout(run,len*spb*1000-60);else musicName='';};run();}
+/* musiche (mp3 royalty free): menù, partita, vittoria per fazione */
+const TRACKS={menu:{f:'musica-menu.mp3',v:.35,loop:true},game:{f:'musica-partita.mp3',v:.35,loop:true},winT:{f:'vittoria-terrestri.mp3',v:.2,loop:false},winA:{f:'vittoria-alieni.mp3',v:.26,loop:false}};
+const MUS={el:null,name:'',done:''};
+function stopMusic(){if(MUS.el){try{MUS.el.pause();}catch(e){}}MUS.el=null;MUS.name='';}
+function playMusic(name){if(!SND.on||!name||document.hidden){stopMusic();return;}if(MUS.name===name)return;stopMusic();
+ if(MUS.done===name)return;const t=TRACKS[name];if(!t)return;
+ try{const a=new Audio(t.f);a.loop=t.loop;a.volume=t.v;a.onended=()=>{if(!t.loop)MUS.done=name;};MUS.el=a;MUS.name=name;const pr=a.play();if(pr&&pr.catch)pr.catch(()=>{if(MUS.el===a)MUS.name='';});}catch(e){MUS.el=null;MUS.name='';}}
+function wantMusic(){if(UI.screen!=='game'||!S)return 'menu';if(!S.over){MUS.done='';return 'game';}if(S.winner<0)return '';return S.fac[S.winner]==='T'?'winT':'winA';}
+function syncMusic(){playMusic(wantMusic());}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopMusic();else syncMusic();});
 const SPK_ON='<svg viewBox="0 0 12 10" aria-hidden="true"><path fill="currentColor" d="M0 3h3l3-3h1v10H6L3 7H0zM8 3h1v4H8zM10 1h1v8h-1z"/></svg>';
 const SPK_OFF='<svg viewBox="0 0 12 10" aria-hidden="true"><path fill="currentColor" d="M0 3h3l3-3h1v10H6L3 7H0zM8 2h1v1H8zM11 2h1v1h-1zM9 3h2v1H9zM9 6h2v1H9zM8 7h1v1H8zM11 7h1v1h-1zM9.5 4h1v2h-1z"/></svg>';
 const sndBtn=()=>`<button class="sndb ${SND.on?'on':''}" data-a="snd" aria-pressed="${SND.on}" aria-label="${SND.on?'Disattiva l\'audio':'Attiva l\'audio'}" title="${SND.on?'Audio attivo':'Audio spento'}">${SND.on?SPK_ON:SPK_OFF}</button>`;
@@ -1370,6 +1381,16 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
   if(!n)body+=`<p>${my?'Ora non puoi usare questa carta.':'Potrai usarla quando tocca a te.'}</p>`;}
  else if(UI.sheet&&UI.sheet.k==='capv'&&CAP[UI.sheet.f]){const f=UI.sheet.f,c=CAP[f];ttl='Capitano';cancel=true;
   body=cardFace({fac:f,art:`capitano-${f}.png`,title:c.n,text:c.ab,tag:f==='T'?'Capitano dei Terrestri':'Capitano degli Alieni',wide:true})+`<p class="ctip">${esc(c.long)}${S&&S.cap&&f==='A'&&S.fac.indexOf('A')>=0&&S.karUsed[S.fac.indexOf('A')]?' In questa partita è già stata usata.':''}</p>`;}
+ else if(UI.sheet&&UI.sheet.k==='credits'){ttl='Crediti';tall=true;cancel=true;
+  const it=(r,n)=>`<li><span class="cr-r">${r}</span><span class="cr-n">${n}</span></li>`;
+  body=`<div class="credits"><p class="cr-t">INVASIONE</p><p class="cr-s">Terrestri contro Alieni</p>
+<h3 class="mh3">Il gioco</h3><ul class="crl">${it('Ideato e realizzato da','Daniele Radavero')}${it('Storia','Daniele Radavero')}</ul>
+<h3 class="mh3">Musiche</h3><ul class="crl">${it('Menù · «Data Analysis»','Retro BGM Chan')}${it('Partita · «Inconvenient Truth»','Retro BGM Chan')}${it('Vittoria dei Terrestri · «8bit Warriors»','EchoBrainz')}${it('Vittoria degli Alieni · «8-bit Horror Noises»','Freesound Community')}</ul>
+<p class="meta">Musiche royalty free da Pixabay.</p>
+<h3 class="mh3">Ringraziamenti</h3><ul class="crl">${it('Allo scrittore','Marco Platia')}<li><span class="cr-r">per aver prestato il volto al Capitano Mark Platt</span></li><li><span class="cr-n">Simone Colombo</span></li><li><span class="cr-r">per aver creduto nel gioco</span></li></ul>
+<h3 class="mh3">Caratteri</h3><ul class="crl">${it('Pixelify Sans','Stefie Justprince')}${it('Press Start 2P','CodeMan38')}${it('IBM Plex Sans','Mike Abbink, IBM')}</ul>
+<p class="meta">Caratteri con licenza SIL Open Font License, da Google Fonts.</p>
+<p class="cr-c">© 2026 Daniele Radavero · Tutti i diritti riservati</p></div>`;}
  else if(UI.sheet&&UI.sheet.k==='tro'){ttl='Trofei';tall=true;cancel=true;const st=loadStats(),u=trophies();
   const row=t=>{const ok=u.includes(t.id);return `<li class="tro ${ok?'ok':'lk'}"><span class="ti" aria-hidden="true">${ok?'★':LOCK}</span><span class="tb"><b>${esc(t.name)}</b>${ok?`<small>${esc(t.desc)}</small>${t.id==='story'?btn('story','','Leggi la Storia','hi'):t.id==='cap'?`<span class="tcaps">${btn('capv','T','Mark Platt')}${btn('capv','A','Kar Am Oh')}</span>`:''}`:`<small>${esc(t.req)} · ${t.prog(st)}</small>`}</span></li>`;};
   const more=n=>`<li class="tro lk"><span class="ti" aria-hidden="true">${LOCK}</span><span class="tb"><b>????</b><small>${n===0&&u.length?'Requisito: in arrivo con il prossimo aggiornamento':'????'}</small></span></li>`;
@@ -1465,9 +1486,10 @@ const HD={
  vdie:k=>{if(!UI.vsel||!S.pend||S.pend.p!==H)return;const i=info().vd[UI.vsel.c+'/'+UI.vsel.v+'/'+k];UI.vsel=null;if(i===undefined){render();return;}act(i);},
  tut0:()=>{UI.sheet={k:'tut',n:0};render();},tutn:v=>{UI.sheet={k:'tut',n:+v};render();},
  snd:()=>{SND.on=!SND.on;try{localStorage.setItem('invasione.audio',SND.on?'1':'0');}catch(e){}if(SND.on){actx();sfx('click');}else stopMusic();render();},
+ credits:()=>{UI.sheet={k:'credits'};render();},
  pick:v=>act(v),pickc:v=>act(v,true),homeq:()=>{UI.sheet={k:'home'};render();},tdie:v=>{UI.tsel=v;render();},tback:()=>{UI.tsel=null;render();},pop:()=>{UI.pops.shift();render();kick();saveGame();},
  grp:v=>{UI.grp=v;render();},back:()=>{UI.grp=null;render();}};
-const CLICKS={tro:1,capv:1,optT:1,setup:1,go:1,gonew:1,hf:1,df:1,story:1,storyLocked:1,tut0:1,tutn:1,help:1,poster:1,stats:1,homeback:1,new:1,endnew:1,recap:1,resume:1,close:1,homeq:1,die:1,card:1,hand:1,vsel:1,tdie:1,ev:1};
+const CLICKS={credits:1,tro:1,capv:1,optT:1,setup:1,go:1,gonew:1,hf:1,df:1,story:1,storyLocked:1,tut0:1,tutn:1,help:1,poster:1,stats:1,homeback:1,new:1,endnew:1,recap:1,resume:1,close:1,homeq:1,die:1,card:1,hand:1,vsel:1,tdie:1,ev:1};
 app.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t||t.disabled)return;if(CLICKS[t.dataset.a])sfx('click');const f=HD[t.dataset.a];if(f)f(t.dataset.v);});
 app.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse'){hideTip();return;}const t=e.target.closest&&e.target.closest('[data-tip]');if(t)showTip(t);else hideTip();});
 app.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse')hideTip();});
