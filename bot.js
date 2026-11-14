@@ -17,8 +17,8 @@ function evalS(s,p){
   x=Math.max(-1.2,Math.min(1.2,x));
   let t=x*(fr.ev===8?2:fr.ev===7?.6:1);
   if(fr.ev!==7){const np=cnt(s,f,p),nq=cnt(s,f,q);
-   if(!np&&!(s.cap&&s.fac[p]==='T'))t-=(rp>0&&!late)?.7:1;
-   if(!nq&&!(s.cap&&s.fac[q]==='T'))t+=(rq>0&&!late)?.7:1;}
+   if(!np&&!E.hasCap(s,p,'mark'))t-=(rp>0&&!late)?.7:1;
+   if(!nq&&!E.hasCap(s,q,'mark'))t+=(rq>0&&!late)?.7:1;}
   v+=t;}
  v+=s.pv[p]-s.pv[q];
  v+=.12*(s.co[p]-s.co[q])+.1*(s.hand[p].length-s.hand[q].length)-.22*(s.vir[p]-s.vir[q]);
@@ -71,15 +71,19 @@ function scoreMain(s,p,opts,extra){
    break;}
   case'sell':{const w=E.worth(s,p,a.c);sc=hn>=4?.18-w*.3:.05-w*.4;if(co>=4)sc-=.1;break;}
   case'buy':sc=(hn<=2?.2:hn===3?.1:-.1)-(co<=2?.1:0);break;
-  case'kar':sc=(hn<=2?.32:hn===3?.22:-.05)-(co<=2?.1:0)+(s.rd>=2?.05:0);break;
+  case'kar':sc=hn>=4?-.2:(co>=4?.3:co>=3&&(s.rd>=2||s.turn>=5)?.15:-.1);break;
   case'sellbuy':{const w=E.worth(s,p,a.c);sc=.12-w*.45+(hn<=3?.05:0);break;}
-  case'karsb':{const w=E.worth(s,p,a.c);sc=.22-w*.45+(hn<=3?.05:0)+(s.rd>=2?.05:0);break;}
+  case'karsb':{const w=E.worth(s,p,a.c);sc=co>=2?.1-w*.45+(hn<=3?.05:0):-.2;break;}
   case'play':sc=playValue(s,p,a.c,b);break;
   case'val':{const d=s.dice[p][a.d];const g0=gainPlace(s,p,d);const u=E.pm(s,o.m);const g1=gainPlace(s,p,d);E.um(u);sc=g1-g0-.45;break;}
   case'vcoins':sc=a.n*(co<=1?.15:.02)-a.n*.28;break;
   case'vextra':sc=-.35;break;
+  case'dani':{const u=E.pm(s,o.m);const dl=evalS(s,p)-b;E.um(u);sc=dl+.3*(4-s.rd)-(s.rd<3?.3:0)+(s.turn>=8?.1:0);break;}
+  case'silvya':sc=(s.rd===3&&s.turn<=7)||(s.rd<3&&s.turn<=3&&s.co[p]>=4)?.3:-.1;break;
+  case'nuysell':{const d=s.dice[p][a.d];sc=(co<=2?.18:co<=3?.08:-.05)-gainPlace(s,p,d)*.8+(s.turn>=9?.12:0);break;}
   case'pass':sc=0;break;
   case'none':sc=0;break;}
+  if(sc>0&&(a.t==='kar'||a.t==='karsb'||a.t==='dani'||a.t==='silvya'||a.t==='nuysell'))sc+=5;
   return sc;});}
 function scoreGeneric(s,p,pd){const c=pd.ctx;
  if(c.then==='keep')return pd.opts.map(o=>-E.worth(s,p,s.hand[p][o.v]));
@@ -94,10 +98,11 @@ function choose(s,noise){const pd=s.pend;if(noise===undefined)noise=.1;
  const sc=pd.ctx.then==='main'?scoreMain(s,pd.p,pd.opts,pd.ctx.extra):scoreGeneric(s,pd.p,pd);
  return pick(sc,noise);}
 /* difficile */
-function determinize(c,p){const q=1-p,full=[];for(let i=1;i<=24;i++)full.push(i);
+function fullIds(c,x){const f=[];for(let i=1;i<=24;i++)f.push(i);if(c.bonus)f.push(27,28);return c.fac[x]==='A'?f.map(i=>i+100):f;}
+function determinize(c,p){const q=1-p;let full=fullIds(c,q);
  const pq=full.filter(id=>c.disc[q].indexOf(id)<0);E.shuffle(c,pq);
  const hn=c.hand[q].length,dn=c.deck[q].length;c.hand[q]=pq.slice(0,hn);c.deck[q]=pq.slice(hn,hn+dn);
- const po=full.filter(id=>c.disc[p].indexOf(id)<0&&c.hand[p].indexOf(id)<0);E.shuffle(c,po);c.deck[p]=po.slice(0,c.deck[p].length);}
+ full=fullIds(c,p);const po=full.filter(id=>c.disc[p].indexOf(id)<0&&c.hand[p].indexOf(id)<0);E.shuffle(c,po);c.deck[p]=po.slice(0,c.deck[p].length);}
 function value(c,p){const q=1-p;let v=c.pv[p]-c.pv[q];
  if(c.rd>=3&&c.winner!==-2)v+=c.winner===p?2.5:c.winner===q?-2.5:0;
  else v+=.12*(c.co[p]-c.co[q])+.1*(c.hand[p].length-c.hand[q].length)-.2*(c.vir[p]-c.vir[q]);

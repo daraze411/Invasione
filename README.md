@@ -20,7 +20,7 @@ Si gioca contro un automa di livello Normale o Difficile, anche da smartphone.
 | `build.py` | Unisce i sorgenti e rigenera `index.html`. |
 | `locandina.jpg`, `locandina-pixel.png` | Locandina originale e versione in pixel art. |
 | `art-*.png` | Illustrazioni delle carte in pixel art (`art-<fazione>-<numero carta>.png`, il numero è quello in engine.js). |
-| `capitano-T.png`, `capitano-A.png` | Ritratti dei Capitani Mark Platt e Kar Am Oh. |
+| `capitano-T.png`, `capitano-A.png`, `capitano-T2.png`, `capitano-A2.png` | Ritratti dei Capitani: Mark Platt, Kar Am Oh, Dani Rada e Silvya Singer, Nuy Tinck. |
 | `musica-menu.mp3`, `musica-partita.mp3`, `vittoria-terrestri.mp3`, `vittoria-alieni.mp3` | Musiche royalty free (Pixabay): autori nei Crediti del gioco. |
 | `anteprima.jpg` | Immagine mostrata quando si condivide il link. |
 | `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `favicon-32.png` | Icone dell'app. |

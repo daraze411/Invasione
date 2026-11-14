@@ -60,6 +60,7 @@ function clone(s){const lg=s.log;s.log=[];const t=JSON.parse(JSON.stringify(s));
 function log(s,t,to){if(!s.nl)s.log.push({t,to:to===undefined?null:to});}
 function qev(s,o){if(!s.nl)s.q.push(o);}
 function fn(s,p){return s.fac[p]==='T'?'Terrestri':'Alieni';}
+function hasCap(s,p,id){return !!s.cap&&!!s.caps&&s.caps[p]===id;}
 function gain(s,p,n){s.co[p]=Math.min(5,s.co[p]+n);}
 function drawT(s,p){if(s.hand[p].length<5&&s.deck[p].length){s.hand[p].push(s.deck[p].pop());return true;}return false;}
 function rem(a,x){const i=a.indexOf(x);if(i>=0)a.splice(i,1);}
@@ -136,17 +137,21 @@ function ask(s,p,ctx,opts){if(!opts||!opts.length)return;
  if(opts.length===1&&ctx.then!=='main'&&ctx.then!=='resp'&&!ctx.noauto){FN[ctx.then](s,ctx,opts[0].v);return;}
  s.pend={p,ctx,opts};}
 function push(s){for(let i=arguments.length-1;i>=1;i--)s.st.push(arguments[i]);}
-function run(s){let g=0;while(!s.pend&&!s.over&&g++<20000){if(s.endNow){s.endNow=false;s.st=[{k:'resolve'}];}const t=s.st.pop();if(!t)throw new Error('stack vuoto');TASK[t.k](s,t);}return s;}
+function tokScan(s){if(!s.cap||!s.token||!(s.token[0]||s.token[1]))return;for(let t=0;t<2;t++){if(!s.token[t])continue;const a=1-t;for(const d of s.dice[a]){const key=a+':'+d.i,on=d.loc==='F';const prev=s.tseen[key];
+ if(on&&(d.v===1||d.v===6)&&(!prev||prev.v!==d.v)){gain(s,t,1);log(s,fn(s,t)+': il Parassita rende 1 € (un dado avversario vale '+d.v+')');}
+ s.tseen[key]=on?{v:d.v}:null;}}}
+function run(s){let g=0;tokScan(s);while(!s.pend&&!s.over&&g++<20000){if(s.endNow){s.endNow=false;s.st=[{k:'resolve'}];}const t=s.st.pop();if(!t)throw new Error('stack vuoto');TASK[t.k](s,t);tokScan(s);}return s;}
 function answer(s,idx){const pd=s.pend;s.pend=null;FN[pd.ctx.then](s,pd.ctx,pd.opts[idx].v);run(s);return s;}
 /* setup */
-function newGame(o){o=o||{};const s={cap:!!o.cap,bonus:!!o.bonus,karUsed:[false,false],rs:(o.seed||Date.now())|0,fac:o.fac||['T','A'],rd:0,turn:0,slot:0,first:0,order:[0,1],pv:[0,0],co:[1,1],hand:[[],[]],deck:[[],[]],disc:[[],[]],vir:[0,0],dbl:[false,false],skip:[false,false],pass:[false,false],vdeck:[],vdisc:[],evdeck:[],fr:[],dice:[[],[]],ord:0,st:[],pend:null,log:[],over:false,endNow:false,res:null,hold:o.hold,nl:o.nl,winner:-2,q:[]};
+function newGame(o){o=o||{};const s={cap:!!o.cap,caps:null,bonus:!!o.bonus,karUsed:[false,false],token:[false,false],daniUsed:[false,false],silUsed:[false,false],nuySold:[false,false],tseen:{},rs:(o.seed||Date.now())|0,fac:o.fac||['T','A'],rd:0,turn:0,slot:0,first:0,order:[0,1],pv:[0,0],co:[1,1],hand:[[],[]],deck:[[],[]],disc:[[],[]],vir:[0,0],dbl:[false,false],skip:[false,false],pass:[false,false],vdeck:[],vdisc:[],evdeck:[],fr:[],dice:[[],[]],ord:0,st:[],pend:null,log:[],over:false,endNow:false,res:null,hold:o.hold,nl:o.nl,winner:-2,q:[]};
+ s.caps=s.cap?[0,1].map(p=>(o.caps&&o.caps[p])||(s.fac[p]==='T'?'mark':'kar')):[null,null];
  const ids=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24].concat(o.bonus?[27,28]:[]);
  for(let p=0;p<2;p++)s.deck[p]=shuffle(s,ids.map(i=>s.fac[p]==='A'?i+100:i));
  s.evdeck=shuffle(s,[1,2,3,4,5,7,8,9,10,11,12]);
  for(let i=1;i<=7;i++){s.vdeck.push(i);if(i!==3)s.vdeck.push(i);}shuffle(s,s.vdeck);
  s.st=[{k:'init'}];run(s);return s;}
 TASK.init=s=>{push(s,{k:'uni',p:0},{k:'uni',p:1},{k:'draw3',p:0},{k:'draw3',p:1},{k:'roundStart'});};
-TASK.uni=(s,t)=>{ask(s,t.p,{then:'uni',p:t.p,ttl:'Scegli la tua Tecnologia univoca. L\'altra viene eliminata.',noauto:true},[25,26].map(c=>s.fac[t.p]==='A'?c+100:c).map(c=>({l:tt(s,t.p,c),v:c,h:worth(s,t.p,c)})));};
+TASK.uni=(s,t)=>{const ids=[25,26].map(c=>s.fac[t.p]==='A'?c+100:c),id=ids[ri(s,2)];s.hand[t.p].push(id);log(s,fn(s,t.p)+' riceve a caso la sua Tecnologia di partenza',t.p);qev(s,{k:'prep',p:t.p,c:id});};
 FN.uni=(s,c,id)=>{s.hand[c.p].push(id);};
 TASK.draw3=(s,t)=>{const got=s.deck[t.p].splice(s.deck[t.p].length-3,3);ask(s,t.p,{then:'keep1',p:t.p,got,ttl:'Hai pescato 3 Tecnologie: quale tieni?',noauto:true},got.map((c,i)=>({l:tt(s,t.p,c),v:i,h:worth(s,t.p,c)})));};
 FN.keep1=(s,c,i)=>{const p=c.p,rest=c.got.filter((x,j)=>j!==i);s.hand[p].push(c.got[i]);ask(s,p,{then:'back',p,rest,ttl:'Quale rimetti nel mazzo? L\'altra viene eliminata.',noauto:true},rest.map((x,j)=>({l:tt(s,p,x),v:j,h:worth(s,p,x)})));};
@@ -159,7 +164,8 @@ TASK.roundStart=s=>{s.rd++;
   ask(s,dec,{then:'first',ttl:'Chi muove per primo nel round '+s.rd+'?'},[{l:'Muovo per primo',v:dec},{l:'Lascio la prima mossa all\'avversario',v:1-dec}]);}};
 FN.first=(s,c,v)=>{s.first=v;};
 TASK.setup=s=>{s.order=[s.first,1-s.first];s.turn=1;s.slot=0;s.pass=[false,false];s.skip=[false,false];s.dbl=[false,false];s.spore=[false,false];s.endNow=false;
- for(let p=0;p<2;p++){s.dice[p]=[];for(let i=0;i<7;i++){s.dice[p].push({i,p,v:1+ri(s,6),loc:'R',f:-1,x:-1,ord:0,fz:0});}}
+ for(let p=0;p<2;p++){s.dice[p]=[];for(let i=0;i<7;i++){s.dice[p].push({i,p,v:1+ri(s,6),loc:(i===6&&s.token&&s.token[p])?'K':'R',f:-1,x:-1,ord:0,fz:0});}}
+ s.nuySold=[false,false];s.tseen={};
  if(!s.cdeck)s.cdeck=shuffle(s,['M','M','M','M','B','B','B','B','DH','DH','DL','DL']);
  s.fr=[];for(let f=0;f<3;f++){const ev=s.evdeck.pop();s.fr.push({ev,cond:ev===9?null:s.cdeck.pop(),flip:ev===9,sp:ev===9?[null,null,null,null]:[]});}
  log(s,'— Round '+s.rd+' — apre: '+fn(s,s.first));push(s,{k:'next'});};
@@ -167,8 +173,9 @@ function askMain(s,p,extra){ask(s,p,{then:'main',p,extra,ttl:extra?'Azione extra
 TASK.next=s=>{const p=s.order[s.slot];push(s,{k:'endSlot'});if(s.skip[p]){s.skip[p]=false;log(s,fn(s,p)+' salta il turno');return;}askMain(s,p,false);};
 TASK.askExtra=(s,t)=>{askMain(s,t.p,true);};
 TASK.endSlot=s=>{s.slot++;
+ if(s.turn===11){push(s,{k:'resolve'});return;}
  if(s.slot>=2){if(s.pass[0]&&s.pass[1]){log(s,'Entrambi passano: il round termina.');push(s,{k:'resolve'});return;}
-  s.turn++;s.slot=0;s.pass=[false,false];if(s.turn>10){push(s,{k:'resolve'});return;}}
+  s.turn++;s.slot=0;s.pass=[false,false];if(s.turn>10){const n=[0,1].find(x=>hasCap(s,x,'nuy'));if(n!==undefined){s.order=[n,1-n];log(s,'Nuy Tinck: gli Alieni giocano l\'undicesimo turno');push(s,{k:'next'});return;}push(s,{k:'resolve'});return;}}
  push(s,{k:'next'});};
 /* azioni */
 function spaceOk(s,p,d,f,x){const fr=s.fr[f];if(!fr.flip||fr.sp[x]!==null||d.loc!=='R')return false;const q=1-p,co=s.co[p],o=d.loc;d.loc='S';let r=false;
@@ -185,12 +192,15 @@ function legalMain(s,p,extra){const o=[],q=1-p,seen={};
    else{const k=d.v+'/'+d.fz+'/'+f;if(seen[k])continue;if(placeOk(s,p,d,f)){seen[k]=1;o.push({l:'Dado '+d.v+' → '+FR[f],v:{t:'place',d:d.i,f},m:[{o:p,i:d.i,set:{loc:'F',f,ord:1e9}}]});}}}}
  const hs=s.hand[p],ids=uniq(hs);
  if(hs.length)for(const c of ids)o.push({l:'Vendi (+1 €): '+tt(s,p,c),v:{t:'sell',c}});
- if(s.co[p]>=2&&hs.length<5&&s.deck[p].length){o.push({l:'Compra una Tecnologia (−2 €)',v:{t:'buy'}});if(s.cap&&s.fac[p]==='A'&&!s.karUsed[p])o.push({l:'Kar Am Oh: compra scegliendo fra 5 carte (−2 €, una volta per partita)',v:{t:'kar'}});}
- if(hs.length&&s.co[p]>=1&&s.deck[p].length)for(const c of ids){o.push({l:'Vendi e compra: '+tt(s,p,c),v:{t:'sellbuy',c}});if(s.cap&&s.fac[p]==='A'&&!s.karUsed[p])o.push({l:'Vendi e compra con Kar Am Oh (scegli fra 5): '+tt(s,p,c),v:{t:'karsb',c}});}
+ if(s.co[p]>=2&&hs.length<5&&s.deck[p].length){o.push({l:'Compra una Tecnologia (−2 €)',v:{t:'buy'}});if(hasCap(s,p,'kar')&&!s.karUsed[p])o.push({l:'Kar Am Oh: compra scegliendo fra 5 carte (−2 €, una volta per partita)',v:{t:'kar'}});}
+ if(hs.length&&s.co[p]>=1&&s.deck[p].length)for(const c of ids){o.push({l:'Vendi e compra: '+tt(s,p,c),v:{t:'sellbuy',c}});if(hasCap(s,p,'kar')&&!s.karUsed[p])o.push({l:'Vendi e compra con Kar Am Oh (scegli fra 5): '+tt(s,p,c),v:{t:'karsb',c}});}
  for(const c of ids){const k=tk(s,p,c);if(k==='jolly'||k==='resp')continue;if(tplan(s,p,c).ok)o.push({l:'Gioca: '+tt(s,p,c),v:{t:'play',c}});}
  const rd={};for(const d of s.dice[p]){if(d.loc==='R'&&!d.fz&&!rd[d.v])rd[d.v]=d;}
  for(const c of ids)for(const v of TECH[cb(c)].v)for(const k in rd){const d=rd[k];o.push({l:'Usa il valore '+v+' di una carta sul dado '+d.v+' (+1 Virus)',v:{t:'val',c,v,d:d.i},m:[{o:p,i:d.i,set:{v}}]});}
  for(let n=1;n<=5-s.co[p];n++)o.push({l:'Prendi '+n+' Virus → +'+n+' €',v:{t:'vcoins',n}});
+ if(hasCap(s,p,'dani')&&!s.daniUsed[p]){const sn={};for(const d of s.dice[p]){if(d.loc!=='F')continue;const k=d.f+'/'+d.v;if(sn[k])continue;sn[k]=1;o.push({l:'Dani Rada: scarta il tuo '+d.v+' su '+FR[d.f]+' e gioca il Parassita',v:{t:'dani',d:d.i},m:[{o:p,i:d.i,set:{loc:'K'}}]});}}
+ if(hasCap(s,p,'dani')&&s.token[p]&&!s.silUsed[p])o.push({l:'Silvya Singer: rimuovi il Parassita e rimetti in gioco il dado (rilanciato)',v:{t:'silvya'}});
+ if(hasCap(s,p,'nuy')&&!s.nuySold[p]){const sn={};for(const d of s.dice[p]){if(d.loc!=='R'||sn[d.v])continue;sn[d.v]=1;o.push({l:'Nuy Tinck: vendi il dado '+d.v+' della riserva (+1 €)',v:{t:'nuysell',d:d.i}});}}
  if(!extra)o.push({l:'Prendi 1 Virus per un\'azione extra',v:{t:'vextra'}});
  o.push(extra?{l:'Nessuna azione extra',v:{t:'none'}}:{l:'Passa',v:{t:'pass'}});
  return o;}
@@ -199,8 +209,14 @@ function doPlace(s,p,a){const d=s.dice[p][a.d],fr=s.fr[a.f];
  if(fr.ev===8)s.co[p]--;
  d.loc='F';d.f=a.f;d.ord=++s.ord;log(s,fn(s,p)+' schiera un '+d.v+' su '+FR[a.f]);
  if(fr.ev===7)push(s,{k:'combat',p,d:d.i,f:a.f});else if(fr.ev===11)push(s,{k:'ev11',p,d:d.i});}
+const CAPACT={kar:1,karsb:1,dani:1,silvya:1,nuysell:1};
+TASK.reask=(s,t)=>{if(!s.over)askMain(s,t.p,t.extra);};
 FN.main=(s,c,a)=>{const p=c.p,q=1-p;
+ if(CAPACT[a.t])push(s,{k:'reask',p,extra:c.extra});
  switch(a.t){
+ case'dani':{const d=s.dice[p][a.d];const was=d.v;d.loc='K';d.f=-1;s.daniUsed[p]=true;s.token[p]=true;for(const e of s.dice[q])s.tseen[q+':'+e.i]=e.loc==='F'?{v:e.v}:null;log(s,fn(s,p)+' usa Dani Rada: scarta un '+was+' e gioca il Parassita');break;}
+ case'silvya':{s.token[p]=false;s.silUsed[p]=true;const d=s.dice[p].find(x=>x.loc==='K');if(d){d.loc='R';d.f=-1;d.v=1+ri(s,6);log(s,fn(s,p)+' usa Silvya Singer: rimuove il Parassita, il dado torna in riserva e vale '+d.v);}else log(s,fn(s,p)+' usa Silvya Singer: rimuove il Parassita');break;}
+ case'nuysell':{const d=s.dice[p][a.d];d.loc='X';s.nuySold[p]=true;gain(s,p,1);log(s,fn(s,p)+' usa Nuy Tinck: vende un dado '+d.v+' per 1 €');break;}
  case'pass':s.pass[p]=true;log(s,fn(s,p)+' passa');break;
  case'none':break;
  case'place':doPlace(s,p,a);break;
@@ -340,7 +356,7 @@ TASK.resolve=s=>{const gp=[0,0];s.res=[];
  for(let f=0;f<3;f++){const fr=s.fr[f];if(fr.flip){s.res.push({f,flip:true});continue;}
   const cnt=[onFront(s,f,0).length,onFront(s,f,1).length],g=[0,0],w=winner(s,f);
   if(w>=0){g[w]+=fr.ev===8?2:1;drawT(s,1-w);}
-  for(let p=0;p<2;p++)if(cnt[p]===0&&!(s.cap&&s.fac[p]==='T'))g[1-p]+=1;
+  for(let p=0;p<2;p++)if(cnt[p]===0&&!hasCap(s,p,'mark'))g[1-p]+=1;
   if(fr.ev===7){g[0]=Math.min(g[0],1);g[1]=Math.min(g[1],1);}
   gp[0]+=g[0];gp[1]+=g[1];
   s.res.push({f,ev:fr.ev,cond:fr.cond,sum:[sumv(validShips(s,f,0)),sumv(validShips(s,f,1))],cnt,w,g,vc:[validShips(s,f,0).length,validShips(s,f,1).length],tb:(fr.cond==='DH'||fr.cond==='DL')&&w>=0&&validShips(s,f,0).length===validShips(s,f,1).length});
@@ -357,6 +373,6 @@ function finish(s){s.over=true;const[a,b]=s.pv;let w=-1,why=null;
   else if(s.vir[0]!==s.vir[1]){w=s.vir[0]<s.vir[1]?0:1;why={k:'vir',v:[s.vir[0],s.vir[1]],r:[ra,rb]};}
   else why={k:'cantina',v:[ra,rb]};}
  s.winner=w;s.why=why;log(s,'Partita conclusa.');}
-return{cb,cf,isStart,FX,FT,placeOk,FR,EVN,EVD,CN,SPN,TECH,VIRN,newGame,run,answer,clone,legalMain,validShips,onFront,sumv,tk,tt,worth,rnd,ri,shuffle,pm,um,tplan,winner,fn,finish};
+return{hasCap,cb,cf,isStart,FX,FT,placeOk,FR,EVN,EVD,CN,SPN,TECH,VIRN,newGame,run,answer,clone,legalMain,validShips,onFront,sumv,tk,tt,worth,rnd,ri,shuffle,pm,um,tplan,winner,fn,finish};
 })();
 if(typeof module!=='undefined')module.exports=INV;
