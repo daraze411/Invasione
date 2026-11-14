@@ -220,6 +220,14 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 .chip{padding:3px 8px}
 .vs{width:42px;height:42px;font-size:16px;font-weight:700;border-width:2px}
 .nb{border-radius:0!important}
+/* addestramento */
+.coach{border:2px solid var(--paper);background:#151c2b;padding:10px 12px;display:flex;flex-direction:column;gap:6px;box-shadow:0 0 0 3px rgba(240,220,170,.15)}
+.coach p{margin:0;color:var(--fg);font-size:14px;line-height:1.4}
+.coach .ck-t{font-family:var(--pix);font-size:9px;letter-spacing:.06em;color:var(--paper);text-transform:uppercase}
+.coach .ck-skip{align-self:flex-end;background:none;border:0;color:var(--mute);font-family:var(--disp);font-size:12px;text-decoration:underline;padding:2px 0}
+.thl{outline:3px solid var(--paper)!important;outline-offset:2px;position:relative;z-index:2}
+@media (prefers-reduced-motion:no-preference){.thl{animation:thl 1s steps(2) infinite}}
+@keyframes thl{50%{outline-color:transparent}}
 /* nome, libro del giorno, scelta del Capitano */
 .hello{margin:0;text-align:center;font-family:var(--disp);font-size:16px;color:var(--paper)}
 .cheer{margin:4px 0 0;font-family:var(--disp);font-size:16px;color:var(--paper);text-align:center}
@@ -521,7 +529,7 @@ function importCode(txt){try{const t=String(txt||'').trim().replace(/\s+/g,'');i
  const d=JSON.parse(decodeURIComponent(escape(atob(b))));if(!d||d.v!==1||!okSt(d.s))return false;if(d.u!==undefined&&(!Array.isArray(d.u)||!d.u.every(x=>TRID.includes(x))))return false;
  saveStats(d.s);try{localStorage.setItem(TRK,JSON.stringify(Array.isArray(d.u)?d.u:[]));}catch(e){}syncTro();if(d.o&&typeof d.o==='object')saveOpt(d.o);if(typeof d.n==='string')setName(d.n);return true;}catch(e){return false;}}
 const SV='invasione.save.v3';
-function saveGame(){if(!S)return;try{if(S.over){localStorage.removeItem(SV);return;}localStorage.setItem(SV,JSON.stringify({v:1,t:Date.now(),diff,S,pops:UI.pops,acc:UI.acc,accOn:UI.accOn,accCont:UI.accCont}));}catch(e){}}
+function saveGame(){if(!S||S.tut)return;try{if(S.over){localStorage.removeItem(SV);return;}localStorage.setItem(SV,JSON.stringify({v:1,t:Date.now(),diff,S,pops:UI.pops,acc:UI.acc,accOn:UI.accOn,accCont:UI.accCont}));}catch(e){}}
 function loadSave(){try{const d=JSON.parse(localStorage.getItem(SV)||'null');if(d&&d.v===1&&d.S&&!d.S.over&&d.S.pend)return d;}catch(e){}return null;}
 function resumeHTML(){const d=loadSave();if(!d)return '';const g=d.S;
  return `<button class="resume" data-a="resume"><b>Riprendi la partita</b><span>${g.fac[H]==='T'?'Terrestri':'Alieni'} · ${d.diff==='hard'?'Difficile':'Normale'} · Round ${Math.min(Math.max(g.rd,1),3)}/3 · Tu ${g.pv[H]} – ${g.pv[1-H]} Avv.</span></button>`;}
@@ -573,6 +581,44 @@ const CAPS={
  nuy:{f:'A',n:'Nuy Tinck',short:'Nuy',img:'capitano-A2.png',ab:'Ha sempre 11 turni per round. Una volta per round può vendere un dado della riserva per 1 €.',
   long:['Effetto permanente: ogni round degli Alieni dura 11 turni invece di 10.','Nell\'undicesimo turno gioca solo l\'Alieno: può schierare o modificare quando l\'avversario non può più rispondere. Se il round finisce prima perché entrambi passano, l\'undicesimo turno non c\'è.','Vendita del dado: azione extra, una volta per round, prima o dopo la tua azione normale.','Scegli un dado della tua riserva (non schierato): esce fino alla fine del round e guadagni 1 € (fino al massimo di 5).','Al round successivo torni ad avere tutti i 7 dadi.']}};
 const CAP={T:CAPS.mark,A:CAPS.kar};
+/* ---------- partita guidata (addestramento) ---------- */
+const TGK='invasione.addestramento.v1';
+function tutSeen(){try{return localStorage.getItem(TGK)!==null;}catch(e){return true;}}
+function tutMark(v){try{localStorage.setItem(TGK,v);}catch(e){}}
+const TBOT=['Dado 5 → Spazio Profondo','Dado 4 → Atmosfera','Dado 6 → Atmosfera','Dado 4 → Superficie Terrestre','Dado 3 → Spazio Profondo','Dado 2 → Atmosfera','Dado 1 → Spazio Profondo'];
+const plc=(v,f)=>o=>o.v&&o.v.t==='place'&&o.v.f===f&&S.dice[H][o.v.d].v===v;
+const TSTEPS=[
+ {t:'Le tue navi',x:['Benvenuto all\'addestramento! Una partita breve: un solo round.','In basso c\'è la tua riserva: 7 dadi, cioè 7 navi. Lo Spazio Profondo non ha limiti (Nessun effetto) e vince la somma più alta (Valore massimo).','Tocca il tuo 6, poi «Schiera qui» sullo Spazio Profondo.'],ok:plc(6,0),hl:['die:6','drop:0']},
+ {t:'Gli Eventi',x:['L\'avversario ha risposto con un 5: per ora sei avanti, 6 a 5.','Guarda l\'Atmosfera: l\'Evento dice «Solo pari», quindi puoi schierare solo 2, 4 e 6. La Condizione dice «Più dadi»: vince chi ha più navi, e a parità la somma più alta.','Schiera il tuo 2 sull\'Atmosfera.'],ok:plc(2,1),hl:['die:2','drop:1']},
+ {t:'Più dadi',x:['Lui ha messo un 4: una nave a testa, e la sua somma è più alta.','Con «Più dadi» conta prima il numero di navi. Aggiungi il tuo 4: due contro una.'],ok:plc(4,1),hl:['die:4','drop:1']},
+ {t:'Rispondi',x:['Ti ha raggiunto con un 6: due navi a testa, e lui ha la somma più alta.','Rispondi con l\'altro 6 sull\'Atmosfera: tre navi contro due.'],ok:plc(6,1),hl:['die:6','drop:1']},
+ {t:'Il terzo Fronte',x:['Superficie Terrestre accetta solo 4, 5 e 6, e c\'è già un 4 avversario.','Il tuo 5 lo batte: schieralo lì.'],ok:plc(5,2),hl:['die:5','drop:2']},
+ {t:'Occhio ai numeri',x:['Attento: sullo Spazio Profondo l\'avversario è salito a 8 contro il tuo 6.','Non serve giocare tutti i dadi, ma qui conviene: aggiungi il 3 e torni avanti, 9 a 8.'],ok:plc(3,0),hl:['die:3','drop:0']},
+ {t:'Le Tecnologie',x:['Sull\'Atmosfera ora siete tre navi a testa e la somma è 12 a 12: pareggio.','È il momento di una Tecnologia. Tocca la carta «Aggiungi o sottrai 1 o 2 a una tua nave» e scegli «Gioca la carta».'],ok:o=>o.v&&o.v.t==='play'&&INV.cb(o.v.c)===1,hl:['card:1','sheet:play']},
+ {t:'Le Tecnologie',x:['Ora scegli la nave: tocca il tuo 2 sull\'Atmosfera e portalo a 4.','Resta un numero pari, quindi rispetta ancora l\'Evento: la tua somma diventa 14.'],tg:true,ok:o=>o.v&&o.v.o===H&&o.v.nv===4&&S.dice[H][o.v.i].loc==='F'&&S.dice[H][o.v.i].f===1&&S.dice[H][o.v.i].v===2,hl:['tdie','sheet:pick']},
+ {t:'Il valore delle carte',x:['Lo Spazio Profondo è di nuovo in parità, 9 a 9, e ti resta solo un 1.','Trucco: ogni Tecnologia ha due valori in basso. Puoi scartarla per dare uno di quei valori a una nave in riserva, ma ti prendi un Virus.','Tocca «Guadagna 2 €», scegli «Usa il valore 6», poi tocca il tuo 1 e conferma.'],ok:o=>o.v&&o.v.t==='val'&&INV.cb(o.v.c)===12&&o.v.v===6,hl:['card:12','sheet:vsel','vdie','sheet:conf']},
+ {t:'Il colpo finale',x:['Il Virus a volte morde, ma quel 6 vale oro.','Schiera il tuo nuovo 6 sullo Spazio Profondo.'],ok:plc(6,0),hl:['die:6','drop:0']},
+ {t:'Passa',x:['Sei avanti su tutti e tre i Fronti. Non hai bisogno d\'altro: tocca «Passa».','Quando passate entrambi, o dopo 10 turni, il round finisce e si contano i punti.'],ok:o=>o.v&&o.v.t==='pass',hl:['pass']}];
+function tutStep(){return S&&S.tut?TSTEPS[S.tutK||0]:null;}
+function tutFilter(){const st=tutStep(),pd=S&&S.pend;if(!st||!pd||pd.p!==H||!pd.opts)return;
+ if(st.hl.some(h=>h.startsWith('card')))UI.handOpen=true;
+ if(pd.ctx.then==='main'&&!st.tg){const o=pd.opts.filter(st.ok);if(o.length)pd.opts=o;}
+ else if(st.tg&&pd.ctx.then!=='main'){const o=pd.opts.filter(st.ok);if(o.length)pd.opts=o;}}
+function tutHTML(){const st=tutStep(),pd=S.pend;if(!st||!pd||pd.p!==H||S.over)return '';
+ if(!!st.tg!==(pd.ctx.then!=='main'))return '';
+ return `<div class="coach" role="status"><p class="ck-t">Addestramento · ${st.t}</p>${st.x.map(l=>`<p>${esc(l)}</p>`).join('')}<button class="ck-skip" data-a="tutQuit">Esci dall'addestramento</button></div>`;}
+function tutHL(){document.querySelectorAll('.thl').forEach(e=>e.classList.remove('thl'));const st=tutStep();if(!st||!S.pend||S.pend.p!==H)return;
+ const ov=!!document.querySelector('.ov');
+ for(const h of st.hl){const [k,v]=h.split(':');let els=[];if(ov&&k!=='sheet')continue;if(!ov&&k==='sheet')continue;
+  if(k==='die')els=[...document.querySelectorAll('.dock .res [data-a=die]')].filter(e=>e.dataset.v.split('/')[0]===v).slice(0,1);
+  else if(k==='drop')els=[...document.querySelectorAll('.front')].filter((e,i)=>i===+v).map(e=>e.querySelector('.drop')).filter(Boolean);
+  else if(k==='card'){if(UI.vsel)continue;els=[...document.querySelectorAll('.hand .card')].filter(e=>INV.cb(+e.dataset.v)===+v);}
+  else if(k==='sheet')els=[...document.querySelectorAll(v==='vsel'?'.sheet [data-a=vsel]':v==='conf'?'.sheet [data-a=pickc]':'.sheet [data-a=pick]')].filter(e=>v!=='vsel'||/valore 6/.test(e.textContent));
+  else if(k==='vdie')els=[...document.querySelectorAll('.dock .res [data-a=vdie]')];
+  else if(k==='tdie')els=[...document.querySelectorAll('button.die.can')];
+  else if(k==='pass')els=[...document.querySelectorAll('.acts .pass')];
+  els.forEach(e=>e.classList.add('thl'));}
+}
 function capOf(p){return S&&S.cap&&S.caps?S.caps[p]:null;}
 function capChip(p){const id=capOf(p);if(!id||!CAPS[id])return '';const c=CAPS[id],f=c.f;
  const g=k=>(S[k]||[])[p];let st='';if(id==='kar'&&g('karUsed'))st=' ✓';if(id==='dani'){st=g('token')?' · Parassita':g('silUsed')?' ✓':'';}if(id==='nuy'&&g('nuySold'))st=' · venduto';
@@ -650,7 +696,7 @@ function frontHTML(f,inf){const fr=S.fr[f],q=1-H;
   const pl=place&&place.find(e=>e.f===f);
   if(pl)h+=`<button class="drop" data-a="pick" data-v="${pl.i}">Schiera qui${fr.ev===8?' (−1 €)':''}</button>`;}
  return h+'</section>';}
-function topHTML(){const s=S;return `<div class="top"><div><div class="t">Round ${Math.min(s.rd,3)}/3</div><div class="m">${s.turn>10?'Turno 11 · Nuy Tinck':'Turno '+s.turn+'/10'}</div></div><div class="score"><span class="me">Tu ${s.pv[H]}</span> – <span class="op">${s.pv[1-H]} Avv.</span></div><span style="display:flex;gap:6px;align-items:center">${sndBtn()}<button class="icon" data-a="homeq" aria-label="Torna alla home" title="Home"><svg class="ico" viewBox="0 0 8 8" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="M3 0h2v1h1v1h1v1h1v1H7v4H5V5H3v3H1V4H0V3h1V2h1V1h1z"/></svg></button><button class="icon" data-a="help" aria-label="Regole">?</button></span></div>`;}
+function topHTML(){const s=S;return `<div class="top"><div><div class="t">${s.tut?'Addestramento':'Round '+Math.min(s.rd,s.rounds||3)+'/'+(s.rounds||3)}</div><div class="m">${s.turn>10?'Turno 11 · Nuy Tinck':'Turno '+s.turn+'/10'}</div></div><div class="score"><span class="me">Tu ${s.pv[H]}</span> – <span class="op">${s.pv[1-H]} Avv.</span></div><span style="display:flex;gap:6px;align-items:center">${sndBtn()}<button class="icon" data-a="homeq" aria-label="Torna alla home" title="Home"><svg class="ico" viewBox="0 0 8 8" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="M3 0h2v1h1v1h1v1h1v1H7v4H5V5H3v3H1V4H0V3h1V2h1V1h1z"/></svg></button><button class="icon" data-a="help" aria-label="Regole">?</button></span></div>`;}
 const ART={'A-1':1,'A-10':1,'A-11':1,'A-12':1,'A-13':1,'A-14':1,'A-15':1,'A-16':1,'A-17':1,'A-18':1,'A-19':1,'A-2':1,'A-20':1,'A-21':1,'A-22':1,'A-23':1,'A-24':1,'A-25':1,'A-26':1,'A-27':1,'A-28':1,'A-3':1,'A-4':1,'A-5':1,'A-6':1,'A-7':1,'A-8':1,'A-9':1,'T-1':1,'T-10':1,'T-11':1,'T-12':1,'T-13':1,'T-14':1,'T-15':1,'T-16':1,'T-17':1,'T-18':1,'T-19':1,'T-2':1,'T-20':1,'T-21':1,'T-22':1,'T-23':1,'T-24':1,'T-25':1,'T-26':1,'T-27':1,'T-28':1,'T-3':1,'T-4':1,'T-5':1,'T-6':1,'T-7':1,'T-8':1,'T-9':1};
 const PIPS={1:[[1,1]],2:[[0,0],[2,2]],3:[[0,0],[1,1],[2,2]],4:[[0,0],[2,0],[0,2],[2,2]],5:[[0,0],[2,0],[1,1],[0,2],[2,2]],6:[[0,0],[2,0],[0,1],[2,1],[0,2],[2,2]]};
 function pipSVG(v){return `<svg viewBox="0 0 13 13" aria-label="${v}"><rect x=".75" y=".75" width="11.5" height="11.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1"/>${(PIPS[v]||[]).map(([x,y])=>`<circle cx="${3.5+x*3}" cy="${3.5+y*3}" r="1.15" fill="currentColor"/>`).join('')}</svg>`;}
@@ -668,6 +714,7 @@ function logHTML(){const L=S.log.filter(e=>e.to===null||e.to===H).slice(-40).rev
 function render(){hideTip();setTimeout(syncMusic,0);
  const CREDIT='<div class="credit end">Gioco di Daniele Radavero · © 2026 Tutti i diritti riservati</div>';
  if(UI.screen==='start'&&getName()===null&&!UI.sheet&&!UI.story&&!UI.poster)UI.sheet={k:'name',first:true};
+ else if(UI.screen==='start'&&!tutSeen()&&!games(totSt(loadStats()))&&!loadSave()&&!UI.sheet&&!UI.story&&!UI.poster)UI.sheet={k:'tutoffer'};
  if(UI.screen==='start'){app.className='home';app.innerHTML=homeHTML()+CREDIT+(UI.story?storyHTML():'')+(UI.poster?posterHTML():'')+sheetHTML();return;}
  if(UI.screen==='setup'){app.className='setup';app.innerHTML=setupHTML()+CREDIT+sheetHTML();return;}
  const s=S,q=1-H,pd=s.pend,mine=pd&&pd.p===H&&pd.ctx.then==='main'&&!UI.pops.length,inf=mine?info():null;
@@ -685,7 +732,7 @@ function render(){hideTip();setTimeout(syncMusic,0);
  else if(TG)st=(pd.ctx.ttl||'Scegli una nave')+': tocca un dado illuminato.';
  else if(mine&&UI.vsel)st='Valore '+UI.vsel.v+': tocca un dado illuminato in riserva (prendi 1 Virus).';
  else if(mine)st=UI.sel?'Scegli dove schierare il dado.':(pd.ctx.extra?'Azione extra: scegli o rinuncia.':'Tocca a te: scegli un dado, una carta o un\'azione.');
- h+=`<div class="dock ${UI.handOpen?'hopen':''}"><div class="pl"><span class="fac ${s.fac[H]}">${fname(s.fac[H])} · Tu</span>${sideInfo(H)}<button class="handtog" data-a="hand" aria-expanded="${!!UI.handOpen}">Carte ${s.hand[H].length} ${UI.handOpen?'▴':'▾'}</button></div>`+reserveHTML(H,inf)+handHTML()+`<div class="status ${mine?'me':''}">${st}</div>`;
+ h+=`<div class="dock ${UI.handOpen?'hopen':''}"><div class="pl"><span class="fac ${s.fac[H]}">${fname(s.fac[H])} · Tu</span>${sideInfo(H)}<button class="handtog" data-a="hand" aria-expanded="${!!UI.handOpen}">Carte ${s.hand[H].length} ${UI.handOpen?'▴':'▾'}</button></div>`+(S.tut?tutHTML():'')+reserveHTML(H,inf)+handHTML()+`<div class="status ${mine?'me':''}">${st}</div>`;
  if(TG){const si=pd.opts.findIndex(x=>x.v===null);if(si>=0)h+=`<div class="acts"><button class="pass" data-a="pick" data-v="${si}">${esc(pd.opts[si].l)}</button></div>`;}
  if(mine){h+='<div class="acts">';
   if(inf.buy>=0)h+=`<button data-a="pick" data-v="${inf.buy}">Compra (−2 €)</button>`;
@@ -695,10 +742,11 @@ function render(){hideTip();setTimeout(syncMusic,0);
   if(inf.nuy.length)h+=`<button class="capb A" data-a="capact" data-v="nuysell">Nuy Tinck: vendi un dado</button>`;
   if(inf.vc.length)h+=`<button class="vir" data-a="vc">Virus → €</button>`;
   if(inf.vx>=0)h+=`<button class="vir" data-a="pick" data-v="${inf.vx}">Virus → extra</button>`;
-  h+=(UI.vsel?'<button data-a="vcancel">Annulla la scelta del valore</button>':'')+`<button class="pass" data-a="pick" data-v="${inf.pass}">${pd.ctx.extra?'Nessuna extra':'Passa'}</button></div>`;}
+  h+=(UI.vsel?'<button data-a="vcancel">Annulla la scelta del valore</button>':'')+(inf.pass>=0?`<button class="pass" data-a="pick" data-v="${inf.pass}">${pd.ctx.extra?'Nessuna extra':'Passa'}</button>`:'')+'</div>';}
  h+='</div>'+(s.over?endHTML():'')+sheetHTML();
  app.className='game';
  app.innerHTML=h;
+ if(S.tut)tutHL();
  if(s.over)startEnd();}
 /* ---------- audio chiptune: suoni generati dal browser, spenti all'inizio ---------- */
 const SND={on:false,ctx:null,master:null};
@@ -745,7 +793,8 @@ const SPK_OFF='<svg viewBox="0 0 12 10" aria-hidden="true"><path fill="currentCo
 const sndBtn=()=>`<button class="sndb ${SND.on?'on':''}" data-a="snd" aria-pressed="${SND.on}" aria-label="${SND.on?'Disattiva l\'audio':'Attiva l\'audio'}" title="${SND.on?'Audio attivo':'Audio spento'}">${SND.on?SPK_ON:SPK_OFF}</button>`;
 const ENDTXT={trees:['HAI VINTO!','LA TERRA È SALVA.','w'],ruins:['HAI VINTO!','LA TERRA È TUA: FANNE BUON USO.','w'],earth:['HAI PERSO:','DAVVERO HAI PENSATO DI POTER BATTERE GLI ALIENI?','l'],fireworks:['HAI PERSO:','HOLLYWOOD NON TI HA INSEGNATO NIENTE.','l'],draw:['TANTO RUMORE PER NULLA.','','d']};
 function endKind(){const w=S.winner,f=S.fac[H];if(w===-1)return 'draw';if(w===H)return f==='T'?'trees':'ruins';return f==='T'?'earth':'fireworks';}
-function endHTML(){const t0=ENDTXT[endKind()],n=nm(),t=[n&&t0[2]==='w'?'HAI VINTO, '+n.toUpperCase()+'!':n&&t0[2]==='l'&&t0[0]==='HAI PERSO:'?'HAI PERSO, '+n.toUpperCase()+':':t0[0],t0[1],t0[2]];
+function endHTML(){if(S.tut)return `<div class="endscr" role="dialog" aria-label="Fine addestramento"><canvas id="endcv" width="160" height="100" aria-hidden="true"></canvas><h1 class="w">ADDESTRAMENTO COMPLETATO</h1><p class="msg">SEI PRONTO${nm()?', COMANDANTE '+esc(nm().toUpperCase()):', COMANDANTE'}: ORA SI FA SUL SERIO.</p><p class="sc">TU ${S.pv[H]} – ${S.pv[1-H]} AVV.</p><div class="row">${btn('tutPlay','','Gioca la prima partita','hi')}${btn('tutAgain','','Rifai l\'addestramento')}${btn('new','','Home','sec')}</div></div>`;
+ const t0=ENDTXT[endKind()],n=nm(),t=[n&&t0[2]==='w'?'HAI VINTO, '+n.toUpperCase()+'!':n&&t0[2]==='l'&&t0[0]==='HAI PERSO:'?'HAI PERSO, '+n.toUpperCase()+':':t0[0],t0[1],t0[2]];
  return `<div class="endscr" role="dialog" aria-label="Fine partita"><canvas id="endcv" width="160" height="100" aria-hidden="true"></canvas><h1 class="${t[2]}">${t[0]}</h1>${t[1]?`<p class="msg">${t[1]}</p>`:''}<p class="sc">TU ${S.pv[H]} – ${S.pv[1-H]} AVV.</p>${S.why?`<div class="why">${whyHTML()}</div>`:''}${(()=>{const u=unl();if(u.length)return u.map(x=>`<p class="unlock">TROFEO SBLOCCATO: ${esc(troName(x).toUpperCase())}</p>`).join('')+`<p class="cheer">Hai sbloccato un nuovo premio. Continua così${nm()?', '+esc(nm()):''}!</p>`;const st=loadStats(),h=trophies(),nx=TROPHIES.find(t=>!h.includes(t.id));if(!nx)return '';return `<p class="hint2">${LOCK} Prossimo trofeo, ${esc(nx.name)}: ${esc(nx.req.charAt(0).toLowerCase()+nx.req.slice(1))} (${nx.prog(st)}).</p>`;})()}<div class="remind ${unl().length?'hot':''}"><p>${unl().length?'Hai sbloccato un contenuto: salva il nuovo codice per non perderlo.':'Ricordati di aggiornare il codice di salvataggio.'}</p>${btn('endCopy','','Copia il nuovo codice',unl().length?'hi':'')}${UI.endMsg?`<p class="codemsg ${UI.endOk?'ok':'ko'}" role="status">${esc(UI.endMsg)}</p>`:''}</div><div class="row">${unl().includes('story')?btn('storyEnd','','Leggi la Storia','hi'):unl().length?btn('troEnd','','Vedi i trofei','hi'):''}${btn('recap','','Riepilogo')}${btn('endnew','','Nuova partita',unl().length?'':'hi')}${btn('new','','Home','sec')}</div></div>`;}
 /* --- animazioni pixel (160x100) --- */
 const EW=160,EH=100;
@@ -912,7 +961,7 @@ function sheetHTML(){
 ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.codeMsg)}</p>`:''}</div>`;}
  else if(UI.sheet&&UI.sheet.k==='help'){ttl='Regolamento';tall=true;body=btn('close','','Chiudi','sec')+rulesHTML();cancel=true;}
  else if(UI.sheet&&UI.sheet.k==='tut'){const n=UI.sheet.n,T=TUT[n];ttl=T.t;tall=true;
-  body=`<p class="step">Tutorial · passo ${n+1} di ${TUT.length}</p><div class="mock" aria-hidden="true">${T.v}</div>${T.h}<div class="nav">${n>0?btn('tutn',n-1,'Indietro','sec'):''}${n<TUT.length-1?btn('tutn',n+1,'Avanti','hi'):btn('close','','Ho capito, si gioca','hi')}</div>`;cancel=true;} else if(UI.sheet&&UI.sheet.k==='ev'){const fr=S.fr[UI.sheet.f];ttl=FR[UI.sheet.f];cancel=true;
+  body=`${n===0?btn('tutGo','','Gioca la partita guidata','hi'):''}<p class="step">Tutorial · passo ${n+1} di ${TUT.length}</p><div class="mock" aria-hidden="true">${T.v}</div>${T.h}<div class="nav">${n>0?btn('tutn',n-1,'Indietro','sec'):''}${n<TUT.length-1?btn('tutn',n+1,'Avanti','hi'):btn('close','','Ho capito, si gioca','hi')}</div>`;cancel=true;} else if(UI.sheet&&UI.sheet.k==='ev'){const fr=S.fr[UI.sheet.f];ttl=FR[UI.sheet.f];cancel=true;
   body=`${cardFace({noart:true,tag:'Evento',title:EVN[fr.ev],text:EVD[fr.ev]})}${fr.cond?`<p><b style="color:var(--paper)">${CN[fr.cond]}</b></p><p>${CD[fr.cond]}</p>`:''}`;}
  else if(UI.sheet&&UI.sheet.k==='card'&&S&&S.hand[H].includes(UI.sheet.id)&&!(pd&&pd.p===H&&pd.ctx.then!=='main')){const id=UI.sheet.id,my=pd&&pd.p===H&&pd.ctx.then==='main',inf=my?info():{plays:{},sells:{},sb:{},ksb:{},vals:{}};cancel=true;ttl='Tecnologia';
   body=`${techFace(id)}<p class="ctip">${esc(techTip(id).split('\n\n').slice(1).join(' '))}</p>`;let n=0;
@@ -927,6 +976,8 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
  else if(UI.sheet&&UI.sheet.k==='capact'&&pd&&pd.p===H&&pd.ctx.then==='main'){const t=UI.sheet.t;cancel=true;ttl=t==='dani'?'Dani Rada':'Nuy Tinck';
   lead=t==='dani'?'Scegli quale tua nave scartare: al suo posto entra in gioco il Parassita.':'Scegli quale dado della riserva vendere per 1 €.';
   body=pd.opts.map((x,i)=>x.v.t===t?btn('pick',i,(t=>t.charAt(0).toUpperCase()+t.slice(1))(x.l.replace(/^[^:]+:\s*/,''))):'').join('')+'<p class="ctip">È un\'azione extra: dopo potrai fare anche la tua azione normale.</p>';}
+ else if(UI.sheet&&UI.sheet.k==='tutoffer'){ttl='Addestramento';
+  body=`<p class="lead">${nm()?esc(nm())+', prima':'Prima'} della prima battaglia ti va una partita guidata? Un solo round, con le istruzioni passo passo: in cinque minuti impari tutto quello che serve.</p>${btn('tutGo','','Inizia l\'addestramento','hi')}${btn('tutSkip','','Salta, so già giocare','sec')}<p class="meta">Puoi rifarlo quando vuoi dal Tutorial.</p>`;}
  else if(UI.sheet&&UI.sheet.k==='name'){const first=UI.sheet.first;ttl=first?'Benvenuto, comandante':'Il tuo nome';
   body=`<p class="lead">${first?'Prima di cominciare: come ti chiami? Il gioco ti chiamerà per nome quando vinci o sblocchi qualcosa.':'Il nome con cui il gioco ti chiama.'}</p><input id="name-in" class="code nm" maxlength="20" autocomplete="given-name" placeholder="Il tuo nome" value="${esc(nm())}" aria-label="Il tuo nome">${btn('nameOk','','Conferma','hi')}${btn('nameSkip','',first?'Preferisco di no':'Annulla','sec')}`;}
  else if(UI.sheet&&UI.sheet.k==='book'&&has('books')){const b=bookOfDay();ttl='Libro del giorno';cancel=true;
@@ -977,10 +1028,11 @@ function drain(){if(S.q&&S.q.length){if(S.q.some(x=>x.k==='reboot'))sfx('reboot'
   UI.pops.push({k:'startcard',c:x.c});
   UI.pops.push({k:'msg',title:'La situazione è tosta…',lines:[T?'…ma gli arsenali della Terra sono aperti.':'…ma l\'Impero non bada a spese.','Pesca 3 Tecnologie: ne tieni una, una torna nel mazzo e l\'ultima viene eliminata.']});return;}
  UI.pops.push(x);});S.q=[];}}
-function advance(){if(S&&S.over&&!S.rec){S.rec=true;recordStats();sfx(S.winner===H?'win':S.winner===-1?'draw':'lose');if(unl().length)setTimeout(()=>sfx('unlock'),1300);}
+function advance(){if(S&&S.tut&&S.over&&!S.rec){S.rec=true;tutMark('1');sfx('win');}
+ if(S&&S.over&&!S.rec){S.rec=true;recordStats();sfx(S.winner===H?'win':S.winner===-1?'draw':'lose');if(unl().length)setTimeout(()=>sfx('unlock'),1300);}
  if(S&&!S.over&&S.pend&&S.pend.ctx.then==='ack'&&UI.ackRd!==S.rd){UI.ackRd=S.rd;sfx('round');}
  UI.sel=null;UI.grp=null;UI.tsel=null;UI.vsel=null;
- drain();
+ drain();tutFilter();
  const pd=S.pend,humanNow=S.over||!pd||pd.p===H;
  if(humanNow&&UI.acc.length){sfx('pop');UI.pops.unshift({k:'tech',title:UI.accCont?'Esito':'Mossa dell\'avversario',lines:UI.acc});UI.acc=[];
   const cont=!S.over&&pd&&pd.ctx.then!=='main'&&pd.ctx.then!=='ack';UI.accCont=cont;UI.accOn=cont;}
@@ -988,7 +1040,8 @@ function advance(){if(S&&S.over&&!S.rec){S.rec=true;recordStats();sfx(S.winner==
  render();kick();saveGame();}
 function kick(){if(!S||S.over||!S.pend||S.pend.p===H||UI.pops.length)return;clearTimeout(tm);tm=setTimeout(botMove,diff==='hard'?80:420);}
 function botMove(){if(!S||!S.pend||S.pend.p===H||UI.pops.length)return;
- const pd=S.pend,idx=diff==='hard'?BOT.hardChoose(S,{K:8,R:18}):BOT.choose(S,.1),t=pd.opts[idx].v,from=S.log.length;
+ const pd=S.pend;let idx;if(S.tut&&pd.ctx.then==='main'){const l=TBOT[S.tutB=(S.tutB||0)];S.tutB++;idx=pd.opts.findIndex(o=>o.l===l);if(idx<0)idx=pd.opts.findIndex(o=>o.v&&o.v.t==='pass');}else idx=diff==='hard'?BOT.hardChoose(S,{K:8,R:18}):BOT.choose(S,.1);
+ const t=pd.opts[idx].v,from=S.log.length;
  const mod=pd.ctx.then==='main'&&t&&(t.t==='play'||t.t==='val'||(t.t==='place'&&(S.fr[t.f].ev===7||S.fr[t.f].ev===11||S.fr[t.f].flip)));
  if(mod||(pd.ctx.then==='resp'&&t===true)){UI.accOn=true;UI.accCont=false;}
  INV.answer(S,idx);
@@ -1000,6 +1053,7 @@ function virusN(o){const a=o&&o.v;if(!a)return 0;if(a.t==='vcoins')return a.n;if
 function actSound(pd,v,from){let n='click';if(pd.ctx.then==='main'&&v){n={place:'place',play:'card',val:'card',sell:'coin',buy:'coin',sellbuy:'coin',vcoins:'coin'}[v.t]||'click';}
  for(const e of S.log.slice(from)){if(e.t.indexOf('Combattimento')===0)n='combat';if(e.t.indexOf('respinge')>=0)n='shield';}sfx(n);}
 function act(i,force){if(!S.pend||S.pend.p!==H)return;
+ if(S.tut&&!(S.pend.ctx.then==='main'&&!force&&virusN(S.pend.opts[+i])>0)){const st=tutStep(),o=S.pend.opts[+i];if(st&&o&&st.ok(o)&&true)S.tutK=(S.tutK||0)+1;}
  if(!force&&S.pend.ctx.then==='main'){const n=virusN(S.pend.opts[+i]);if(n>0){UI.sheet={k:'vconf',i:+i,n,lab:S.pend.opts[+i].l};render();return;}}
  UI.sheet=null;const from=S.log.length,pd0=S.pend,v0=pd0.opts[+i]&&pd0.opts[+i].v;
  try{INV.answer(S,+i);}catch(e){console.error(e);}
@@ -1043,6 +1097,11 @@ const HD={
  tut0:()=>{UI.sheet={k:'tut',n:0};render();},tutn:v=>{UI.sheet={k:'tut',n:+v};render();},
  snd:()=>{SND.on=!SND.on;try{localStorage.setItem('invasione.audio',SND.on?'1':'0');}catch(e){}if(SND.on){actx();sfx('click');}else stopMusic();render();},
  credits:()=>{UI.sheet={k:'credits'};render();},
+ tutGo:()=>{clearTimeout(tm);tutMark('0');S=INV.newGame({fac:['T','A'],hold:H,tut:true});S.tutK=0;S.tutB=0;UI=mkUI('game');UI.handOpen=false;advance();},
+ tutSkip:()=>{tutMark('0');UI.sheet=null;render();},
+ tutQuit:()=>{clearTimeout(tm);S=null;UI=mkUI('start');render();},
+ tutAgain:()=>{HD.tutGo();},
+ tutPlay:()=>{clearTimeout(tm);S=null;UI=mkUI('setup');hf='T';render();},
  book:()=>{UI.sheet={k:'book'};render();},
  capact:v=>{UI.sheet={k:'capact',t:v==='nuysell'?'nuysell':'dani'};render();},
  capPick:v=>{const o=loadOpt();if(CAPOK.includes(v))o['cap'+hf]=v;saveOpt(o);render();},
@@ -1051,7 +1110,7 @@ const HD={
  nameSkip:()=>{if(UI.sheet&&UI.sheet.first)setName('');UI.sheet=null;render();},
  pick:v=>act(v),pickc:v=>act(v,true),homeq:()=>{UI.sheet={k:'home'};render();},tdie:v=>{UI.tsel=v;render();},tback:()=>{UI.tsel=null;render();},pop:()=>{UI.pops.shift();render();kick();saveGame();},
  grp:v=>{UI.grp=v;render();},back:()=>{UI.grp=null;render();}};
-const CLICKS={book:1,capact:1,capPick:1,nameEdit:1,nameOk:1,nameSkip:1,credits:1,tro:1,capv:1,optT:1,setup:1,go:1,gonew:1,hf:1,df:1,story:1,storyLocked:1,tut0:1,tutn:1,help:1,poster:1,stats:1,homeback:1,new:1,endnew:1,recap:1,resume:1,close:1,homeq:1,die:1,card:1,hand:1,vsel:1,tdie:1,ev:1};
+const CLICKS={tutGo:1,tutSkip:1,tutQuit:1,tutAgain:1,tutPlay:1,book:1,capact:1,capPick:1,nameEdit:1,nameOk:1,nameSkip:1,credits:1,tro:1,capv:1,optT:1,setup:1,go:1,gonew:1,hf:1,df:1,story:1,storyLocked:1,tut0:1,tutn:1,help:1,poster:1,stats:1,homeback:1,new:1,endnew:1,recap:1,resume:1,close:1,homeq:1,die:1,card:1,hand:1,vsel:1,tdie:1,ev:1};
 app.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t||t.disabled)return;if(CLICKS[t.dataset.a])sfx('click');const f=HD[t.dataset.a];if(f)f(t.dataset.v);});
 app.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse'){hideTip();return;}const t=e.target.closest&&e.target.closest('[data-tip]');if(t)showTip(t);else hideTip();});
 app.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse')hideTip();});

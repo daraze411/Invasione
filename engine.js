@@ -149,6 +149,8 @@ function newGame(o){o=o||{};const s={cap:!!o.cap,caps:null,bonus:!!o.bonus,karUs
  for(let p=0;p<2;p++)s.deck[p]=shuffle(s,ids.map(i=>s.fac[p]==='A'?i+100:i));
  s.evdeck=shuffle(s,[1,2,3,4,5,7,8,9,10,11,12]);
  for(let i=1;i<=7;i++){s.vdeck.push(i);if(i!==3)s.vdeck.push(i);}shuffle(s,s.vdeck);
+ if(o.tut){s.tut=true;s.rounds=1;s.evdeck=[4,1,12];s.cdeck=['M','DH','M'];s.tutDice=[[6,2,4,6,5,1,3],[5,4,6,4,3,2,1]];
+  const id=(p,c)=>s.fac[p]==='A'?c+100:c;s.hand=[[id(0,1),id(0,12)],[id(1,12)]];s.vdeck.push(5);s.st=[{k:'roundStart'}];run(s);return s;}
  s.st=[{k:'init'}];run(s);return s;}
 TASK.init=s=>{push(s,{k:'uni',p:0},{k:'uni',p:1},{k:'draw3',p:0},{k:'draw3',p:1},{k:'roundStart'});};
 TASK.uni=(s,t)=>{const ids=[25,26].map(c=>s.fac[t.p]==='A'?c+100:c),id=ids[ri(s,2)];s.hand[t.p].push(id);log(s,fn(s,t.p)+' riceve a caso la sua Tecnologia di partenza',t.p);qev(s,{k:'prep',p:t.p,c:id});};
@@ -159,12 +161,12 @@ FN.back=(s,c,j)=>{const p=c.p;s.deck[p].push(c.rest[j]);shuffle(s,s.deck[p]);};
 TASK.roundStart=s=>{s.rd++;
  if(s.rd>=2)for(let p=0;p<2;p++){if(s.vir[p]>0)s.vir[p]--;gain(s,p,1);drawT(s,p);}
  push(s,{k:'setup'});
- if(s.rd===1){s.first=ri(s,2);}
+ if(s.rd===1){s.first=s.tut?0:ri(s,2);}
  else{const dec=s.pv[0]<s.pv[1]?0:s.pv[1]<s.pv[0]?1:s.first;
   ask(s,dec,{then:'first',ttl:'Chi muove per primo nel round '+s.rd+'?'},[{l:'Muovo per primo',v:dec},{l:'Lascio la prima mossa all\'avversario',v:1-dec}]);}};
 FN.first=(s,c,v)=>{s.first=v;};
 TASK.setup=s=>{s.order=[s.first,1-s.first];s.turn=1;s.slot=0;s.pass=[false,false];s.skip=[false,false];s.dbl=[false,false];s.spore=[false,false];s.endNow=false;
- for(let p=0;p<2;p++){s.dice[p]=[];for(let i=0;i<7;i++){s.dice[p].push({i,p,v:1+ri(s,6),loc:(i===6&&s.token&&s.token[p])?'K':'R',f:-1,x:-1,ord:0,fz:0});}}
+ for(let p=0;p<2;p++){s.dice[p]=[];for(let i=0;i<7;i++){s.dice[p].push({i,p,v:s.tutDice?s.tutDice[p][i]:1+ri(s,6),loc:(i===6&&s.token&&s.token[p])?'K':'R',f:-1,x:-1,ord:0,fz:0});}}
  s.nuySold=[false,false];s.tseen={};
  if(!s.cdeck)s.cdeck=shuffle(s,['M','M','M','M','B','B','B','B','DH','DH','DL','DL']);
  s.fr=[];for(let f=0;f<3;f++){const ev=s.evdeck.pop();s.fr.push({ev,cond:ev===9?null:s.cdeck.pop(),flip:ev===9,sp:ev===9?[null,null,null,null]:[]});}
@@ -362,7 +364,7 @@ TASK.resolve=s=>{const gp=[0,0];s.res=[];
   s.res.push({f,ev:fr.ev,cond:fr.cond,sum:[sumv(validShips(s,f,0)),sumv(validShips(s,f,1))],cnt,w,g,vc:[validShips(s,f,0).length,validShips(s,f,1).length],tb:(fr.cond==='DH'||fr.cond==='DL')&&w>=0&&validShips(s,f,0).length===validShips(s,f,1).length});
   log(s,FR[f]+': '+(w<0?'pareggio':'vince '+fn(s,w))+' (+'+g[0]+' / +'+g[1]+' PV)');}
  s.pv[0]+=gp[0];s.pv[1]+=gp[1];s.resRd=s.rd;
- if(s.rd>=3){finish(s);return;}
+ if(s.rd>=(s.rounds||3)){finish(s);return;}
  if(s.stopAtEnd){s.rdOver=true;s.over=true;return;}
  push(s,{k:'roundStart'});
  if(s.hold!==undefined)ask(s,s.hold,{then:'ack',noauto:true,ttl:'Round '+s.rd+' concluso'},[{l:'Prosegui',v:0}]);};
