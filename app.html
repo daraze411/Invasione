@@ -221,6 +221,9 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 .vs{width:42px;height:42px;font-size:16px;font-weight:700;border-width:2px}
 .nb{border-radius:0!important}
 /* compendio, avvisi */
+.pbar .sep,.sep{color:var(--mute);margin:0 2px}
+.nomore{display:flex;gap:8px;align-items:center;font-family:var(--disp);font-size:14px;color:var(--fg);margin:6px 0}
+.nomore input{width:20px;height:20px;accent-color:var(--paper)}
 .sum.bust{color:var(--warn)!important;font-weight:700}
 .warnp{color:var(--warn)!important}
 .tutrem{text-align:left}
@@ -606,7 +609,7 @@ function tutMark(v){try{localStorage.setItem(TGK,v);}catch(e){}}
 const TBOT=['Dado 5 → Spazio Profondo','Dado 4 → Atmosfera','Dado 6 → Atmosfera','Dado 4 → Superficie Terrestre','Dado 3 → Spazio Profondo','Dado 2 → Atmosfera','Dado 1 → Spazio Profondo'];
 const plc=(v,f)=>o=>o.v&&o.v.t==='place'&&o.v.f===f&&S.dice[H][o.v.d].v===v;
 const TSTEPS=[
- {t:'Le tue navi',x:['Benvenuto all\'addestramento! Una partita breve: un solo round.','In basso c\'è la tua riserva: 7 dadi, cioè 7 navi. Lo Spazio Profondo non ha limiti (Nessun effetto) e vince la somma più alta (Valore massimo).','Tocca il tuo 6, poi «Schiera qui» sullo Spazio Profondo.'],ok:plc(6,0),hl:['die:6','drop:0']},
+ {t:'La prima nave',x:['Guarda lo Spazio Profondo: l\'Evento è «Nessun effetto», quindi va bene qualsiasi dado. La Condizione è «Valore massimo», quindi qui vince chi ha la somma più alta.','Il tuo dado più forte è il 6. Tocca il tuo 6, poi «Schiera qui» sullo Spazio Profondo.'],ok:plc(6,0),hl:['die:6','drop:0']},
  {t:'Gli Eventi',x:['L\'avversario ha risposto con un 5: per ora sei avanti, 6 a 5.','Guarda l\'Atmosfera: l\'Evento dice «Solo pari», quindi puoi schierare solo 2, 4 e 6. La Condizione dice «Più dadi»: vince chi ha più navi, e a parità la somma più alta.','Schiera il tuo 2 sull\'Atmosfera.'],ok:plc(2,1),hl:['die:2','drop:1']},
  {t:'Più dadi',x:['Lui ha messo un 4: una nave a testa, e la sua somma è più alta.','Con «Più dadi» conta prima il numero di navi. Aggiungi il tuo 4: due contro una.'],ok:plc(4,1),hl:['die:4','drop:1']},
  {t:'Rispondi',x:['Ti ha raggiunto con un 6: due navi a testa, e lui ha la somma più alta.','Rispondi con l\'altro 6 sull\'Atmosfera: tre navi contro due.'],ok:plc(6,1),hl:['die:6','drop:1']},
@@ -614,9 +617,12 @@ const TSTEPS=[
  {t:'Occhio ai numeri',x:['Attento: sullo Spazio Profondo l\'avversario è salito a 8 contro il tuo 6.','Non serve giocare tutti i dadi, ma qui conviene: aggiungi il 3 e torni avanti, 9 a 8.'],ok:plc(3,0),hl:['die:3','drop:0']},
  {t:'Le Tecnologie',x:['Sull\'Atmosfera ora siete tre navi a testa e la somma è 12 a 12: pareggio.','È il momento di una Tecnologia. Tocca la carta «Aggiungi o sottrai 1 o 2 a una tua nave» e scegli «Gioca la carta».'],ok:o=>o.v&&o.v.t==='play'&&INV.cb(o.v.c)===1,hl:['card:1','sheet:play']},
  {t:'Le Tecnologie',x:['Ora scegli la nave: tocca il tuo 2 sull\'Atmosfera e portalo a 4.','Resta un numero pari, quindi rispetta ancora l\'Evento: la tua somma diventa 14.'],tg:true,ok:o=>o.v&&o.v.o===H&&o.v.nv===4&&S.dice[H][o.v.i].loc==='F'&&S.dice[H][o.v.i].f===1&&S.dice[H][o.v.i].v===2,hl:['tdie','sheet:pick']},
- {t:'Il valore delle carte',x:['Lo Spazio Profondo è di nuovo in parità, 9 a 9, e ti resta solo un 1.','Trucco: ogni Tecnologia ha due valori in basso. Puoi scartarla per dare uno di quei valori a una nave in riserva, ma ti prendi un Virus.','Tocca «Guadagna 2 €», scegli «Usa il valore 6», poi tocca il tuo 1 e conferma.'],ok:o=>o.v&&o.v.t==='val'&&INV.cb(o.v.c)===12&&o.v.v===6,hl:['card:12','sheet:vsel','vdie','sheet:conf']},
- {t:'Il colpo finale',x:['Il Virus a volte morde, ma quel 6 vale oro.','Schiera il tuo nuovo 6 sullo Spazio Profondo.'],ok:plc(6,0),hl:['die:6','drop:0']},
+ {t:'Il valore delle carte',x:['Lo Spazio Profondo è di nuovo in parità, 9 a 9, e ti resta solo un 1.','Trucco: ogni Tecnologia ha due valori in basso. Puoi scartarla, rinunciando al suo effetto, per dare uno di quei valori a un dado della tua riserva. Il prezzo è un Virus.','Tocca «Guadagna 2 €», scegli «Usa il valore 6», poi tocca il tuo 1 e conferma.'],ok:o=>o.v&&o.v.t==='val'&&INV.cb(o.v.c)===12&&o.v.v===6,hl:['card:12','sheet:vsel','vdie','sheet:conf']},
+ {t:'I Virus',x:['Hai preso il tuo primo Virus.','Ogni volta che prendi un Virus peschi una carta Virus: c\'è sempre una penalità, di solito piccola. Può costarti una nave, un euro, oppure fare un regalo all\'avversario. Stavolta ti è andata bene: «fino a fine round ogni Virus vale doppio».','I segnalini Virus li vedi in alto, accanto alle monete. Puoi tenerne al massimo 3: il quarto li azzera, ma ti fa pescare 2 carte Virus. Buona notizia: all\'inizio di ogni round un segnalino va via da solo.','Perché prenderli, allora? Perché sono una risorsa preziosa: con «Virus → €» li trasformi in monete, con «Virus → extra» ti compri un\'azione in più, e ti permettono di usare il valore delle carte, come hai appena fatto.','Spesso quella monetina o quell\'azione in più vale più della penalità. Usali con giudizio!','Ora schiera il tuo nuovo 6 sullo Spazio Profondo.'],ok:plc(6,0),hl:['die:6','drop:0']},
  {t:'Passa',x:['Sei avanti su tutti e tre i Fronti. Non hai bisogno d\'altro: tocca «Passa».','Quando passate entrambi, o dopo 10 turni, il round finisce e si contano i punti.'],ok:o=>o.v&&o.v.t==='pass',hl:['pass']}];
+const SPK='invasione.info.spazi';
+function spSeen(){try{return localStorage.getItem(SPK)==='1';}catch(e){return true;}}
+function spCheck(){if(!S||S.tut||S.over||UI.sheet||UI.pops.length||S.spShown||spSeen())return;const f=S.fr?S.fr.findIndex(x=>x&&x.flip):-1;if(f<0)return;S.spShown=true;UI.sheet={k:'spazi',f};}
 function tutStep(){return S&&S.tut?TSTEPS[S.tutK||0]:null;}
 function tutFilter(){const st=tutStep(),pd=S&&S.pend;if(!st||!pd||pd.p!==H||!pd.opts)return;
  if(st.hl.some(h=>h.startsWith('card')))UI.handOpen=true;
@@ -626,6 +632,7 @@ function tutHTML(){const st=tutStep(),pd=S.pend;if(!st||!pd||pd.p!==H||S.over)re
  if(!!st.tg!==(pd.ctx.then!=='main'))return '';
  return `<div class="coach" role="status"><p class="ck-t">Addestramento · ${st.t}</p>${st.x.map(l=>`<p>${esc(l)}</p>`).join('')}<button class="ck-skip" data-a="tutQuit">Esci dall'addestramento</button></div>`;}
 function tutHL(){document.querySelectorAll('.thl').forEach(e=>e.classList.remove('thl'));const st=tutStep();if(!st||!S.pend||S.pend.p!==H)return;
+ if(UI.sheet&&UI.sheet.k==='tutintro'){if(UI.sheet.n===1)[...document.querySelectorAll('.front')][0]?.querySelectorAll('[data-a=ev]').forEach(e=>e.classList.add('thl'));return;}
  const ov=!!document.querySelector('.ov');
  for(const h of st.hl){const [k,v]=h.split(':');let els=[];if(ov&&k!=='sheet')continue;if(!ov&&k==='sheet')continue;
   if(k==='die')els=[...document.querySelectorAll('.dock .res [data-a=die]')].filter(e=>e.dataset.v.split('/')[0]===v).slice(0,1);
@@ -661,7 +668,7 @@ function capOf(p){return S&&S.cap&&S.caps?S.caps[p]:null;}
 function capChip(p){const id=capOf(p);if(!id||!CAPS[id])return '';const c=CAPS[id],f=c.f;
  const g=k=>(S[k]||[])[p];let st='';if(id==='kar'&&g('karUsed'))st=' ✓';if(id==='dani'){st=g('token')?' · Parassita':g('silUsed')?' ✓':'';}if(id==='nuy'&&g('nuySold'))st=' · venduto';
  return `<button class="capchip ${f}" data-a="capv" data-v="${id}" data-tip="${esc(c.n+': '+c.ab)}"><img src="${c.img}" alt="">${esc(c.short)}${st}</button>`;}
-function techTip(id){const k=INV.tk(S,H,id);const base=TDESC[k]||INV.tt(S,H,id);if(INV.isStart(id))return base+'\n\nTecnologia univoca: non ha valori in basso.';const val=INV.cb(id)===20?'Valori: qualsiasi da 1 a 6.':'Valori in basso: '+INV.TECH[INV.cb(id)].v.join(' oppure ')+'.';return base+'\n\n'+val+' Come azione puoi scartare la carta, dare quel valore a una tua nave in riserva e prendere 1 Virus.';}
+function techTip(id){const k=INV.tk(S,H,id);const base=TDESC[k]||INV.tt(S,H,id);if(INV.isStart(id))return base+'\n\nTecnologia univoca: non ha valori in basso.';const val=INV.cb(id)===20?'qualsiasi valore da 1 a 6':INV.TECH[INV.cb(id)].v.join(' oppure ');return base+'\n\nPuoi scartare la carta, rinunciando al suo effetto, per modificare il valore di uno dei tuoi dadi in riserva con uno di quelli indicati in basso ('+val+'). In cambio prendi 1 Virus.';}
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fname=f=>f==='T'?'Terrestri':'Alieni';
 const dk=d=>d.v+'/'+d.fz;
@@ -675,7 +682,7 @@ function homeHTML(){const st=totSt(loadStats()),sv=loadSave(),ng=games(st);
  return `<div class="home"><div class="pwrap"><img class="poster" src="locandina-pixel.png" width="192" height="192" alt="Locandina di INVASIONE in pixel art: Terrestri contro Alieni">${sndBtn()}</div>
 ${nm()?`<p class="hello">Ciao, ${esc(nm())}! I Fronti ti aspettano.</p>`:''}<nav class="menu" aria-label="Menù">${resumeHTML()}<button class="mi main" data-a="setup">${sv?'NUOVA PARTITA':'GIOCA'}</button>
 ${storyOpen()?'<button class="mi" data-a="story">Storia</button>':''}${has('books')?'<button class="mi" data-a="book">Libro del giorno</button>':''}<button class="mi" data-a="tro">Trofei</button><button class="mi" data-a="comp">Carte</button><button class="mi" data-a="tut0">Tutorial</button>
-<button class="mi" data-a="help">Regolamento</button><button class="mi" data-a="poster">Locandina</button><button class="mi" data-a="credits">Crediti</button>
+<button class="mi" data-a="help">Regolamento</button><button class="mi" data-a="credits">Crediti</button>
 <button class="mi ${(storyOpen()?1:0)+(has('books')?1:0)===1?'wide':''}" data-a="stats">Le tue partite<small>${sub}</small></button></nav></div>`;}
 function setupHTML(){
  const side=(f,name)=>`<button class="side ${f} ${hf===f?'on':''}" data-a="hf" data-v="${f}" aria-pressed="${hf===f}"><b>${name}</b>${hf===f?'<span class="you">La tua fazione</span>':''}</button>`;
@@ -713,11 +720,11 @@ function info(){const o=S.pend.opts,r={place:{},plays:{},sells:{},sb:{},ksb:{},v
   case'buy':r.buy=i;break;case'kar':r.kar=i;break;case'karsb':r.ksb[a.c]=i;break;case'dani':r.dani.push(i);break;case'silvya':r.sil=i;break;case'nuysell':r.nuy.push(i);break;case'vcoins':r.vc.push({i,n:a.n});break;case'vextra':r.vx=i;break;
   case'pass':case'none':r.pass=i;break;}});return r;}
 function sideInfo(p){const s=S,me=p===H;
- return `<span class="st" data-tip="${esc('Monete: massimo 5. Servono per comprare Tecnologie (2 €) e per molte carte.')}">€ ${s.co[p]}</span><span class="st ${s.vir[p]>=2?'warn':''}" data-tip="${esc((s.dbl[p]?'Virus doppio fino a fine round.\n\n':'')+VIRTIP)}">Virus ${s.vir[p]}/3${s.dbl[p]?' ×2':''}</span><span class="st ${me?'techst':''}" data-tip="${esc(me?'Tecnologie in mano: massimo 5. Passa il mouse o tocca una carta per leggerla.':'Tecnologie in mano all\'avversario (massimo 5). Le carte sono segrete.')}">Tecnologie ${s.hand[p].length}</span>${s.skip[p]?'<span class="warn" data-tip="Salta il prossimo momento d\'azione.">salta il turno</span>':''}${capChip(p)}`;}
+ return `<span class="st" data-tip="${esc('Monete: massimo 5. Servono per comprare Tecnologie (2 €) e per molte carte.')}">€ ${s.co[p]}</span><span class="sep" aria-hidden="true">–</span><span class="st ${s.vir[p]>=2?'warn':''}" data-tip="${esc((s.dbl[p]?'Virus doppio fino a fine round.\n\n':'')+VIRTIP)}">Virus ${s.vir[p]}/3${s.dbl[p]?' ×2':''}</span><span class="st ${me?'techst':''}" data-tip="${esc(me?'Tecnologie in mano: massimo 5. Passa il mouse o tocca una carta per leggerla.':'Tecnologie in mano all\'avversario (massimo 5). Le carte sono segrete.')}">Tecnologie ${s.hand[p].length}</span>${s.skip[p]?'<span class="warn" data-tip="Salta il prossimo momento d\'azione.">salta il turno</span>':''}${capChip(p)}`;}
 function reserveHTML(p,inf){const ds=S.dice[p].filter(d=>d.loc==='R');
  if(p!==H)return `<div class="res"><span class="lab">Riserva</span>${ds.map(d=>dieHTML(d,'sm')).join('')||'<span class="lab">vuota</span>'}</div>`;
  return `<div class="res"><span class="lab">Riserva</span>${ds.map(d=>{const k=dk(d),vs=UI.vsel,can=vs?(inf&&inf.vd[vs.c+'/'+vs.v+'/'+k]!==undefined):(inf&&inf.place[k]);return dieHTML(d,(can?'can ':'')+(!vs&&UI.sel===k?'sel':'')+(d.fz?' fz':''),'button',can?`data-a="${vs?'vdie':'die'}" data-v="${k}"`:'disabled');}).join('')||'<span class="lab">vuota</span>'}</div>`;}
-const EVS={1:'Solo pari',2:'Solo dispari',3:'Solo 1, 2, 3',4:'Solo 4, 5, 6',5:'Scala',6:'Stesso valore',7:'Combattimento',8:'Paga 1 € · 2 PV',9:'Spazi azione',10:'Dal più alto',11:'Modifica di 1',12:'Nessun effetto'};
+const EVS={1:'Solo pari',2:'Solo dispari',3:'Solo 1, 2, 3',4:'Solo 4, 5, 6',5:'Scala',6:'Stesso valore',7:'Combattimento',8:'Paga 1 € · 2 PV',9:'Spazi azione',10:'Dal più alto',11:'Ritocco ±1',12:'Nessun effetto'};
 const CNS={M:'Valore massimo',DH:'Più dadi · Σ alta',DL:'Più dadi · Σ bassa',B:'Bersaglio 12'};
 function frontHTML(f,inf){const fr=S.fr[f],q=1-H;
  let h=`<section class="front"><div class="fh"><b>${FR[f]}</b><span style="display:flex;gap:6px;flex-wrap:wrap"><button class="chip ev" data-a="ev" data-v="${f}" data-tip="${esc(EVN[fr.ev]+'\n'+EVD[fr.ev])}">${esc(EVS[fr.ev])}</button>${fr.cond?`<button class="chip" data-a="ev" data-v="${f}" data-tip="${esc(CN[fr.cond]+'\n'+CD[fr.cond])}">${CNS[fr.cond]}</button>`:''}</span></div>`;
@@ -832,7 +839,7 @@ const SPK_OFF='<svg viewBox="0 0 12 10" aria-hidden="true"><path fill="currentCo
 const sndBtn=()=>`<button class="sndb ${SND.on?'on':''}" data-a="snd" aria-pressed="${SND.on}" aria-label="${SND.on?'Disattiva l\'audio':'Attiva l\'audio'}" title="${SND.on?'Audio attivo':'Audio spento'}">${SND.on?SPK_ON:SPK_OFF}</button>`;
 const ENDTXT={trees:['HAI VINTO!','LA TERRA È SALVA.','w'],ruins:['HAI VINTO!','LA TERRA È TUA: FANNE BUON USO.','w'],earth:['HAI PERSO:','DAVVERO HAI PENSATO DI POTER BATTERE GLI ALIENI?','l'],fireworks:['HAI PERSO:','HOLLYWOOD NON TI HA INSEGNATO NIENTE.','l'],draw:['TANTO RUMORE PER NULLA.','','d']};
 function endKind(){const w=S.winner,f=S.fac[H];if(w===-1)return 'draw';if(w===H)return f==='T'?'trees':'ruins';return f==='T'?'earth':'fireworks';}
-function endHTML(){if(S.tut)return `<div class="endscr" role="dialog" aria-label="Fine addestramento"><canvas id="endcv" width="160" height="100" aria-hidden="true"></canvas><h1 class="w">ADDESTRAMENTO COMPLETATO</h1><p class="msg">SEI PRONTO${nm()?', COMANDANTE '+esc(nm().toUpperCase()):', COMANDANTE'}: ORA SI FA SUL SERIO.</p><p class="sc">TU ${S.pv[H]} – ${S.pv[1-H]} AVV.</p><div class="remind tutrem"><p><b>Due cose da ricordare:</b></p><p>· Eventi e Condizioni cambiano a ogni round: ricontrolla i Fronti prima di schierare.</p><p>· Non scordarti la compravendita: vendi una Tecnologia per 1 €, comprane una per 2 €, oppure fai tutte e due le cose con «Vendi e compra».</p></div><div class="row">${btn('tutPlay','','Gioca la prima partita','hi')}${btn('tutAgain','','Rifai l\'addestramento')}${btn('new','','Home','sec')}</div></div>`;
+function endHTML(){if(S.tut)return `<div class="endscr" role="dialog" aria-label="Fine addestramento"><canvas id="endcv" width="160" height="100" aria-hidden="true"></canvas><h1 class="w">ADDESTRAMENTO COMPLETATO</h1><p class="msg">SEI PRONTO${nm()?', COMANDANTE '+esc(nm().toUpperCase()):', COMANDANTE'}: ORA SI FA SUL SERIO.</p><p class="sc">TU ${S.pv[H]} – ${S.pv[1-H]} AVV.</p><div class="remind tutrem"><p><b>Ricorda:</b></p><p>· Nella partita vera i round sono 3, e a ogni round Eventi e Condizioni cambiano. Ricontrolla sempre i Fronti prima di schierare.</p><p>· Non scordarti la compravendita: vendi una Tecnologia per 1 €, comprane una per 2 €, oppure fai tutte e due le cose con «Vendi e compra».</p><p>· I Virus hanno sempre una piccola penalità, ma sono una risorsa: monete, azioni extra, valori delle carte. E a ogni round uno se ne va.</p></div><div class="row">${btn('tutPlay','','Gioca la prima partita','hi')}${btn('tutAgain','','Rifai l\'addestramento')}${btn('new','','Home','sec')}</div></div>`;
  const t0=ENDTXT[endKind()],n=nm(),t=[n&&t0[2]==='w'?'HAI VINTO, '+n.toUpperCase()+'!':n&&t0[2]==='l'&&t0[0]==='HAI PERSO:'?'HAI PERSO, '+n.toUpperCase()+':':t0[0],t0[1],t0[2]];
  return `<div class="endscr" role="dialog" aria-label="Fine partita"><canvas id="endcv" width="160" height="100" aria-hidden="true"></canvas><h1 class="${t[2]}">${t[0]}</h1>${t[1]?`<p class="msg">${t[1]}</p>`:''}<p class="sc">TU ${S.pv[H]} – ${S.pv[1-H]} AVV.</p>${S.why?`<div class="why">${whyHTML()}</div>`:''}${(()=>{const u=unl();if(u.length)return u.map(x=>`<p class="unlock">TROFEO SBLOCCATO: ${esc(troName(x).toUpperCase())}</p>`).join('')+`<p class="cheer">Hai sbloccato un nuovo premio. Continua così${nm()?', '+esc(nm()):''}!</p>`;const st=loadStats(),h=trophies(),nx=TROPHIES.find(t=>!h.includes(t.id));if(!nx)return '';return `<p class="hint2">${LOCK} Prossimo trofeo, ${esc(nx.name)}: ${esc(nx.req.charAt(0).toLowerCase()+nx.req.slice(1))} (${nx.prog(st)}).</p>`;})()}<div class="remind ${unl().length?'hot':''}"><p>${unl().length?'Hai sbloccato un contenuto: salva il nuovo codice per non perderlo.':'Ricordati di aggiornare il codice di salvataggio.'}</p>${btn('endCopy','','Copia il nuovo codice',unl().length?'hi':'')}${UI.endMsg?`<p class="codemsg ${UI.endOk?'ok':'ko'}" role="status">${esc(UI.endMsg)}</p>`:''}</div><div class="row">${unl().includes('story')?btn('storyEnd','','Leggi la Storia','hi'):unl().length?btn('troEnd','','Vedi i trofei','hi'):''}${btn('recap','','Riepilogo')}${btn('endnew','','Nuova partita',unl().length?'':'hi')}${btn('new','','Home','sec')}</div></div>`;}
 /* --- animazioni pixel (160x100) --- */
@@ -1022,6 +1029,26 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
   const tb=(k,l)=>`<button class="ctab ${tab===k?'on':''}" data-a="ctab" data-v="${k}" aria-pressed="${tab===k}">${l}</button>`;
   body=`<div class="ctabs">${tb('T','Terrestri')}${tb('A','Alieni')}${tb('E','Eventi')}${tb('V','Virus')}${tb('C','Capitani')}</div>${compHTML(tab)}`;}
  else if(UI.sheet&&UI.sheet.k==='cview'){ttl='Compendio';cancel=true;body=cviewFace(UI.sheet.a)+btn('ctab',UI.sheet.tab,'← Torna al compendio','sec');}
+ else if(UI.sheet&&UI.sheet.k==='tutintro'){const n=UI.sheet.n;
+  if(n===0){ttl=nm()?'Benvenuto, comandante '+nm()+'!':'Benvenuto, comandante!';
+   body=`<p class="lead">Gli Impronunciabili sono arrivati, e la Terra si difende su <b>tre Fronti</b>: Spazio Profondo, Atmosfera e Superficie Terrestre.</p>
+<p class="lead"><b>Il tuo obiettivo:</b> vincere più Fronti possibile. Ogni Fronte vinto vale <b>Punti Vittoria</b>. Dopo <b>3 round</b>, chi ha più Punti Vittoria vince la partita.</p>
+<p class="lead">Le tue armi sono <b>7 dadi</b>: ogni dado è una nave. A turno, tu e l'avversario schierate una nave alla volta sui Fronti.</p>
+<p class="lead">Ti aiuteranno le <b>Tecnologie</b> (carte con poteri speciali), le <b>monete</b> e perfino i <b>Virus</b>: li conoscerai strada facendo.</p>${btn('tutNext',1,'Avanti','hi')}<p class="meta">1 di 2</p>`;}
+  else{ttl='Le regole cambiano sempre';
+   body=`<p class="lead">Ogni Fronte ha due tessere, e <b>a ogni round cambiano tutte</b>:</p><ul class="capl"><li><b>l'Evento</b> dice <i>quali navi</i> puoi schierare lì (per esempio «Solo dadi pari»);</li><li><b>la Condizione</b> dice <i>come si vince</i> quel Fronte (per esempio «Valore massimo»: vince la somma più alta).</li></ul>
+<p class="lead">Prima di schierare, guarda sempre Evento e Condizione: è lì che si decide la battaglia. Le trovi in alto a destra di ogni Fronte.</p>
+<p class="lead">Attenzione: se a fine round lasci un Fronte <b>senza navi</b>, regali un punto in più all'avversario.</p>
+<p class="lead">In questo addestramento giochi <b>un solo round</b>, con l'aiuto del comando. Pronto?</p>${btn('tutNext',2,'Iniziamo','hi')}<p class="meta">2 di 2</p>`;}}
+ else if(UI.sheet&&UI.sheet.k==='spazi'){const f=UI.sheet.f;ttl='Spazi azione';
+  body=`<p class="lead">Questo round il Fronte <b>${FR[f]}</b> è girato sul lato B: qui non si combatte, si fanno affari.</p>
+<ul class="capl"><li>Il Fronte ha 4 spazi azione. Invece di schierare una nave per combattere, la metti su uno spazio libero e ne ottieni subito l\'effetto.</li>
+<li>Va bene una nave della riserva di qualsiasi valore: conta solo lo spazio che scegli.</li>
+<li>Ogni spazio si può occupare una sola volta per round, da te o dall\'avversario: chi arriva prima, lo prende.</li>
+<li>Alcuni spazi costano monete o chiedono di avere una Tecnologia da scartare: quelli che non puoi pagare restano spenti.</li>
+<li>La nave resta sullo spazio fino a fine round. Su questo Fronte nessuno vince Punti Vittoria e non vale l\'obbligo di presenza.</li></ul>
+<p class="lead">Gli spazi di ${FR[f]}:</p><ul class="capl">${INV.SPN[f].map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
+<label class="nomore"><input type="checkbox" id="sp-no" ${spSeen()?'checked':''}> Non mostrare più questo messaggio</label>${btn('spOk','','Ho capito','hi')}`;}
  else if(UI.sheet&&UI.sheet.k==='leave'){ttl='Lasciare la partita?';
   body=`<p class="lead">${S&&S.tut?'Se esci, l\'addestramento si interrompe: potrai rifarlo dal Tutorial.':'La partita resta salvata: potrai riprenderla dalla schermata iniziale.'}</p>${btn('leaveYes','','Sì, torna alla home','hi')}${btn('close','','Resta in partita','sec')}`;}
  else if(UI.sheet&&UI.sheet.k==='tutoffer'){ttl='Addestramento';
@@ -1081,7 +1108,7 @@ function advance(){if(S&&S.tut&&S.over&&!S.rec){S.rec=true;tutMark('1');sfx('win
  if(S&&S.over&&!S.rec){S.rec=true;recordStats();sfx(S.winner===H?'win':S.winner===-1?'draw':'lose');if(unl().length)setTimeout(()=>sfx('unlock'),1300);}
  if(S&&!S.over&&S.pend&&S.pend.ctx.then==='ack'&&UI.ackRd!==S.rd){UI.ackRd=S.rd;sfx('round');}
  UI.sel=null;UI.grp=null;UI.tsel=null;UI.vsel=null;
- drain();tutFilter();
+ drain();tutFilter();spCheck();
  const pd=S.pend,humanNow=S.over||!pd||pd.p===H;
  if(humanNow&&UI.acc.length){sfx('pop');UI.pops.unshift({k:'tech',title:UI.accCont?'Esito':'Mossa dell\'avversario',lines:UI.acc});UI.acc=[];
   const cont=!S.over&&pd&&pd.ctx.then!=='main'&&pd.ctx.then!=='ack';UI.accCont=cont;UI.accOn=cont;}
@@ -1154,13 +1181,15 @@ const HD={
  tut0:()=>{UI.sheet={k:'tut',n:0};render();},tutn:v=>{UI.sheet={k:'tut',n:+v};render();},
  snd:()=>{SND.on=!SND.on;try{localStorage.setItem('invasione.audio',SND.on?'1':'0');}catch(e){}if(SND.on){actx();sfx('click');}else stopMusic();render();},
  credits:()=>{UI.sheet={k:'credits'};render();},
+ spOk:()=>{const c=document.getElementById('sp-no');try{if(c&&c.checked)localStorage.setItem(SPK,'1');}catch(e){}UI.sheet=null;render();},
  sbopen:()=>{UI.sheet={k:'sb'};render();},
  undo:()=>{if(!canUndo())return;S=UI.undo;UI.undo=null;UI.sheet=null;UI.tsel=null;UI.grp=null;UI.sel=null;UI.pops=[];UI.acc=[];UI.accOn=false;render();},
  leaveYes:()=>{UI.sheet=null;if(S&&S.tut){HD.tutQuit();return;}HD.new();},
  comp:()=>{UI.sheet={k:'comp',tab:'T'};render();},
  ctab:v=>{UI.sheet={k:'comp',tab:v||'T'};render();},
  cview:v=>{const t=UI.sheet&&UI.sheet.tab||'T';UI.sheet={k:'cview',a:v,tab:t};render();},
- tutGo:()=>{clearTimeout(tm);tutMark('0');S=INV.newGame({fac:['T','A'],hold:H,tut:true});S.tutK=0;S.tutB=0;UI=mkUI('game');UI.handOpen=false;advance();},
+ tutGo:()=>{clearTimeout(tm);tutMark('0');S=INV.newGame({fac:['T','A'],hold:H,tut:true});S.tutK=0;S.tutB=0;UI=mkUI('game');UI.handOpen=false;UI.sheet={k:'tutintro',n:0};advance();},
+ tutNext:v=>{if(+v>=2){UI.sheet=null;}else UI.sheet={k:'tutintro',n:+v};render();},
  tutSkip:()=>{tutMark('0');UI.sheet=null;render();},
  tutQuit:()=>{clearTimeout(tm);S=null;UI=mkUI('start');render();},
  tutAgain:()=>{HD.tutGo();},
@@ -1173,7 +1202,7 @@ const HD={
  nameSkip:()=>{if(UI.sheet&&UI.sheet.first)setName('');UI.sheet=null;render();},
  pick:v=>act(v),pickc:v=>act(v,true),homeq:()=>{UI.sheet={k:'home'};render();},tdie:v=>{UI.tsel=v;render();},tback:()=>{UI.tsel=null;render();},pop:()=>{UI.pops.shift();render();kick();saveGame();},
  grp:v=>{UI.grp=v;render();},back:()=>{UI.grp=null;render();}};
-const CLICKS={sbopen:1,undo:1,leaveYes:1,comp:1,ctab:1,cview:1,tutGo:1,tutSkip:1,tutQuit:1,tutAgain:1,tutPlay:1,book:1,capact:1,capPick:1,nameEdit:1,nameOk:1,nameSkip:1,credits:1,tro:1,capv:1,optT:1,setup:1,go:1,gonew:1,hf:1,df:1,story:1,storyLocked:1,tut0:1,tutn:1,help:1,poster:1,stats:1,homeback:1,new:1,endnew:1,recap:1,resume:1,close:1,homeq:1,die:1,card:1,hand:1,vsel:1,tdie:1,ev:1};
+const CLICKS={tutNext:1,sbopen:1,undo:1,leaveYes:1,comp:1,ctab:1,cview:1,tutGo:1,tutSkip:1,tutQuit:1,tutAgain:1,tutPlay:1,book:1,capact:1,capPick:1,nameEdit:1,nameOk:1,nameSkip:1,credits:1,tro:1,capv:1,optT:1,setup:1,go:1,gonew:1,hf:1,df:1,story:1,storyLocked:1,tut0:1,tutn:1,help:1,poster:1,stats:1,homeback:1,new:1,endnew:1,recap:1,resume:1,close:1,homeq:1,die:1,card:1,hand:1,vsel:1,tdie:1,ev:1};
 /* tasto indietro del telefono */
 try{history.replaceState({inv:0},'');history.pushState({inv:1},'');}catch(e){}
 window.addEventListener('popstate',()=>{let stay=true;
