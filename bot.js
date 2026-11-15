@@ -91,7 +91,8 @@ function scoreGeneric(s,p,pd){const c=pd.ctx;
  if(c.then==='uni'||c.then==='keep1'||c.then==='back'||c.then==='kar')return pd.opts.map(o=>o.h||0);
  const b=evalS(s,p);
  if(c.then==='resp'){const u=E.pm(s,c.m);const d=evalS(s,p)-b;E.um(u);return d<-.35?[1,0]:[0,1];}
- return pd.opts.map(o=>{let sc=o.h||0;if(o.m){sc+=optGain(s,p,o,b);if(o.v&&o.v.c)sc-=.12;}return sc;});}
+ const tmp=c.then==='spExtra'&&pd.opts.some(o=>o.v&&o.v.t==='place8');if(tmp)s.dice[p].push({i:s.dice[p].length,p,v:1,loc:'R',f:-1,x:-1,ord:0,fz:0,eighth:true});
+ try{return pd.opts.map(o=>{let sc=o.h||0;if(o.m){sc+=optGain(s,p,o,b);if(o.v&&o.v.c)sc-=.12;}return sc;});}finally{if(tmp)s.dice[p].pop();}}
 function pick(sc,noise){let bi=0,bv=-1e9;for(let i=0;i<sc.length;i++){const v=sc[i]+(Math.random()-.5)*2*noise;if(v>bv){bv=v;bi=i;}}return bi;}
 function choose(s,noise){const pd=s.pend;if(noise===undefined)noise=.1;
  if(pd.opts.length===1)return 0;

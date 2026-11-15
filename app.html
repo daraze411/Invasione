@@ -221,6 +221,7 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 .vs{width:42px;height:42px;font-size:16px;font-weight:700;border-width:2px}
 .nb{border-radius:0!important}
 /* compendio, avvisi */
+.slot.off{opacity:.55}.slot.off .who{color:var(--warn)}
 .pbar .sep,.sep{color:var(--mute);margin:0 2px}
 .nomore{display:flex;gap:8px;align-items:center;font-family:var(--disp);font-size:14px;color:var(--fg);margin:6px 0}
 .nomore input{width:20px;height:20px;accent-color:var(--paper)}
@@ -726,13 +727,22 @@ function reserveHTML(p,inf){const ds=S.dice[p].filter(d=>d.loc==='R');
  return `<div class="res"><span class="lab">Riserva</span>${ds.map(d=>{const k=dk(d),vs=UI.vsel,can=vs?(inf&&inf.vd[vs.c+'/'+vs.v+'/'+k]!==undefined):(inf&&inf.place[k]);return dieHTML(d,(can?'can ':'')+(!vs&&UI.sel===k?'sel':'')+(d.fz?' fz':''),'button',can?`data-a="${vs?'vdie':'die'}" data-v="${k}"`:'disabled');}).join('')||'<span class="lab">vuota</span>'}</div>`;}
 const EVS={1:'Solo pari',2:'Solo dispari',3:'Solo 1, 2, 3',4:'Solo 4, 5, 6',5:'Scala',6:'Stesso valore',7:'Combattimento',8:'Paga 1 € · 2 PV',9:'Spazi azione',10:'Dal più alto',11:'Ritocco ±1',12:'Nessun effetto'};
 const CNS={M:'Valore massimo',DH:'Più dadi · Σ alta',DL:'Più dadi · Σ bassa',B:'Bersaglio 12'};
+function spReason(f,x){const co=S.co[H],hn=S.hand[H].length,on=S.dice[H].some(d=>d.loc==='F'),onq=S.dice[1-H].some(d=>d.loc==='F');
+ if(f===0){if(x===0)return hn?'Non disponibile':'Ti serve una Tecnologia da scartare';
+  if(x===1)return co<1?'Ti serve 1 €':hn>=5?'Hai già 5 Tecnologie':'Il mazzo è finito';
+  if(x===2)return co<4?'Ti servono 4 €':'L\'ottavo dado non entra su nessun Fronte';
+  return co<2?'Ti servono 2 €':!S.hand[1-H].length?'L\'avversario non ha Tecnologie':hn>=5?'Hai già 5 Tecnologie':'Non disponibile';}
+ if(f===1){if(x===2)return co<1?'Ti serve 1 €':'Nessuna tua nave da spostare';if(x===3)return co<2?'Ti servono 2 €':'Nessuna nave avversaria da spostare';return 'Non disponibile';}
+ if(x===1)return hn?'Non disponibile':'Ti serve una Tecnologia da scartare';
+ if(x===2)return co<1?'Ti serve 1 €':'Nessuna tua nave da modificare';
+ if(x===3)return co<2?'Ti servono 2 €':'Nessuna nave avversaria da modificare';return 'Non disponibile';}
 function frontHTML(f,inf){const fr=S.fr[f],q=1-H;
  let h=`<section class="front"><div class="fh"><b>${FR[f]}</b><span style="display:flex;gap:6px;flex-wrap:wrap"><button class="chip ev" data-a="ev" data-v="${f}" data-tip="${esc(EVN[fr.ev]+'\n'+EVD[fr.ev])}">${esc(EVS[fr.ev])}</button>${fr.cond?`<button class="chip" data-a="ev" data-v="${f}" data-tip="${esc(CN[fr.cond]+'\n'+CD[fr.cond])}">${CNS[fr.cond]}</button>`:''}</span></div>`;
  const place=inf&&UI.sel?inf.place[UI.sel]:null;
  if(fr.flip){h+='<div class="spaces">';for(let x=0;x<4;x++){const o=fr.sp[x],pl=place&&place.find(e=>e.f===f&&e.x===x);
   const d=o?S.dice[o.o][o.i]:null;
   h+=pl?`<button class="slot free" data-a="pick" data-v="${pl.i}"><span>${esc(SPN[f][x])}</span><span class="who">Tocca per occupare</span></button>`:
-   `<div class="slot ${o?'taken':''}"><span>${esc(SPN[f][x])}</span><span class="who">${o?(o.o===H?'Occupato da te':'Occupato dall\'avversario'):'Libero'}</span></div>`;}
+   `<div class="slot ${o?'taken':''} ${!o&&place?'off':''}"><span>${esc(SPN[f][x])}</span><span class="who">${o?(o.o===H?'Occupato da te':'Occupato dall\'avversario'):place?esc(spReason(f,x)):'Libero'}</span></div>`;}
   h+='</div>';}
  else{
   const row=(p)=>{const sh=S.dice[p].filter(d=>d.loc==='F'&&d.f===f).sort((a,b)=>a.ord-b.ord),val=INV.validShips(S,f,p);
@@ -1045,7 +1055,8 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
 <ul class="capl"><li>Il Fronte ha 4 spazi azione. Invece di schierare una nave per combattere, la metti su uno spazio libero e ne ottieni subito l\'effetto.</li>
 <li>Va bene una nave della riserva di qualsiasi valore: conta solo lo spazio che scegli.</li>
 <li>Ogni spazio si può occupare una sola volta per round, da te o dall\'avversario: chi arriva prima, lo prende.</li>
-<li>Alcuni spazi costano monete o chiedono di avere una Tecnologia da scartare: quelli che non puoi pagare restano spenti.</li>
+<li>Alcuni spazi costano monete o chiedono di avere una Tecnologia da scartare: quelli che non puoi usare restano spenti, e quando scegli un dado ti dicono perché.</li>
+<li>Lo spazio «Paga 4 €, ottavo dado a scelta» ti dà un dado in più: scegli tu il valore e lo schieri subito su un Fronte dove è valido. Vale solo per questo round.</li>
 <li>La nave resta sullo spazio fino a fine round. Su questo Fronte nessuno vince Punti Vittoria e non vale l\'obbligo di presenza.</li></ul>
 <p class="lead">Gli spazi di ${FR[f]}:</p><ul class="capl">${INV.SPN[f].map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
 <label class="nomore"><input type="checkbox" id="sp-no" ${spSeen()?'checked':''}> Non mostrare più questo messaggio</label>${btn('spOk','','Ho capito','hi')}`;}

@@ -4,7 +4,7 @@ const FR=['Spazio Profondo','Atmosfera','Superficie Terrestre'];
 const EVN={1:'Solo dadi pari',2:'Solo dadi dispari',3:'Solo 1, 2 e 3',4:'Solo 4, 5 e 6',5:'Scala',6:'Stesso valore',7:'Combattimento',8:'Paga 1 € a dado · vittoria 2 PV',9:'Spazi azione (lato B)',10:'Dal più alto al più basso',11:'Ritocco: dopo ogni dado, ±1 a un\'altra tua nave',12:'Nessun effetto'};
 const EVD={1:'Si piazzano solo 2, 4, 6.',2:'Si piazzano solo 1, 3, 5.',3:'Si piazzano solo 1, 2, 3.',4:'Si piazzano solo 4, 5, 6.',5:'Dadi consecutivi senza buchi, min. 2. Si estende da entrambi i lati.',6:'Il primo dado fissa il valore dei successivi (per fazione). Min. 2 dadi.',7:'Ogni nuovo dado attacca una nave avversaria: i due valori si sottraggono a vicenda in contemporanea. Chi ha il valore maggiore resta con la differenza, l\'altro è eliminato; a parità sono eliminate entrambe. Max 1 PV sul Fronte.',8:'Ogni piazzamento costa 1 €. Il vincitore prende 2 PV.',9:'Nessuna battaglia. Ogni dado occupa uno spazio azione (4, esclusivi).',10:'Ogni nuovo dado ≤ del precedente.',11:'Ogni volta che schieri un dado su questo Fronte, aggiungi o togli 1 a un\'altra tua nave già schierata, anche su un altro Fronte. Se non ne hai, modifichi una nave della riserva.',12:'Nessuna limitazione.'};
 const CN={M:'Valore massimo',DH:'Più dadi (parità: somma alta)',DL:'Più dadi (parità: somma bassa)',B:'Bersaglio 12'};
-const SPN=[['Scarta una Tecnologia, +2 €','Paga 1 €, pesca una Tecnologia','Paga 4 €, gioca una nave extra','Paga 2 €, ruba una Tecnologia'],['+2 €','Pesca una Tecnologia','Paga 1 €, sposta una tua nave','Paga 2 €, sposta una nave avversaria'],['+1 €','Scarta una Tecnologia e pescane un\'altra','Paga 1 €, ±1 a una tua nave','Paga 2 €, ±1 a una nave avversaria']];
+const SPN=[['Scarta una Tecnologia, +2 €','Paga 1 €, pesca una Tecnologia','Paga 4 €, ottavo dado a scelta','Paga 2 €, ruba una Tecnologia'],['+2 €','Pesca una Tecnologia','Paga 1 €, sposta una tua nave','Paga 2 €, sposta una nave avversaria'],['+1 €','Scarta una Tecnologia e pescane un\'altra','Paga 1 €, ±1 a una tua nave','Paga 2 €, ±1 a una nave avversaria']];
 const TECH={
 1:{k:'modSelf2',v:[1,6],t:'Aggiungi o sottrai 1 o 2 a una tua nave'},
 2:{k:'modOpp2',v:[2,5],t:'Aggiungi o sottrai 1 o 2 a una nave avversaria'},
@@ -180,9 +180,13 @@ TASK.endSlot=s=>{s.slot++;
   s.turn++;s.slot=0;s.pass=[false,false];if(s.turn>10){const n=[0,1].find(x=>hasCap(s,x,'nuy'));if(n!==undefined){s.order=[n,1-n];log(s,'Nuy Tinck: gli Alieni giocano l\'undicesimo turno');push(s,{k:'next'});return;}push(s,{k:'resolve'});return;}}
  push(s,{k:'next'});};
 /* azioni */
+/* Spazio azione "nave extra": un ottavo dado, valore a scelta, solo per questo round */
+function eighthOpts(s,p){const out=[];if(s.dice[p].length>7)return out;const e={i:s.dice[p].length,p,v:1,loc:'R',f:-1,x:-1,ord:0,fz:0,eighth:true};s.dice[p].push(e);
+ try{for(let v=6;v>=1;v--){e.v=v;for(let g=0;g<3;g++)if(placeOk(s,p,e,g))out.push({l:'Valore '+v+' → '+FR[g],v:{t:'place8',v,f:g},m:[{o:p,i:e.i,set:{v,loc:'F',f:g,ord:1e9}}]});}}finally{s.dice[p].pop();}
+ return out;}
 function spaceOk(s,p,d,f,x){const fr=s.fr[f];if(!fr.flip||fr.sp[x]!==null||d.loc!=='R')return false;const q=1-p,co=s.co[p],o=d.loc;d.loc='S';let r=false;
  if(f===0){if(x===0)r=s.hand[p].length>=1;else if(x===1)r=co>=1&&s.hand[p].length<5&&s.deck[p].length>0;
-  else if(x===2){if(co>=4){s.co[p]-=4;r=s.dice[p].some(e=>e.loc==='R'&&[0,1,2].some(g=>placeOk(s,p,e,g)));s.co[p]+=4;}}
+  else if(x===2){if(co>=4){s.co[p]-=4;r=eighthOpts(s,p).length>0;s.co[p]+=4;}}
   else r=co>=2&&s.hand[q].length>=1&&s.hand[p].length<5;}
  else if(f===1){if(x<2)r=true;else if(x===2)r=co>=1&&moveOpts(s,p).length>0;else r=co>=2&&moveOpts(s,q).length>0;}
  else{if(x===0)r=true;else if(x===1)r=s.hand[p].length>=1;else if(x===2)r=co>=1&&modOpts(s,p,p,[-1,1],false,true).length>0;else r=co>=2&&modOpts(s,p,q,[-1,1],false,false).length>0;}
@@ -310,8 +314,8 @@ TASK.space=(s,t)=>{const p=t.p,q=1-p,f=t.f,x=t.x;
  if(f===0){
   if(x===0)ask(s,p,{then:'spDisc',p,gain:2,draw:0,ttl:'Scarta una Tecnologia (+2 €)'},handOpts(s,p,'hand').map(o=>(o.h=-o.h,o)));
   else if(x===1){s.co[p]--;drawT(s,p);}
-  else if(x===2){s.co[p]-=4;const out=[],seen={};for(const d of s.dice[p]){if(d.loc!=='R'||seen[d.v])continue;seen[d.v]=1;for(let g=0;g<3;g++)if(placeOk(s,p,d,g))out.push({l:'Dado '+d.v+' → '+FR[g],v:{t:'place',d:d.i,f:g},m:[{o:p,i:d.i,set:{loc:'F',f:g,ord:1e9}}]});}
-   ask(s,p,{then:'spExtra',p,ttl:'Nave extra: dove la schieri?'},out);}
+  else if(x===2){const out=eighthOpts(s,p);s.co[p]-=4;
+   ask(s,p,{then:'spExtra',p,ttl:'Ottavo dado: scegli valore e Fronte'},out);}
   else{s.co[p]-=2;const h=s.hand[q];if(h.length&&s.hand[p].length<5){const c=h.splice(ri(s,h.length),1)[0];s.hand[p].push(c);log(s,'Hai rubato: '+tt(s,p,c),p);log(s,fn(s,p)+' ruba una Tecnologia');}}}
  else if(f===1){
   if(x===0)gain(s,p,2);else if(x===1)drawT(s,p);
@@ -323,7 +327,7 @@ TASK.space=(s,t)=>{const p=t.p,q=1-p,f=t.f,x=t.x;
   else if(x===2){s.co[p]--;ask(s,p,{then:'spMod',p,ttl:'Quale tua nave modifichi?'},modOpts(s,p,p,[-1,1],false,true));}
   else{s.co[p]-=2;ask(s,p,{then:'spMod',p,ttl:'Quale nave avversaria modifichi?'},modOpts(s,p,q,[-1,1],false,false));}}};
 FN.spDisc=(s,c,id)=>{rem(s.hand[c.p],id);s.disc[c.p].push(id);if(c.gain)gain(s,c.p,c.gain);if(c.draw)drawT(s,c.p);};
-FN.spExtra=(s,c,v)=>{doPlace(s,c.p,v);};
+FN.spExtra=(s,c,v)=>{if(v&&v.t==='place8'){const p=c.p,i=s.dice[p].length;s.dice[p].push({i,p,v:v.v,loc:'R',f:-1,x:-1,ord:0,fz:0,eighth:true});log(s,fn(s,p)+' riceve un ottavo dado con valore '+v.v);doPlace(s,p,{t:'place',d:i,f:v.f});return;}doPlace(s,c.p,v);};
 FN.spMove=(s,c,v)=>{execEff(s,{e:'move',o:v.o,i:v.i,to:v.to});};
 FN.spMod=(s,c,v)=>{execEff(s,{e:'setV',o:v.o,i:v.i,nv:v.nv});};
 /* virus */
