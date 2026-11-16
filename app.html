@@ -509,7 +509,7 @@ const TRK='invasione.trofei.v1',OPK='invasione.opzioni.v1';
 const winsOf=st=>st.T.w+st.A.w;
 const TROPHIES=[
  {id:'story',name:'Storia',req:'Vinci una partita con i Terrestri e una con gli Alieni',prog:st=>`${st.T.w?'✓':'○'} Terrestri · ${st.A.w?'✓':'○'} Alieni`,ok:st=>st.T.w>0&&st.A.w>0,
-  desc:'Come sono iniziati i guai fra Terrestri e Impronunciabili. La trovi anche nella schermata iniziale.'},
+  desc:'Come sono iniziati i guai fra Terrestri e Alieni. La trovi anche nella schermata iniziale.'},
  {id:'bonus',name:'Carte «Salta il turno»',req:'Vinci 3 partite',prog:st=>`${Math.min(3,winsOf(st))}/3 vittorie`,ok:st=>winsOf(st)>=3,
   desc:'Due Tecnologie in più in entrambi i mazzi: l\'avversario salta un turno, ma guadagna 1 € oppure rimuove 1 Virus. Le attivi in Nuova partita.'},
  {id:'cap',name:'Capitani',req:'Vinci 6 partite',prog:st=>`${Math.min(6,winsOf(st))}/6 vittorie`,ok:st=>winsOf(st)>=6,
@@ -586,7 +586,7 @@ const TDESC={
  mutate:'Paghi 1 €: capovolgi una nave, tua o avversaria. Se colpisce una nave avversaria può essere respinta.',
  vacc:'Rimuovi 1 segnalino Virus e guadagni 1 €.',
  rerollR:'Rilanci fino a 2 tue navi in riserva.',
- mimic:'Modifichi di 1 in più o in meno una tua nave in riserva, senza prendere Virus.',
+ mimic:'Guardi le navi avversarie già schierate e ne scegli una: una tua nave in riserva prende il suo stesso valore. Serve almeno una nave avversaria su un Fronte con un valore diverso dal tuo.',
  spore:'Fino a fine round, ogni volta che l\'avversario prende un Virus guadagni 1 €.',
  jolly:'Carta senza effetto: serve solo per i valori. Puoi dare a una tua nave in riserva qualsiasi valore da 1 a 6 prendendo 1 Virus.',
  steal:'Prendi a caso 2 Tecnologie dalla mano avversaria, le guardi, ne tieni una e restituisci l\'altra. Se ne ha una sola, la rubi.',
@@ -984,7 +984,7 @@ function whyHTML(){const y=S.why;if(!y)return '';const pv=S.pv[H];let t='';
 function popupHTML(){const p=UI.pops[0];let ttl,body;
  if(p.k==='virus'){const me=p.p===H;ttl='Virus';body=`<p>${me?'Hai pescato':'L\'avversario ha pescato'} questo Virus:</p><p class="vir">${esc(VT[p.c][me?0:1])}</p>`;}
  else if(p.k==='reboot'){ttl='Quarto Virus';body=`<p>${p.p===H?'Hai raggiunto':'L\'avversario ha raggiunto'} il quarto Virus: i segnalini tornano a 0 e si risolvono 2 carte Virus.</p>`;}
- else if(p.k==='startcard'){ttl='Tecnologia di partenza';body=`<p style="color:var(--fg)">Il comando l'ha pescata a caso per te fra le due Tecnologie univoche della tua fazione:</p>${techFace(p.c)}<p class="ctip">Si usa come le altre Tecnologie.</p>`;}
+ else if(p.k==='startcard'){ttl='Tecnologia di partenza';body=`<p style="color:var(--fg)">Il comando l'ha pescata a caso per te fra le due Tecnologie univoche della tua fazione:</p>${techFace(p.c)}`;}
  else{ttl=p.title;body=p.lines.map(l=>`<p style="color:var(--fg)">${esc(l)}</p>`).join('');}
  return `<div class="ov" data-a="pop" data-v=""><div class="sheet" role="dialog"><h2>${esc(ttl)}</h2>${body}<p class="hint">Tocca ovunque per chiudere</p></div></div>`;}
 function sheetHTML(){
@@ -998,7 +998,7 @@ function sheetHTML(){
   body=`<p style="color:var(--fg)">${esc(UI.sheet.lab)}</p><p>Pescherai ${u>1?u+' carte Virus':'una carta Virus'} e ne applicherai subito l'effetto${S.dbl[H]?' (ogni Virus vale doppio)':''}. Segnalini Virus attuali: ${v}/3.</p>`+(v+u>3?'<p class="vir">Attenzione: raggiungerai il quarto Virus. I segnalini tornano a 0 e pescherai 2 carte Virus.</p>':'')+btn('pickc',UI.sheet.i,'Conferma','hi')+btn('close','','Annulla','sec');}
  else if(UI.sheet&&UI.sheet.k==='storyLocked'){const st=loadStats();ttl='Storia da sbloccare';cancel=true;
   const r=(f,n)=>`<li class="${st[f].w?'done':''}"><span class="ck">${st[f].w?'✓':'○'}</span><span>Vinci una partita con <b class="f${f}">${n}</b>${st[f].w?' — fatto':''}</span></li>`;
-  body=`<p class="lead">Come sono iniziati i guai fra Terrestri e Impronunciabili? Per scoprirlo devi aver combattuto da entrambe le parti.</p><ul class="goals">${r('T','i Terrestri')}${r('A','gli Alieni')}</ul><p>Vale qualsiasi difficoltà. Le vittorie restano anche nel codice di salvataggio.</p>`+btn('setup','','Gioca una partita','hi');}
+  body=`<p class="lead">Come sono iniziati i guai fra Terrestri e Alieni? Per scoprirlo devi aver combattuto da entrambe le parti.</p><ul class="goals">${r('T','i Terrestri')}${r('A','gli Alieni')}</ul><p>Vale qualsiasi difficoltà. Le vittorie restano anche nel codice di salvataggio.</p>`+btn('setup','','Gioca una partita','hi');}
  else if(UI.sheet&&UI.sheet.k==='stats'){ttl='Le tue partite';tall=true;cancel=true;const code=exportCode(),ng=games(totSt(loadStats()));
   const canShare=typeof navigator!=='undefined'&&!!navigator.share;
   const wa='https://wa.me/?text='+encodeURIComponent('INVASIONE, il mio codice di salvataggio: '+code);
@@ -1041,7 +1041,7 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
  else if(UI.sheet&&UI.sheet.k==='cview'){ttl='Compendio';cancel=true;body=cviewFace(UI.sheet.a)+btn('ctab',UI.sheet.tab,'← Torna al compendio','sec');}
  else if(UI.sheet&&UI.sheet.k==='tutintro'){const n=UI.sheet.n;
   if(n===0){ttl=nm()?'Benvenuto, comandante '+nm()+'!':'Benvenuto, comandante!';
-   body=`<p class="lead">Gli Impronunciabili sono arrivati, e la Terra si difende su <b>tre Fronti</b>: Spazio Profondo, Atmosfera e Superficie Terrestre.</p>
+   body=`<p class="lead">Gli Alieni sono arrivati, e la Terra si difende su <b>tre Fronti</b>: Spazio Profondo, Atmosfera e Superficie Terrestre.</p>
 <p class="lead"><b>Il tuo obiettivo:</b> vincere più Fronti possibile. Ogni Fronte vinto vale <b>Punti Vittoria</b>. Dopo <b>3 round</b>, chi ha più Punti Vittoria vince la partita.</p>
 <p class="lead">Le tue armi sono <b>7 dadi</b>: ogni dado è una nave. A turno, tu e l'avversario schierate una nave alla volta sui Fronti.</p>
 <p class="lead">Ti aiuteranno le <b>Tecnologie</b> (carte con poteri speciali), le <b>monete</b> e perfino i <b>Virus</b>: li conoscerai strada facendo.</p>${btn('tutNext',1,'Avanti','hi')}<p class="meta">1 di 2</p>`;}
@@ -1111,7 +1111,7 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
 function pub(from){const me=fname(S.fac[H]);return S.log.slice(from).filter(e=>e.to===null||e.to===H).map(e=>e.t).filter(t=>t.charAt(0)!=='—'&&t.charAt(0)!=='☣'&&t.indexOf(' PV)')<0&&t.indexOf('Entrambi passano')<0&&t.indexOf('Partita conclusa')<0).map(t=>t.replace(/\b(Terrestri|Alieni)\b/g,m=>m===me?'Tu':'Avversario'));}
 function drain(){if(S.q&&S.q.length){if(S.q.some(x=>x.k==='reboot'))sfx('reboot');else if(S.q.some(x=>x.k==='virus'))sfx('virus');S.q.forEach(x=>{if((x.k==='msg'||x.k==='prep')&&x.p!==H)return;
  if(x.k==='prep'){const n=nm(),T=S.fac[H]==='T';
-  UI.pops.push({k:'msg',title:'Preparazione',lines:[(n?'Comandante '+n+', ':'Comandante, ')+(T?'la flotta terrestre è schierata e i dadi sono pronti.':'la flotta degli Impronunciabili è in orbita e i dadi sono pronti.'),'Prima di partire, un consiglio: '+TIPS[Math.floor(Math.random()*TIPS.length)]]});
+  UI.pops.push({k:'msg',title:'Preparazione',lines:[(n?'Comandante '+n+', ':'Comandante, ')+(T?'la flotta terrestre è schierata e i dadi sono pronti.':'la flotta aliena è in orbita e i dadi sono pronti.'),'Prima di partire, un consiglio: '+TIPS[Math.floor(Math.random()*TIPS.length)]]});
   UI.pops.push({k:'startcard',c:x.c});
   UI.pops.push({k:'msg',title:'La situazione è tosta…',lines:[T?'…ma gli arsenali della Terra sono aperti.':'…ma l\'Impero non bada a spese.','Pesca 3 Tecnologie: ne tieni una, una torna nel mazzo e l\'ultima viene eliminata.']});return;}
  UI.pops.push(x);});S.q=[];}}

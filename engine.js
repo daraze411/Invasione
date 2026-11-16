@@ -44,7 +44,7 @@ const FT={steal:'Ruba 2 Tecnologie dalla mano dell\'avversario e conservane una'
  mutate:'Mutazione: paga 1 €, capovolgi una nave, tua o avversaria. Se colpisce una nave avversaria può essere respinta',
  vacc:'Vaccino: rimuovi 1 segnalino Virus e guadagna 1 €',
  rerollR:'Rilancio tattico: rilancia fino a 2 tue navi in riserva',
- mimic:'Mimetismo: modifica di ±1 una tua nave in riserva, senza prendere Virus',
+ mimic:'Mimetismo: scegli una nave avversaria schierata; una tua nave in riserva prende il suo stesso valore',
  spore:'Spore: fino a fine round, ogni volta che l\'avversario prende un Virus guadagni 1 €'};
 /* le carte aliene hanno id +100: una carta resta la stessa anche quando cambia mano */
 const cb=id=>id%100,cf=id=>id>100?'A':'T';
@@ -99,6 +99,8 @@ function modOpts(s,p,owner,deltas,allowSet,self){const out=[],seen={};
   for(const dl of deltas){const nv=d.v+dl;if(nv<1||nv>6)continue;if(self&&!okOwn(s,d,nv))continue;out.push({l:dlab(s,d)+' → '+nv,v:{o:owner,i:d.i,nv,c:0},m:[{o:owner,i:d.i,set:{v:nv}}]});}
   if(allowSet&&s.co[p]>=1)for(let nv=1;nv<=6;nv++){if(nv===d.v)continue;if(self&&!okOwn(s,d,nv))continue;out.push({l:dlab(s,d)+' → '+nv+' (−1 €)',v:{o:owner,i:d.i,nv,c:1},m:[{o:owner,i:d.i,set:{v:nv}}]});}}
  return out;}
+function mimicOpts(s,p){const q=1-p,out=[],seen={},vs=[...new Set(s.dice[q].filter(d=>d.loc==='F'&&!s.fr[d.f].flip).map(d=>d.v))];
+ for(const d of s.dice[p]){if(d.loc!=='R'||d.fz)continue;for(const v of vs){if(v===d.v||seen[d.v+'>'+v])continue;seen[d.v+'>'+v]=1;out.push({l:'Il tuo '+d.v+' in riserva copia un '+v+' avversario → '+v,v:{o:p,i:d.i,nv:v},m:[{o:p,i:d.i,set:{v}}]});}}return out;}
 function moveOpts(s,owner){const out=[];for(const d of s.dice[owner]){if(d.loc!=='F'||d.fz||s.fr[d.f].flip)continue;for(let g=0;g<3;g++){if(g===d.f||s.fr[g].flip)continue;out.push({l:dlab(s,d)+' → '+FR[g],v:{o:owner,i:d.i,to:g},m:[{o:owner,i:d.i,set:{f:g,ord:1e9}}]});}}return out;}
 function ownDice(s,p,hint){const out=[],seen={};for(const d of s.dice[p]){if(d.fz||(d.loc!=='R'&&d.loc!=='F'))continue;if(d.loc==='R'){if(seen[d.v])continue;seen[d.v]=1;}
  let h=0;if(hint){if(d.loc==='F'){const val=validShips(s,d.f,p).includes(d);h=val?(3.5-d.v)*.4-.3:2;}else h=(3.5-d.v)*.5;}
@@ -120,7 +122,7 @@ function tplan(s,p,id){const k=tk(s,p,id),q=1-p,co=s.co[p];let opts=null,ok=true
  case'mutate':{opts=[];if(co>=1)for(const o of[p,q]){const seen={};for(const d of s.dice[o]){if(d.fz||(d.loc!=='R'&&d.loc!=='F'))continue;if(d.loc==='R'){if(seen[d.v])continue;seen[d.v]=1;}const nv=7-d.v;if(nv<1||nv>6)continue;opts.push({l:(o===p?'Tua: ':'Avversaria: ')+dlab(s,d)+' → '+nv,v:{o,i:d.i,nv},m:[{o,i:d.i,set:{v:nv}}]});}}ok=opts.length>0;break;}
  case'vacc':break;
  case'rerollR':opts=ownDice(s,p,true).filter(o=>s.dice[p][o.v.i].loc==='R');ok=opts.length>0;break;
- case'mimic':opts=modOpts(s,p,p,[-1,1],false,true).filter(o=>s.dice[p][o.v.i].loc==='R');ok=opts.length>0;break;
+ case'mimic':opts=mimicOpts(s,p);ok=opts.length>0;break;
  case'spore':ok=!(s.spore&&s.spore[p]);break;
  case'freeze':opts=ownDice(s,p,false);ok=opts.length>0;break;
  case'swapCond':{opts=[];if(co>=3)for(let a=0;a<3;a++)for(let b=a+1;b<3;b++){if(s.fr[a].flip||s.fr[b].flip)continue;opts.push({l:FR[a]+' ⇄ '+FR[b],v:{a,b},m:[{fr:a,set:{cond:s.fr[b].cond}},{fr:b,set:{cond:s.fr[a].cond}}]});}ok=opts.length>0;break;}
@@ -258,7 +260,7 @@ function playTech(s,p,id){const plan=tplan(s,p,id),q=1-p;rem(s.hand[p],id);s.dis
  case'mutate':s.co[p]--;ask(s,p,{then:'mutate',p,ttl:'Quale nave capovolgi?'},plan.opts);break;
  case'vacc':if(s.vir[p]>0)s.vir[p]--;gain(s,p,1);log(s,fn(s,p)+' rimuove 1 Virus e guadagna 1 €');break;
  case'rerollR':push(s,{k:'rr',p,n:2});break;
- case'mimic':ask(s,p,{then:'spMod',p,ttl:'Quale nave in riserva modifichi?'},plan.opts);break;
+ case'mimic':ask(s,p,{then:'spMod',p,ttl:'Mimetismo: quale valore avversario copi?'},plan.opts);break;
  case'spore':if(!s.spore)s.spore=[false,false];s.spore[p]=true;log(s,fn(s,p)+': Spore attive fino a fine round');break;
  case'swapShips':ask(s,p,{then:'techSwap',p,ttl:'Quali navi scambi?'},plan.opts);break;
  case'regrow':s.co[p]--;log(s,fn(s,p)+' recupera una Tecnologia dagli scarti');ask(s,p,{then:'regrow',p,ttl:'Recupera una Tecnologia dagli scarti'},handOpts(s,p,'disc',s.disc[p].length-1));break;
