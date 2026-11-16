@@ -22,6 +22,9 @@ Si gioca contro un automa di livello Normale o Difficile, anche da smartphone.
 | `art-*.png` | Illustrazioni delle carte in pixel art (`art-<fazione>-<numero carta>.png`, il numero è quello in engine.js). |
 | `capitano-T.png`, `capitano-A.png`, `capitano-T2.png`, `capitano-A2.png` | Ritratti dei Capitani: Mark Platt, Kar Am Oh, Dani Rada e Silvya Singer, Nuy Tinck. |
 | `musica-menu.mp3`, `musica-partita.mp3`, `vittoria-terrestri.mp3`, `vittoria-alieni.mp3` | Musiche royalty free (Pixabay): autori nei Crediti del gioco. |
+| `nuy.html` | Nuy Tinck Runs!!: il platform che si sblocca con 10 vittorie (si apre dal gioco). |
+| `ritr-nuy.png`, `ritr-dani.png`, `ritr-silvya.png` | Ritratti dei dialoghi del platform. |
+| `musica-nuy.mp3` | Musica del platform, di Daniele Radavero. |
 | `anteprima.jpg` | Immagine mostrata quando si condivide il link. |
 | `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `favicon-32.png` | Icone dell'app. |
 | `manifest.webmanifest` | Fa aprire il gioco come app quando lo si salva nella schermata Home. |

@@ -159,6 +159,8 @@ button.chip{cursor:pointer}
 .dock .res{min-height:36px}
 .hint{font-size:11px;color:var(--mute);text-align:center}
 .sheet.tall{max-height:92%}
+#nuyov{position:fixed;inset:0;z-index:9999;background:#0b1017}
+#nuyov iframe{width:100%;height:100%;border:0;display:block}
 .sheet .b.qo{text-align:left;font-family:var(--disp);font-size:17px}
 .sheet.tall p.qtx{font-family:var(--disp);font-size:20px;line-height:1.35}
 .sheet.tall .pscr p.pline,.sheet.tall .pscr p.ptag{font-family:var(--disp)}
@@ -557,10 +559,10 @@ const unl=()=>S&&S.unlock?(S.unlock===true?['story']:S.unlock):[];
 const troName=id=>(TROPHIES.find(t=>t.id===id)||{}).name||id;
 const LOCK='<svg class="lock" viewBox="0 0 8 9" aria-hidden="true"><path fill="currentColor" d="M2 0h4v1H2zM1 1h1v3H1zM6 1h1v3H6zM0 4h8v5H0z"/><path fill="var(--panel)" d="M3 5h2v2H3z"/></svg>';
 /* codice di salvataggio: INV1- + JSON in base64 */
-function exportCode(){const d={v:1,s:loadStats(),u:syncTro(),o:loadOpt()};if(nm())d.n=nm();if(plattGet()!==null)d.p=plattGet();return 'INV1-'+btoa(unescape(encodeURIComponent(JSON.stringify(d)))).replace(/=+$/,'');}
+function exportCode(){const d={v:1,s:loadStats(),u:syncTro(),o:loadOpt()};if(nm())d.n=nm();if(plattGet()!==null)d.p=plattGet();const ny=nuyGet();if(ny)d.y=ny;return 'INV1-'+btoa(unescape(encodeURIComponent(JSON.stringify(d)))).replace(/=+$/,'');}
 function importCode(txt){try{const t=String(txt||'').trim().replace(/\s+/g,'');if(!t.startsWith('INV1-'))return false;let b=t.slice(5);while(b.length%4)b+='=';
  const d=JSON.parse(decodeURIComponent(escape(atob(b))));if(!d||d.v!==1||!okSt(d.s))return false;if(d.u!==undefined&&(!Array.isArray(d.u)||!d.u.every(x=>TRID.includes(x))))return false;
- saveStats(d.s);try{localStorage.setItem(TRK,JSON.stringify(Array.isArray(d.u)?d.u:[]));}catch(e){}syncTro();if(d.o&&typeof d.o==='object')saveOpt(d.o);if(typeof d.n==='string')setName(d.n);if(typeof d.p==='number'&&d.p>=0&&d.p<=10)plattSet(d.p|0);return true;}catch(e){return false;}}
+ saveStats(d.s);try{localStorage.setItem(TRK,JSON.stringify(Array.isArray(d.u)?d.u:[]));}catch(e){}syncTro();if(d.o&&typeof d.o==='object')saveOpt(d.o);if(typeof d.n==='string')setName(d.n);if(typeof d.p==='number'&&d.p>=0&&d.p<=10)plattSet(d.p|0);if(d.y&&typeof d.y==='object'){const o={seen:d.y.seen?1:0};if(typeof d.y.best==='number'&&d.y.best>=0)o.best=d.y.best|0;nuySet(o);}return true;}catch(e){return false;}}
 const SV='invasione.save.v3';
 function saveGame(){if(!S||S.tut)return;try{if(S.over){localStorage.removeItem(SV);return;}localStorage.setItem(SV,JSON.stringify({v:1,t:Date.now(),diff,S,pops:UI.pops,acc:UI.acc,accOn:UI.accOn,accCont:UI.accCont}));}catch(e){}}
 function loadSave(){try{const d=JSON.parse(localStorage.getItem(SV)||'null');if(d&&d.v===1&&d.S&&!d.S.over&&d.S.pend)return d;}catch(e){}return null;}
@@ -782,6 +784,7 @@ function render(){hideTip();setTimeout(syncMusic,0);setTimeout(plattKick,0);
  if(UI.screen==='start'&&getName()===null&&!UI.sheet&&!UI.story&&!UI.poster)UI.sheet={k:'name',first:true};
  else if(UI.screen==='start'&&!tutSeen()&&!games(totSt(loadStats()))&&!loadSave()&&!UI.sheet&&!UI.story&&!UI.poster)UI.sheet={k:'tutoffer'};
  else if(UI.screen==='start'&&has('cap')&&plattGet()===null&&!QDONE&&!UI.sheet&&!UI.story&&!UI.poster)UI.sheet={k:'quiz',i:0,ok:0,sel:-1};
+ else if(UI.screen==='start'&&has('cap2')&&!NUYON&&!NUYTRY&&!(nuyGet()||{}).seen&&!UI.sheet&&!UI.story&&!UI.poster)setTimeout(()=>openNuy(false),0);
  if(UI.screen==='start'){app.className='home';app.innerHTML=homeHTML()+CREDIT+(UI.story?storyHTML():'')+(UI.poster?posterHTML():'')+sheetHTML();return;}
  if(UI.screen==='setup'){app.className='setup';app.innerHTML=setupHTML()+CREDIT+sheetHTML();return;}
  const s=S,q=1-H,pd=s.pend,mine=pd&&pd.p===H&&pd.ctx.then==='main'&&!UI.pops.length,inf=mine?info():null;
@@ -854,7 +857,7 @@ function playMusic(name){if(!SND.on||!name||document.hidden){stopMusic();return;
  if(MUS.done===name)return;const t=TRACKS[name];if(!t)return;
  try{const a=new Audio(t.f);a.loop=t.loop;a.volume=t.v;a.onended=()=>{if(!t.loop)MUS.done=name;};MUS.el=a;MUS.name=name;const pr=a.play();if(pr&&pr.catch)pr.catch(()=>{if(MUS.el===a)MUS.name='';});}catch(e){MUS.el=null;MUS.name='';}}
 function wantMusic(){if(UI.screen!=='game'||!S)return 'menu';if(!S.over){MUS.done='';return 'game';}if(S.winner<0)return '';return S.fac[S.winner]==='T'?'winT':'winA';}
-function syncMusic(){playMusic(wantMusic());}
+function syncMusic(){if(NUYON){stopMusic();return;}playMusic(wantMusic());}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopMusic();else syncMusic();});
 const SPK_ON='<svg viewBox="0 0 12 10" aria-hidden="true"><path fill="currentColor" d="M0 3h3l3-3h1v10H6L3 7H0zM8 3h1v4H8zM10 1h1v8h-1z"/></svg>';
 const SPK_OFF='<svg viewBox="0 0 12 10" aria-hidden="true"><path fill="currentColor" d="M0 3h3l3-3h1v10H6L3 7H0zM8 2h1v1H8zM11 2h1v1h-1zM9 3h2v1H9zM9 6h2v1H9zM8 7h1v1H8zM11 7h1v1h-1zM9.5 4h1v2h-1z"/></svg>';
@@ -1046,6 +1049,19 @@ function plattStart(){
   if(i<parts.length)PL.tm=setTimeout(()=>{const e=document.getElementById('pt');if(e)e.textContent='';next();},1300);
   else if(m.w)PL.tm=setTimeout(whisper,1300);});
  draw();next();}
+
+/* ---------- Nuy Tinck Runs!! (premio delle 10 vittorie) ---------- */
+const NUYK='invasione.nuy.v1';let NUYON=false,NUYTRY=false;
+function nuyGet(){try{const o=JSON.parse(localStorage.getItem(NUYK)||'null');return o&&typeof o==='object'?o:null;}catch(e){return null;}}
+function nuySet(o){try{localStorage.setItem(NUYK,JSON.stringify(o));}catch(e){}}
+function nuyBestHTML(){const o=nuyGet();if(!o||typeof o.best!=='number')return '';return `<small>Miglior risultato: ${o.best} colpi${o.best===0?' · ★ Senza un graffio':''}</small>`;}
+function openNuy(replay){if(NUYON)return;NUYON=true;NUYTRY=true;const o=nuyGet()||{};o.seen=1;nuySet(o);stopMusic();
+ const d=document.createElement('div');d.id='nuyov';d.innerHTML='<iframe src="nuy.html'+(replay?'?r=1':'')+'" title="Nuy Tinck Runs!!" allow="autoplay"></iframe>';document.body.appendChild(d);
+ try{history.pushState({nuy:1},'');}catch(e){}}
+function closeNuy(){const d=document.getElementById('nuyov');if(d)d.remove();NUYON=false;render();}
+window.addEventListener('message',e=>{const m=e.data;if(!m||!m.nuy)return;
+ if(m.nuy==='close')closeNuy();
+ else if(m.nuy==='prize'){closeNuy();UI.sheet={k:'prize',ids:['dani','nuy']};render();}});
 function sheetHTML(){
  if(UI.pops.length)return popupHTML();
  let body='',ttl='',lead='',cancel=false,tall=false;
@@ -1131,14 +1147,14 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
   const it=(r,n)=>`<li><span class="cr-r">${r}</span><span class="cr-n">${n}</span></li>`;
   body=`<div class="credits"><p class="cr-t">INVASIONE</p><p class="cr-s">Terrestri contro Alieni</p>
 <h3 class="mh3">Il gioco</h3><ul class="crl">${it('Ideato e realizzato da','Daniele Radavero')}${it('Storia','Daniele Radavero')}</ul>
-<h3 class="mh3">Musiche</h3><ul class="crl">${it('Menù · «Data Analysis»','Retro BGM Chan')}${it('Partita · «Inconvenient Truth»','Retro BGM Chan')}${it('Vittoria dei Terrestri · «8bit Warriors»','EchoBrainz')}${it('Vittoria degli Alieni · «8-bit Horror Noises»','Freesound Community')}</ul>
-<p class="meta">Musiche royalty free da Pixabay.</p>
+<h3 class="mh3">Musiche</h3><ul class="crl">${it('Menù · «Data Analysis»','Retro BGM Chan')}${it('Partita · «Inconvenient Truth»','Retro BGM Chan')}${it('Vittoria dei Terrestri · «8bit Warriors»','EchoBrainz')}${it('Vittoria degli Alieni · «8-bit Horror Noises»','Freesound Community')}${it('Nuy Tinck Runs!! · musica originale','Daniele Radavero')}</ul>
+<p class="meta">Le altre musiche sono royalty free, da Pixabay.</p>
 <h3 class="mh3">Ringraziamenti</h3><ul class="crl">${it('Allo scrittore','Marco Platia')}<li><span class="cr-r">per aver prestato il volto al Capitano Mark Platt</span></li><li><span class="cr-n">Simone Colombo</span></li><li><span class="cr-r">per aver creduto nel gioco</span></li></ul>
 <h3 class="mh3">Caratteri</h3><ul class="crl">${it('Pixelify Sans','Stefie Justprince')}${it('Press Start 2P','CodeMan38')}${it('IBM Plex Sans','Mike Abbink, IBM')}</ul>
 <p class="meta">Caratteri con licenza SIL Open Font License, da Google Fonts.</p>
 <p class="cr-c">© 2026 Daniele Radavero · Tutti i diritti riservati</p></div>`;}
  else if(UI.sheet&&UI.sheet.k==='tro'){ttl='Trofei';tall=true;cancel=true;const st=loadStats(),u=trophies();
-  const row=t=>{const ok=u.includes(t.id);return `<li class="tro ${ok?'ok':'lk'}"><span class="ti" aria-hidden="true">${ok?'★':LOCK}</span><span class="tb"><b>${esc(t.name)}</b>${ok?`<small>${esc(t.desc)}</small>${t.id==='story'?btn('story','','Leggi la Storia','hi'):t.id==='cap'?`<span class="tcaps">${btn('capv','mark','Mark Platt')}${btn('capv','kar','Kar Am Oh')}</span>${plattGet()!==null?btn('pmsg','','Rivedi il messaggio di Platt'):btn('quizgo','','Fai il quiz di Platt')}`:t.id==='cap2'?`<span class="tcaps">${btn('capv','dani','Dani e Silvya')}${btn('capv','nuy','Nuy Tinck')}</span>`:t.id==='books'?btn('book','','Libro del giorno','hi'):''}`:`<small>${esc(t.req)} · ${t.prog(st)}</small>`}</span></li>`;};
+  const row=t=>{const ok=u.includes(t.id);return `<li class="tro ${ok?'ok':'lk'}"><span class="ti" aria-hidden="true">${ok?'★':LOCK}</span><span class="tb"><b>${esc(t.name)}</b>${ok?`<small>${esc(t.desc)}</small>${t.id==='story'?btn('story','','Leggi la Storia','hi'):t.id==='cap'?`<span class="tcaps">${btn('capv','mark','Mark Platt')}${btn('capv','kar','Kar Am Oh')}</span>${plattGet()!==null?btn('pmsg','','Rivedi il messaggio di Platt'):btn('quizgo','','Fai il quiz di Platt')}`:t.id==='cap2'?`<span class="tcaps">${btn('capv','dani','Dani e Silvya')}${btn('capv','nuy','Nuy Tinck')}</span>${btn('nuyplay','','Gioca a Nuy Tinck Runs!!')}${nuyBestHTML()}`:t.id==='books'?btn('book','','Libro del giorno','hi'):''}`:`<small>${esc(t.req)} · ${t.prog(st)}</small>`}</span></li>`;};
   const hid=`<li class="tro lk"><span class="ti" aria-hidden="true">${LOCK}</span><span class="tb"><b>????</b><small>????</small></span></li>`,vis=3+u.length;
   const rows=TROPHIES.map((t,i)=>u.includes(t.id)||i<vis?row(t):hid).join('')+(TROPHIES.length<vis?`<li class="tro lk"><span class="ti" aria-hidden="true">${LOCK}</span><span class="tb"><b>????</b><small>Requisito: in arrivo con un prossimo aggiornamento</small></span></li>`:hid);
   body=`<p class="lead">Vinci contro il computer per sbloccare nuovi contenuti. Vale qualsiasi fazione e difficoltà, e i trofei restano anche se azzeri le statistiche.</p><ul class="trol">${rows}</ul><p class="meta">I trofei viaggiano nel codice di salvataggio: dopo uno sblocco aggiornalo da «Le tue partite».</p>`;}
@@ -1171,8 +1187,8 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
   body=`<p class="tx qtx">Hai risposto giusto a <b>${UI.sheet.score}</b> domande su ${PQ.length}.</p>`+btn('pmsg','','Guarda il messaggio di Platt','hi qo');}
  else if(UI.sheet&&UI.sheet.k==='platt'){ttl='Messaggio dal ponte';tall=true;cancel=true;
   body=`<div class="pscr"><p class="ptag">COLLEGAMENTO · PONTE DI COMANDO</p><canvas id="pcv" width="256" height="192" aria-label="Il Capitano Mark Platt"></canvas><p class="pline" id="pt"></p><p class="pline pw" id="pw"></p></div>`+btn('pmsg','','Rivedi','sec')+btn('plPrize','','Riscuoti il premio','hi');}
- else if(UI.sheet&&UI.sheet.k==='prize'){ttl='Premio: i Capitani';tall=true;cancel=true;lead='Mark Platt guida i Terrestri, Kar Am Oh gli Alieni. Li attivi in Nuova partita.';
-  body=['mark','kar'].map(id=>{const c=CAPS[id];return cardFace({fac:c.f,art:c.img,title:c.n,text:c.ab,tag:c.f==='T'?'Capitano dei Terrestri':'Capitano degli Alieni',wide:true})+`<h3 class="mh3">Come funziona</h3><ul class="capl">${c.long.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;}).join('');}
+ else if(UI.sheet&&UI.sheet.k==='prize'){ttl='Premio: i Capitani';tall=true;cancel=true;const pids=UI.sheet.ids||['mark','kar'];lead=pids[0]==='dani'?'Dani e Silvya guidano i Terrestri, Nuy Tinck gli Alieni. Li attivi in Nuova partita.':'Mark Platt guida i Terrestri, Kar Am Oh gli Alieni. Li attivi in Nuova partita.';
+  body=pids.map(id=>{const c=CAPS[id];return cardFace({fac:c.f,art:c.img,title:c.n,text:c.ab,tag:c.f==='T'?'Capitano dei Terrestri':'Capitano degli Alieni',wide:true})+`<h3 class="mh3">Come funziona</h3><ul class="capl">${c.long.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;}).join('');}
  else return '';
  return `<div class="ov"><div class="sheet ${tall?'tall':''}" role="dialog"><h2>${esc(ttl)}</h2>${lead?`<p>${esc(lead)}</p>`:''}${body}${cancel?btn('close','','Chiudi','sec'):''}</div></div>`;}
 function pub(from){const me=fname(S.fac[H]);return S.log.slice(from).filter(e=>e.to===null||e.to===H).map(e=>e.t).filter(t=>t.charAt(0)!=='—'&&t.charAt(0)!=='☣'&&t.indexOf(' PV)')<0&&t.indexOf('Entrambi passano')<0&&t.indexOf('Partita conclusa')<0).map(t=>t.replace(/\b(Terrestri|Alieni)\b/g,m=>m===me?'Tu':'Avversario'));}
@@ -1245,6 +1261,7 @@ const HD={
   setTimeout(()=>{if(UI.sheet!==q)return;if(q.i+1<PQ.length)UI.sheet={k:'quiz',i:q.i+1,ok:q.ok,sel:-1};else{plattSet(q.ok);QDONE=true;UI.sheet={k:'quizres',score:q.ok};}render();},900);},
  pmsg:()=>{const sc=plattGet();UI.sheet={k:'platt',score:sc===null?0:sc};render();},
  plPrize:()=>{UI.sheet={k:'prize'};render();},
+ nuyplay:()=>{UI.sheet=null;render();openNuy(true);},
  optT:v=>{const o=loadOpt();if(v==='bonus'||v==='cap')o[v]=!o[v];saveOpt(o);render();},
  troEnd:()=>{clearTimeout(tm);S=null;UI=mkUI('start');UI.sheet={k:'tro'};render();},
  storyEnd:()=>{clearTimeout(tm);S=null;UI=mkUI('start');UI.story=reduceMotion()?'static':'crawl';render();},storyStatic:()=>{UI.story='static';render();},storyCrawl:()=>{UI.story='crawl';render();},storyClose:()=>{UI.story=null;render();},
@@ -1288,7 +1305,7 @@ const HD={
 const CLICKS={tutNext:1,sbopen:1,undo:1,leaveYes:1,comp:1,ctab:1,cview:1,tutGo:1,tutSkip:1,tutQuit:1,tutAgain:1,tutPlay:1,book:1,capact:1,capPick:1,nameEdit:1,nameOk:1,nameSkip:1,credits:1,tro:1,capv:1,optT:1,setup:1,go:1,gonew:1,hf:1,df:1,story:1,storyLocked:1,tut0:1,tutn:1,help:1,poster:1,stats:1,homeback:1,new:1,endnew:1,recap:1,resume:1,close:1,homeq:1,die:1,card:1,hand:1,vsel:1,tdie:1,ev:1};
 /* tasto indietro del telefono */
 try{history.replaceState({inv:0},'');history.pushState({inv:1},'');}catch(e){}
-window.addEventListener('popstate',()=>{let stay=true;
+window.addEventListener('popstate',()=>{if(NUYON){closeNuy();return;}let stay=true;
  if(UI.sheet&&UI.sheet.k!=='name'&&UI.sheet.k!=='leave'){UI.sheet=null;UI.sel=null;render();}
  else if(UI.story||UI.poster){UI.story=null;UI.poster=false;render();}
  else if(UI.screen==='game'&&S&&!S.over){UI.sheet={k:'leave'};render();}
