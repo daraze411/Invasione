@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Nuy Tinck Runs!!</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap">
 <style>
 :root{--bg:#f4efe4;--ink:#1d1a16;--edge:#1d1a16;--btn:#8a1c2b;--btnink:#fffdf6;--sec:#e4dccb}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15130f;--ink:#f1ebdc;--edge:#f1ebdc;--btn:#c9485a;--sec:#2b2620}}
 :root[data-theme="dark"]{--bg:#15130f;--ink:#f1ebdc;--edge:#f1ebdc;--btn:#c9485a;--sec:#2b2620}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Pixelify Sans','Courier New',monospace}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'DotGothic16','Courier New',monospace}
 body{padding:16px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:12px}
 .wrap{width:100%;max-width:640px}
 h1{font-size:24px;margin:0 0 4px}
@@ -416,7 +416,7 @@ button.big{display:block;width:100%;font-size:22px;padding:16px;margin:10px 0 0;
     R(c,x,40,60,GY-40,'#4a4560'); for(var y=44;y<GY;y+=10){ for(var bx=x+((y/10)%2?0:6);bx<x+60;bx+=12) R(c,bx,y,11,9,'#5a5574'); }
     R(c,x,GY-10,60,10,'#e0b43a'); for(var k=0;k<60;k+=10) R(c,x+k,GY-10,5,10,'#1b1220');
     R(c,x+14,70,32,14,'#c1272d'); R(c,x+18,75,24,4,'#fffdf6'); }
-  function outlined(str,x,y,size,fill,shadow){ c.font='700 '+size+'px "Pixelify Sans", monospace'; c.textAlign='center'; c.textBaseline='middle';
+  function outlined(str,x,y,size,fill,shadow){ c.font='400 '+size+'px "DotGothic16", monospace'; c.textAlign='center'; c.textBaseline='middle';
     if(shadow){ c.fillStyle=shadow; c.fillText(str,x+3,y+3); }
     c.fillStyle='#1b1220'; [[-2,0],[2,0],[0,-2],[0,2]].forEach(function(o){ c.fillText(str,x+o[0],y+o[1]); });
     c.fillStyle=fill; c.fillText(str,x,y); }

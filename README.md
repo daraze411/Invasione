@@ -50,3 +50,17 @@ node sim.js hard norm 30     # Difficile contro Normale (lento)
 ## Diritti
 
 Il gioco e il codice non sono open source. Vedi [LICENSE](LICENSE).
+
+
+## App Android (facoltativa)
+Se nella stessa cartella di `index.html` c'è un file `invasione.apk`, nella home compare da solo il pulsante «Scarica l'app». Se il file non c'è, il pulsante resta nascosto. Il pulsante non compare su iPhone né quando il gioco è già installato come app.
+
+## Account online con email (facoltativo)
+Il gioco ha già tutto il necessario. Resta da creare il servizio, gratuito:
+1. Su supabase.com crea un progetto (regione UE, per la privacy).
+2. SQL Editor: incolla il contenuto di `supabase-setup.sql` ed esegui.
+3. Authentication > URL Configuration: Site URL = `https://invasione.netlify.app`, e lo stesso indirizzo in Redirect URLs.
+4. Authentication > Email Templates > Magic Link: aggiungi nel messaggio la riga `Codice: {{ .Token }}` (serve a chi apre la mail su un altro dispositivo).
+5. Authentication > SMTP: il servizio di prova di Supabase manda poche mail all'ora. Per i playtester collega un SMTP gratuito (per esempio Brevo o Resend).
+6. Project Settings > API: copia "Project URL" e la chiave "anon public" dentro `config.js`, poi carica tutto su GitHub.
+Se `config.js` resta vuoto, la sezione email non compare e il gioco funziona come prima, solo con il codice.

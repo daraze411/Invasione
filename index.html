@@ -26,7 +26,8 @@
 <style>:root{color-scheme:dark;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}html{-webkit-text-size-adjust:100%}</style>
 <title>Invasione</title>
 
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Press+Start+2P&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<script src="config.js"></script>
 <style>
 /* Layout: plancia verticale a una colonna: avversario in alto, tre Fronti al centro, tu in basso con mano e azioni. */
 :root{
@@ -225,7 +226,7 @@ button.chip{cursor:pointer}
 
 /* ===== Pixel art: caratteri pixel per titoli, pulsanti e numeri; testi lunghi in IBM Plex Sans ===== */
 @font-face{font-family:'EuroPix';src:url(data:font/ttf;base64,AAEAAAAKAIAAAwAgT1MvMmXxZQ4AAAEoAAAAYGNtYXAADCD/AAABkAAAADRnbHlm7a3QqAAAAcwAAADaaGVhZC/3d/wAAACsAAAANmhoZWEGLgJbAAAA5AAAACRobXR4BMQAKAAAAYgAAAAIbG9jYQBtAAAAAAHEAAAABm1heHAAGABWAAABCAAAACBuYW1lY1dn4wAAAqgAAABgcG9zdHZ4c0UAAAMIAAAAKwABAAAAAQAA08VBLl8PPPUAAwPoAAAAAOccmjAAAAAA5xyaMAAoAAACgAK8AAAAAwACAAAAAAAAAAEAAAOE/zgAAALQACgAUAKAAAEAAAAAAAAAAAAAAAAAAAACAAEAAAACAFQAFQAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAwJiAZAABQAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAPz8/PwAAIKwgrAOE/zgAAAOEAMgAAAAAAAAAAAAAAAAAAAAgAAAB9AAAAtAAKAAAAAIAAAADAAAAFAADAAEAAAAUAAQAIAAAAAQABAABAAAgrP//AAAgrP//31UAAQAAAAAAAAAAAG0AAAAVACgAAAKAArwAAwAHAAsADwATABcAGwAfACMAJwArAC8AMwA3ADsAPwBDAEcASwBPAFMAABM1MxUxNTMVMTUzFTE1MxUFNTMVBzUzFTE1MxUxNTMVMTUzFTE1MxUFNTMVBzUzFTE1MxUxNTMVMTUzFTE1MxUFNTMVFTUzFTE1MxUxNTMVMTUzFfBkZGRk/gxkyGRkZGRk/nBkyGRkZGRk/nBkZGRkZAJYZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkAAAAAAAEADYAAQAAAAAAAQAHAAAAAQAAAAAAAgAHAAcAAwABBAkAAQAOAA4AAwABBAkAAgAOABxFdXJvUGl4UmVndWxhcgBFAHUAcgBvAFAAaQB4AFIAZQBnAHUAbABhAHIAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAABAgRFdXJvAA==) format('truetype');unicode-range:U+20AC}
-:root{--disp:'EuroPix','Pixelify Sans','Courier New',monospace;--pix:'Press Start 2P','Courier New',monospace;--mono:var(--pix);
+:root{--disp:'EuroPix','DotGothic16','Courier New',monospace;--pix:'Press Start 2P','Courier New',monospace;--mono:var(--pix);
  --notch:polygon(0 4px,4px 4px,4px 0,calc(100% - 4px) 0,calc(100% - 4px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 4px) calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 4px),0 calc(100% - 4px))}
 *,*::before,*::after{border-radius:0!important}
 body{background:var(--bg) url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAA00lEQVR4Xu3cMQ6CMBQAUHB28JyexdlDeAhP4ujowOCOk4maIAQotPz3ZkKb//spND9UFUk1z/b8b4Bd0tGDewe/LwkkJPgzax+X68y3BIBy2RghvNu9OYUPQm4kJRibMQAAABTH53w3Z1tMp0/m26KdcTrFMqACAAAAAAAAAAAAAGLTl1+AIUkack22ip48jBKll3/N6q67MvMZ/MO+Po7KINNEqQB+rPlIgPSs8IUJeA8BApiFv71kqOikFD15AAAA4nHSzDZZ2QAAi/DaBQBsygvgUG6JzxaG8gAAAABJRU5ErkJggg==) repeat;background-size:192px 192px;image-rendering:pixelated}
@@ -462,7 +463,7 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 .menu{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:8px}
 .mi{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;padding:11px 12px;background:var(--panel);border:2px solid var(--line);border-bottom:5px solid #070b10;color:var(--fg);font-size:19px;font-weight:600;min-height:54px}
 .mi small{font-family:var(--body);font-size:11px;font-weight:400;color:var(--mute)}
-.mi.wide{grid-column:1/-1}
+.mi.wide{grid-column:1/-1}.cl{margin:0 0 14px;padding:12px;border:2px solid var(--line);background:var(--panel)}.cl p{margin:0 0 8px}.cl input.code{width:100%;box-sizing:border-box;margin:0 0 8px}.cl .cm.ok{color:#9ff0e4}.cl .cm.er{color:#ff9a8a}.mi[hidden]{display:none}a.mi{text-decoration:none}
 .mi.main{grid-column:1/-1;align-items:center;background:var(--paper);color:#1a1608;border-color:#a8955f;border-bottom-color:#6e5f35;font-size:24px;font-weight:700;letter-spacing:.08em}
 .menu .resume{grid-column:1/-1;border:2px solid var(--paper);border-bottom:5px solid #6e5f35}
 .resume b{font-weight:700}
@@ -1056,10 +1057,58 @@ const SK2='invasione.stats.v2';
 const zrec=()=>({w:0,l:0,d:0});
 function zst(){return{T:zrec(),A:zrec(),normal:zrec(),hard:zrec()};}
 function okRec(x){return !!x&&['w','l','d'].every(k=>Number.isInteger(x[k])&&x[k]>=0&&x[k]<1e6);}
+/* ===== Account online facoltativo (Supabase, link via email) =====
+   Compila url e key (chiavi pubbliche) per attivarlo. Vuoti = la sezione non compare. */
+const SB=Object.assign({url:'',key:''},window.INV_SB||{});
+const CL={cl:null,user:null,msg:'',ok:false,sent:false,email:'',load:null,booted:false,noPush:false,fromLink:false,busy:false};
+var CLT=null;
+const cloudOn=()=>!!(SB.url&&SB.key);
+function cloudLoad(){if(!cloudOn())return Promise.resolve(null);if(CL.cl)return Promise.resolve(CL.cl);if(CL.load)return CL.load;
+ CL.load=new Promise(res=>{const go=()=>{try{
+  CL.cl=window.supabase.createClient(SB.url,SB.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  CL.cl.auth.onAuthStateChange((ev,ses)=>{const u=ses&&ses.user||null,was=CL.user;CL.user=u;
+   if(u&&(!was||was.id!==u.id))setTimeout(cloudSync,0);else render();});
+  CL.cl.auth.getSession().then(r=>{const u=r&&r.data&&r.data.session?r.data.session.user:null;if(u&&!CL.user){CL.user=u;setTimeout(cloudSync,0);}else render();});
+  res(CL.cl);}catch(e){CL.load=null;CL.cl=null;res(null);}};
+  if(window.supabase)return go();
+  const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.1/dist/umd/supabase.js';sc.onload=go;sc.onerror=()=>{CL.load=null;res(null);};document.head.appendChild(sc);});
+ return CL.load;}
+function cloudBoot(){if(CL.booted||!cloudOn())return;CL.booted=true;let has=false;try{for(let i=0;i<localStorage.length;i++){if(/^sb-.*-auth-token$/.test(localStorage.key(i))){has=true;break;}}}catch(e){}
+ if(/access_token=|[?&]code=|type=magiclink/.test(location.hash+location.search)){has=true;CL.fromLink=true;}
+ if(has)cloudLoad();}
+async function cloudSync(){const c=CL.cl;if(!c||!CL.user)return;
+ try{const r=await c.from('saves').select('code,wins').eq('user_id',CL.user.id).maybeSingle();if(r.error)throw r.error;const d=r.data,lw=winsOf(loadStats());
+  if(d&&typeof d.wins==='number'&&d.wins>lw){CL.noPush=true;const ok=importCode(d.code);CL.noPush=false;CL.msg=ok?'Fatto: ho ripristinato i tuoi progressi dall\'account.':'Il salvataggio online non è leggibile.';}
+  else{await cloudPush(true);CL.msg=d?'Progressi salvati online.':'Account collegato. Da ora i progressi si salvano da soli.';}
+  CL.ok=true;}catch(e){CL.noPush=false;CL.ok=false;CL.msg='Non riesco a raggiungere il salvataggio online. Riprova più tardi.';}
+ if(CL.fromLink){CL.fromLink=false;UI.sheet={k:'stats'};UI.codeMsg=null;UI.codeIn='';UI.rst=false;try{history.replaceState(null,'',location.pathname);}catch(e){}}
+ render();}
+function cloudPush(now){if(!cloudOn()||!CL.cl||!CL.user||CL.noPush)return Promise.resolve();clearTimeout(CLT);
+ const go=async()=>{try{await CL.cl.from('saves').upsert({user_id:CL.user.id,code:exportCode(),wins:winsOf(loadStats()),updated_at:new Date().toISOString()});}catch(e){}};
+ if(now)return go();CLT=setTimeout(go,2500);return Promise.resolve();}
+async function cloudSend(){const el=document.getElementById('cl-mail');const em=(el?el.value:CL.email||'').trim();CL.email=em;
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)){CL.msg='Scrivi un indirizzo email valido.';CL.ok=false;render();return;}
+ CL.busy=true;CL.msg='Invio in corso…';CL.ok=true;render();const c=await cloudLoad();
+ if(!c){CL.busy=false;CL.ok=false;CL.msg='Servizio online non raggiungibile. Riprova più tardi.';render();return;}
+ try{const r=await c.auth.signInWithOtp({email:em,options:{shouldCreateUser:true,emailRedirectTo:location.origin+location.pathname}});if(r.error)throw r.error;CL.sent=true;CL.ok=true;CL.msg='Ti abbiamo scritto. Controlla la posta, anche nello spam.';}
+ catch(e){CL.ok=false;CL.msg='Non sono riuscito a inviare la mail'+(e&&e.status===429?': troppi tentativi, aspetta un po\'.':'. Controlla l\'indirizzo e riprova.');}
+ CL.busy=false;render();}
+async function cloudVerify(){const el=document.getElementById('cl-code');const t=(el?el.value:'').replace(/\s+/g,'');if(!/^\d{6,8}$/.test(t)){CL.msg='Il codice è fatto di sole cifre.';CL.ok=false;render();return;}
+ const c=await cloudLoad();if(!c)return;try{const r=await c.auth.verifyOtp({email:CL.email,token:t,type:'email'});if(r.error)throw r.error;CL.msg='';CL.sent=false;}catch(e){CL.ok=false;CL.msg='Codice non valido o scaduto.';render();}}
+async function cloudOut(){try{if(CL.cl)await CL.cl.auth.signOut();}catch(e){}CL.user=null;CL.sent=false;CL.msg='Sei uscito dall\'account. I progressi restano su questo dispositivo.';CL.ok=true;render();}
+async function cloudDel(){try{if(CL.cl&&CL.user)await CL.cl.from('saves').delete().eq('user_id',CL.user.id);await CL.cl.auth.signOut();}catch(e){}CL.user=null;CL.sent=false;CL.msg='Ho cancellato il salvataggio online. Per cancellare anche la tua email scrivi a chi gestisce il gioco.';CL.ok=true;render();}
+function cloudHTML(){if(!cloudOn())return '';
+ const m=CL.msg?`<p class="cm ${CL.ok?'ok':'er'}" role="status">${esc(CL.msg)}</p>`:'';
+ if(CL.user)return `<div class="cl"><p><b>Account online</b></p><p>Collegato come <b>${esc(CL.user.email||CL.email)}</b>. I progressi si salvano da soli e li ritrovi su qualsiasi telefono.</p>${m}<div class="opts">${btn('cl_push','','Salva ora','hi')}${btn('cl_out','','Esci','sec')}${btn('cl_del','','Cancella i dati online','sec')}</div></div>`;
+ return `<div class="cl"><p><b>Iscriviti con la tua email</b> <span class="meta">Facoltativo, ma consigliato.</span></p><p>Così ritrovi trofei e statistiche su qualsiasi telefono, senza copiare il codice. Ti mandiamo un link di accesso, niente password.</p>
+<input id="cl-mail" class="code" type="email" inputmode="email" autocomplete="email" placeholder="la.tua@email.it" value="${esc(CL.email)}" aria-label="La tua email">
+<div class="opts">${btn('cl_send','',CL.sent?'Rimanda il link':'Inviami il link','hi')}</div>${m}
+${CL.sent?`<p class="meta">Tocca il link nella mail. Se nel messaggio c'è un codice a cifre, scrivilo qui.</p><input id="cl-code" class="code" inputmode="numeric" autocomplete="one-time-code" placeholder="Codice a cifre" aria-label="Codice ricevuto per email"><div class="opts">${btn('cl_verify','','Conferma codice','sec')}</div>`:''}
+<p class="meta">Usiamo l'email solo per ripristinare i tuoi progressi. Puoi cancellare i dati online quando vuoi.</p></div>`;}
 function okSt(x){return !!x&&['T','A','normal','hard'].every(k=>okRec(x[k]));}
 function loadStats(){try{const v=JSON.parse(localStorage.getItem(SK2)||'null');if(okSt(v))return v;
  const o=JSON.parse(localStorage.getItem(SK)||'null');if(o&&typeof o.g==='number'){const z=zst();for(const k of['T','A','normal','hard'])if(o[k]){z[k].w=o[k].w|0;z[k].l=Math.max(0,(o[k].g|0)-(o[k].w|0));}return z;}}catch(e){}return zst();}
-function saveStats(st){try{localStorage.setItem(SK2,JSON.stringify(st));}catch(e){}}
+function saveStats(st){try{localStorage.setItem(SK2,JSON.stringify(st));}catch(e){}cloudPush();}
 const games=r=>r.w+r.l+r.d;
 function totSt(st){return{w:st.T.w+st.A.w,l:st.T.l+st.A.l,d:st.T.d+st.A.d};}
 /* trofei: si sbloccano con le vittorie e restano anche se azzeri le statistiche */
@@ -1242,7 +1291,7 @@ function homeHTML(){const st=totSt(loadStats()),sv=loadSave(),ng=games(st);
 ${nm()?`<p class="hello">Ciao, ${esc(nm())}! I Fronti ti aspettano.</p>`:''}<nav class="menu" aria-label="Menù">${resumeHTML()}<button class="mi main" data-a="setup">${sv?'NUOVA PARTITA':'GIOCA'}</button>
 ${storyOpen()?'<button class="mi" data-a="story">Storia</button>':''}${has('books')?'<button class="mi" data-a="book">Libro del giorno</button>':''}<button class="mi" data-a="tro">Trofei</button><button class="mi" data-a="comp">Carte</button><button class="mi" data-a="tut0">Tutorial</button>
 <button class="mi" data-a="help">Regolamento</button><button class="mi" data-a="credits">Crediti</button>
-<button class="mi ${(storyOpen()?1:0)+(has('books')?1:0)===1?'wide':''}" data-a="stats">Le tue partite<small>${sub}</small></button></nav></div>`;}
+<button class="mi ${(storyOpen()?1:0)+(has('books')?1:0)===1?'wide':''}" data-a="stats">Le tue partite<small>${sub}</small></button><a class="mi wide" id="apk" href="invasione.apk" download hidden>Scarica l'app<small>Android · file APK</small></a></nav></div>`;}
 function setupHTML(){
  const side=(f,name)=>`<button class="side ${f} ${hf===f?'on':''}" data-a="hf" data-v="${f}" aria-pressed="${hf===f}"><b>${name}</b>${hf===f?'<span class="you">La tua fazione</span>':''}</button>`;
  return `<div class="setup"><div class="bar"><button class="back" data-a="homeback" aria-label="Torna alla home" title="Home"><svg class="ico" viewBox="0 0 8 8" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="M3 0h2v1h1v1h1v1h1v1H7v4H5V5H3v3H1V4H0V3h1V2h1V1h1z"/></svg></button><h1>Nuova partita</h1>${sndBtn()}</div>
@@ -1324,7 +1373,11 @@ function handHTML(){const h=S.hand[H];if(!h.length)return '<div class="nohand">N
  return `<div class="hand">${h.map(id=>{return `<button class="card ${INV.cf(id)}" data-a="card" data-v="${id}" data-tip="${esc(techTip(id))}"><span>${esc(INV.tt(S,H,id))}</span></button>`;}).join('')}</div>`;}
 function logHTML(){const L=S.log.filter(e=>e.to===null||e.to===H).slice(-40).reverse();
  return `<details class="log"><summary>Registro della partita</summary><ol>${L.map(e=>`<li class="${e.t.charAt(0)==='—'?'h':''}">${esc(e.t)}</li>`).join('')}</ol></details>`;}
-function render(){hideTip();setTimeout(syncMusic,0);setTimeout(plattKick,0);
+let APKOK=null;
+function apkShow(){const el=document.getElementById('apk');if(!el)return;if(APKOK===false)return;try{if((window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone||/iPhone|iPad|iPod/.test(navigator.userAgent)){APKOK=false;return;}}catch(e){}
+ if(APKOK===true){el.hidden=false;return;}
+ try{fetch('invasione.apk',{method:'HEAD',cache:'no-store'}).then(r=>{const t=r.headers.get('content-type')||'';APKOK=r.ok&&!/text\/html/.test(t);const e=document.getElementById('apk');if(e)e.hidden=!APKOK;}).catch(()=>{APKOK=false;});}catch(e){APKOK=false;}}
+function render(){hideTip();setTimeout(syncMusic,0);setTimeout(apkShow,0);setTimeout(cloudBoot,0);setTimeout(plattKick,0);
  const CREDIT='<div class="credit end">Gioco di Daniele Radavero · © 2026 Tutti i diritti riservati</div>';
  if(UI.screen==='start'&&getName()===null&&!UI.sheet&&!UI.story&&!UI.poster)UI.sheet={k:'name',first:true};
  else if(UI.screen==='start'&&!tutSeen()&&!games(totSt(loadStats()))&&!loadSave()&&!UI.sheet&&!UI.story&&!UI.poster)UI.sheet={k:'tutoffer'};
@@ -1558,7 +1611,7 @@ function popupHTML(){const p=UI.pops[0];let ttl,body;
 /* ---------- Quiz di Platt (sblocco dei Capitani) ---------- */
 const PTK='invasione.platt.v1';let QDONE=false;
 function plattGet(){try{const v=localStorage.getItem(PTK);if(v===null)return null;const n=+v;return n>=0&&n<=10?n:null;}catch(e){return null;}}
-function plattSet(n){try{localStorage.setItem(PTK,String(n));}catch(e){}}
+function plattSet(n){try{localStorage.setItem(PTK,String(n));}catch(e){}cloudPush();}
 const PQ=[
  {q:'Quale famoso film è stato tratto dal libro «Ma gli androidi sognano pecore elettriche?»',a:['Rapunzel','Il cane andaluso','Blade Runner','Mamma ho perso l\'aereo'],ok:2},
  {q:'Dove è nato Isaac Asimov?',a:['La Spezia','Petroviči','New York','Mosca'],ok:1},
@@ -1606,7 +1659,7 @@ function plattStart(){
 /* ---------- Nuy Tinck Runs!! (premio delle 10 vittorie) ---------- */
 const NUYK='invasione.nuy.v1';let NUYON=false,NUYTRY=false;
 function nuyGet(){try{const o=JSON.parse(localStorage.getItem(NUYK)||'null');return o&&typeof o==='object'?o:null;}catch(e){return null;}}
-function nuySet(o){try{localStorage.setItem(NUYK,JSON.stringify(o));}catch(e){}}
+function nuySet(o){try{localStorage.setItem(NUYK,JSON.stringify(o));}catch(e){}cloudPush();}
 function nuyBestHTML(){const o=nuyGet();if(!o||typeof o.best!=='number')return '';return `<small>Miglior risultato: ${o.best} colpi${o.best===0?' · ★ Senza un graffio':''}</small>`;}
 function openNuy(replay){if(NUYON)return;NUYON=true;NUYTRY=true;const o=nuyGet()||{};o.seen=1;nuySet(o);stopMusic();
  const d=document.createElement('div');d.id='nuyov';d.innerHTML='<iframe src="nuy.html'+(replay?'?r=1':'')+'" title="Nuy Tinck Runs!!" allow="autoplay"></iframe>';document.body.appendChild(d);
@@ -1633,6 +1686,7 @@ function sheetHTML(){
   body=`<p class="lead">${nm()?esc(nm())+', ecco le tue':'Le tue'} partite contro il computer.</p>${statsHTML()}${btn('nameEdit','',nm()?'Cambia nome ('+nm()+')':'Scegli il tuo nome','sec')}`
   +(ng?(UI.rst?`<div class="confirm"><p>Azzerare tutte le statistiche? Non si può annullare, a meno che tu non abbia un codice di salvataggio.</p>${btn('rstYes','','Sì, azzera','hi')}${btn('rstNo','','Annulla','sec')}</div>`:btn('rst','','Azzera statistiche','sec')):'')
   +`<h3 class="mh3">Salva i tuoi progressi</h3><div class="savebox">
+${cloudHTML()}${cloudOn()?'<p class="meta"><b>Oppure usa il codice di salvataggio</b>, senza iscriverti:</p>':''}
 <p><b>Perché te lo chiediamo.</b> Le statistiche restano solo in questo browser: se cambi telefono o browser, o cancelli i dati di navigazione, ripartono da zero. Con il codice di salvataggio le ritrovi in un attimo, ovunque.</p>
 <p class="reward"><b>Tienilo da parte:</b> il codice conserva anche i contenuti che hai sbloccato, come la Storia. Nelle prossime versioni potrà sbloccare altre ricompense, e chi ha registrato più partite partirà avvantaggiato.</p>
 <textarea id="code-out" class="code" readonly rows="2" aria-label="Il tuo codice di salvataggio">${code}</textarea>
@@ -1703,7 +1757,7 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
 <h3 class="mh3">Musiche</h3><ul class="crl">${it('Menù · «Data Analysis»','Retro BGM Chan')}${it('Partita · «Inconvenient Truth»','Retro BGM Chan')}${it('Vittoria dei Terrestri · «8bit Warriors»','EchoBrainz')}${it('Vittoria degli Alieni · «8-bit Horror Noises»','Freesound Community')}${it('Nuy Tinck Runs!! · musica originale','Daniele Radavero')}${it('Tema di Mark Platt · musica originale','Daniele Radavero')}</ul>
 <p class="meta">Le altre musiche sono royalty free, da Pixabay.</p>
 <h3 class="mh3">Ringraziamenti</h3><ul class="crl">${it('Allo scrittore','Marco Platia')}<li><span class="cr-r">per aver prestato il volto al Capitano Mark Platt</span></li><li><span class="cr-n">Simone Colombo</span></li><li><span class="cr-r">per aver creduto nel gioco</span></li></ul>
-<h3 class="mh3">Caratteri</h3><ul class="crl">${it('Pixelify Sans','Stefie Justprince')}${it('Press Start 2P','CodeMan38')}${it('IBM Plex Sans','Mike Abbink, IBM')}</ul>
+<h3 class="mh3">Caratteri</h3><ul class="crl">${it('DotGothic16','Fontworks Inc.')}${it('Press Start 2P','CodeMan38')}${it('IBM Plex Sans','Mike Abbink, IBM')}</ul>
 <p class="meta">Caratteri con licenza SIL Open Font License, da Google Fonts.</p>
 <p class="cr-c">© 2026 Daniele Radavero · Tutti i diritti riservati</p></div>`;}
  else if(UI.sheet&&UI.sheet.k==='tro'){ttl='Trofei';tall=true;cancel=true;const st=loadStats(),u=trophies();
@@ -1799,7 +1853,8 @@ const HD={
  new:()=>{clearTimeout(tm);UI=mkUI('start');S=null;render();},
  setup:()=>{UI=mkUI('setup');render();},homeback:()=>{UI=mkUI('start');render();},
  endnew:()=>{clearTimeout(tm);S=null;UI=mkUI('setup');render();},recap:()=>{UI.sheet={k:'recap'};render();},
- stats:()=>{UI.sheet={k:'stats'};UI.codeMsg=null;UI.codeIn='';UI.rst=false;render();},
+ stats:()=>{UI.sheet={k:'stats'};UI.codeMsg=null;UI.codeIn='';UI.rst=false;CL.msg='';render();if(cloudOn())cloudLoad();},
+ cl_send:()=>{cloudSend();},cl_verify:()=>{cloudVerify();},cl_push:()=>{cloudPush(true).then(()=>{CL.msg='Progressi salvati online.';CL.ok=true;render();});},cl_out:()=>{cloudOut();},cl_del:()=>{cloudDel();},
  rst:()=>{UI.rst=true;render();},rstNo:()=>{UI.rst=false;render();},rstYes:()=>{syncTro();saveStats(zst());UI.rst=false;UI.codeMsg='Statistiche azzerate.';UI.codeOk=true;render();},
  codeCopy:()=>{const code=exportCode();const done=(m,ok)=>{UI.codeMsg=m;UI.codeOk=ok;render();if(!ok){const o=document.getElementById('code-out');if(o&&o.select){o.focus();o.select();}}};
   try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(()=>done('Codice copiato. Ora incollalo dove vuoi conservarlo.',true),()=>done('Copia non disponibile qui: il codice è selezionato, copialo a mano.',false));return;}}catch(e){}
