@@ -1112,7 +1112,7 @@ function saveGame(){if(!S||S.tut)return;try{if(S.over){localStorage.removeItem(S
 function loadSave(){try{const d=JSON.parse(localStorage.getItem(SV)||'null');if(d&&d.v===1&&d.S&&!d.S.over&&d.S.pend)return d;}catch(e){}return null;}
 function resumeHTML(){const d=loadSave();if(!d)return '';const g=d.S;
  return `<button class="resume" data-a="resume"><b>Riprendi la partita</b><span>${g.fac[H]==='T'?'Terrestri':'Alieni'} · ${d.diff==='hard'?'Difficile':'Normale'} · Round ${Math.min(Math.max(g.rd,1),3)}/3 · Tu ${g.pv[H]} – ${g.pv[1-H]} Avv.</span></button>`;}
-const mkUI=sc=>({screen:sc,story:null,poster:false,sheet:null,sel:null,grp:null,tsel:null,vsel:null,pops:[],acc:[],accOn:false,accCont:false});
+const mkUI=sc=>({screen:sc,story:null,poster:false,sheet:null,sel:null,grp:null,tsel:null,swapA:null,vsel:null,pops:[],acc:[],accOn:false,accCont:false});
 let S=null,hf='T',diff='normal',UI=mkUI('start'),TG=null,tm=null;
 const VT=[null,['Scarta una tua nave per questo round.','L\'avversario scarta una sua nave per questo round.'],['L\'avversario rilancia una tua nave.','Rilanci una nave dell\'avversario.'],['Se il 5° turno è già passato, il round termina subito. Altrimenti il contatore dei turni va al 5.','Se il 5° turno è già passato, il round termina subito. Altrimenti il contatore dei turni va al 5.'],['Paghi 1 € oppure elimini 2 Tecnologie dal tuo mazzo.','L\'avversario paga 1 € oppure elimina 2 Tecnologie dal suo mazzo.'],['Fino a fine round ogni Virus che prendi vale doppio.','Fino a fine round ogni Virus dell\'avversario vale doppio.'],['Ritiri una tua nave valida da un Fronte e la rilanci.','L\'avversario ritira una sua nave da un Fronte e la rilancia.'],['L\'avversario guadagna 1 €.','Guadagni 1 €.']];
 try{if(/netlify\.app$/i.test(location.hostname))document.documentElement.style.setProperty('--badge','60px');}catch(e){}
@@ -1267,7 +1267,7 @@ function posterHTML(){return `<div class="pv" data-a="posterClose" data-v="" rol
 const reduceMotion=()=>{try{return !!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);}catch(e){return false;}};
 function tgtRep(d){if(!TG)return null;for(const x of TG){const v=x.v;if(v.o!==d.p)continue;if(v.i===d.i)return v.i;const r=S.dice[v.o][v.i];if(d.loc==='R'&&r.loc==='R'&&r.v===d.v&&r.fz===d.fz)return v.i;}return null;}
 function dieHTML(d,cls,tag,extra){let t=tag||'i';cls=cls||'';extra=extra||'';
- const r=tgtRep(d);if(r!==null){t='button';cls=cls.replace('can','')+' can'+(UI.tsel===d.p+':'+r?' sel':'');extra=`data-a="tdie" data-v="${d.p}:${r}"`;}
+ const r=tgtRep(d);if(r!==null){t='button';cls=cls.replace('can','')+' can'+(UI.tsel===d.p+':'+r||(UI.swapA!=null&&d.p===H&&r===UI.swapA)?' sel':'');extra=`data-a="tdie" data-v="${d.p}:${r}"`;}
  const tp=cls.indexOf('nul')>=0?'Nave nulla: non rispetta l\'Evento del Fronte, quindi non conta per somma, numero di dadi e Bersaglio. Torna valida se il valore cambia.':(d.fz?'Nave congelata: non può essere spostata, rilanciata o modificata da effetti.':'');
  return `<${t} class="die ${S.fac[d.p]} ${cls}" ${extra}${tp?` data-tip="${esc(tp)}"`:''}>${d.v}</${t}>`;}
 function info(){const o=S.pend.opts,r={place:{},plays:{},sells:{},sb:{},ksb:{},vals:{},vd:{},buy:-1,kar:-1,dani:[],sil:-1,nuy:[],vc:[],vx:-1,pass:-1};
@@ -1336,6 +1336,10 @@ function render(){hideTip();setTimeout(syncMusic,0);setTimeout(plattKick,0);
  const isD=x=>x.v&&typeof x.v==='object'&&x.v.o!==undefined&&x.v.i!==undefined;
  if(pd&&pd.p===H&&pd.ctx.then!=='main'&&!UI.pops.length&&pd.opts.some(isD)&&pd.opts.every(x=>isD(x)||x.v===null)&&pd.opts.filter(x=>x.v===null).length<=1){
   TG=pd.opts.filter(isD);if(!s.dice[0].concat(s.dice[1]).some(d=>(d.loc==='R'||d.loc==='F')&&tgtRep(d)!==null))TG=null;}
+ const swp=!!(pd&&pd.p===H&&pd.ctx.then==='techSwap'&&!UI.pops.length&&pd.opts.some(x=>x.v&&x.v.a!==undefined));
+ if(swp){const aO=UI.swapA;
+  TG=aO==null?pd.opts.map(x=>({v:{o:H,i:x.v.a}})):[{v:{o:H,i:aO}}].concat(pd.opts.filter(x=>x.v.a===aO).map(x=>({v:{o:1-H,i:x.v.b}})));
+  if(!s.dice[0].concat(s.dice[1]).some(d=>(d.loc==='R'||d.loc==='F')&&tgtRep(d)!==null))TG=null;}
  let h='<div class="board">'+topHTML();
  h+=`<div class="opp"><div class="pl"><span class="fac ${s.fac[q]}">${fname(s.fac[q])}<span class="lg"> · Avversario</span><span class="sh"> · Avv.</span></span>${sideInfo(q)}</div>`+reserveHTML(q)+'</div>';
  h+='<div class="fronts">';if(s.fr.length&&s.dice[0].length)for(let f=0;f<3;f++)h+=frontHTML(f,inf);h+='</div>';
@@ -1343,11 +1347,12 @@ function render(){hideTip();setTimeout(syncMusic,0);setTimeout(plattKick,0);
  let st='';
  if(s.over)st='Partita conclusa.';
  else if(pd&&pd.p!==H)st=pd.ctx.then==='main'?'L\'avversario sta giocando…':'L\'avversario sta scegliendo…';
+ else if(TG&&swp)st=UI.swapA==null?"Scambio: tocca una tua nave.":"Scambio: ora tocca una nave avversaria. Tocca di nuovo la tua per annullare.";
  else if(TG)st=(pd.ctx.ttl||'Scegli una nave')+': tocca un dado illuminato.';
  else if(mine&&UI.vsel)st='Valore '+UI.vsel.v+': tocca un dado illuminato in riserva (prendi 1 Virus).';
  else if(mine)st=UI.sel?'Scegli dove schierare il dado.':(pd.ctx.extra?'Azione extra: scegli o rinuncia.':'Tocca a te: scegli un dado, una carta o un\'azione.');
  h+=`<div class="dock ${UI.handOpen?'hopen':''}"><div class="pl"><span class="fac ${s.fac[H]}">${fname(s.fac[H])} · Tu</span>${sideInfo(H)}<button class="handtog" data-a="hand" aria-expanded="${!!UI.handOpen}">Carte ${s.hand[H].length} ${UI.handOpen?'▴':'▾'}</button></div>`+(S.tut?tutHTML():'')+reserveHTML(H,inf)+handHTML()+`<div class="status ${mine?'me':''}">${st}</div>`;
- if(TG){const si=pd.opts.findIndex(x=>x.v===null);if(si>=0||canUndo())h+=`<div class="acts">${si>=0?`<button class="pass" data-a="pick" data-v="${si}">${esc(pd.opts[si].l)}</button>`:''}${canUndo()?'<button data-a="undo">Annulla la carta</button>':''}</div>`;}
+ if(TG){const si=pd.opts.findIndex(x=>x.v===null);const swb=swp&&UI.swapA!=null;if(si>=0||canUndo()||swb)h+=`<div class="acts">${si>=0?`<button class="pass" data-a="pick" data-v="${si}">${esc(pd.opts[si].l)}</button>`:''}${swb?'<button data-a="swback">Scegli un\'altra nave</button>':''}${canUndo()?'<button data-a="undo">Annulla la carta</button>':''}</div>`;}
  if(mine){h+='<div class="acts">';
   if(inf.buy>=0)h+=`<button data-a="pick" data-v="${inf.buy}">Compra (−2 €)</button>`;
   if(Object.keys(inf.sb).length)h+=`<button data-a="sbopen">Vendi e compra</button>`;
@@ -1394,13 +1399,13 @@ const SFX={
  unlock:c=>seq(c,[72,76,79,83,86,91],.06,{v:.05})};
 function sfx(n){if(!SND.on)return;const c=actx();if(!c)return;try{SFX[n](c);}catch(e){}}
 /* musiche (mp3 royalty free): menù, partita, vittoria per fazione */
-const TRACKS={menu:{f:'musica-menu.mp3',v:.35,loop:true},game:{f:'musica-partita.mp3',v:.35,loop:true},winT:{f:'vittoria-terrestri.mp3',v:.2,loop:false},winA:{f:'vittoria-alieni.mp3',v:.26,loop:false}};
+const TRACKS={platt:{f:'tema-platt.mp3',v:.45,loop:false},menu:{f:'musica-menu.mp3',v:.35,loop:true},game:{f:'musica-partita.mp3',v:.35,loop:true},winT:{f:'vittoria-terrestri.mp3',v:.2,loop:false},winA:{f:'vittoria-alieni.mp3',v:.26,loop:false}};
 const MUS={el:null,name:'',done:''};
 function stopMusic(){if(MUS.el){try{MUS.el.pause();}catch(e){}}MUS.el=null;MUS.name='';}
 function playMusic(name){if(!SND.on||!name||document.hidden){stopMusic();return;}if(MUS.name===name)return;stopMusic();
  if(MUS.done===name)return;const t=TRACKS[name];if(!t)return;
- try{const a=new Audio(t.f);a.loop=t.loop;a.volume=t.v;a.onended=()=>{if(!t.loop)MUS.done=name;};MUS.el=a;MUS.name=name;const pr=a.play();if(pr&&pr.catch)pr.catch(()=>{if(MUS.el===a)MUS.name='';});}catch(e){MUS.el=null;MUS.name='';}}
-function wantMusic(){if(UI.screen!=='game'||!S)return 'menu';if(!S.over){MUS.done='';return 'game';}if(S.winner<0)return '';return S.fac[S.winner]==='T'?'winT':'winA';}
+ try{const a=new Audio(t.f);a.loop=t.loop;a.volume=t.v;a.onended=()=>{if(!t.loop&&name!=='platt')MUS.done=name;};MUS.el=a;MUS.name=name;const pr=a.play();if(pr&&pr.catch)pr.catch(()=>{if(MUS.el===a)MUS.name='';});}catch(e){MUS.el=null;MUS.name='';}}
+function wantMusic(){if(UI.sheet&&UI.sheet.k==='platt')return 'platt';if(UI.screen!=='game'||!S)return 'menu';if(!S.over){MUS.done='';return 'game';}if(S.winner<0)return '';return S.fac[S.winner]==='T'?'winT':'winA';}
 function syncMusic(){if(NUYON){stopMusic();return;}playMusic(wantMusic());}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopMusic();else syncMusic();});
 const SPK_ON='<svg viewBox="0 0 12 10" aria-hidden="true"><path fill="currentColor" d="M0 3h3l3-3h1v10H6L3 7H0zM8 3h1v4H8zM10 1h1v8h-1z"/></svg>';
@@ -1691,7 +1696,7 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
   const it=(r,n)=>`<li><span class="cr-r">${r}</span><span class="cr-n">${n}</span></li>`;
   body=`<div class="credits"><p class="cr-t">INVASIONE</p><p class="cr-s">Terrestri contro Alieni</p>
 <h3 class="mh3">Il gioco</h3><ul class="crl">${it('Ideato e realizzato da','Daniele Radavero')}${it('Storia','Daniele Radavero')}</ul>
-<h3 class="mh3">Musiche</h3><ul class="crl">${it('Menù · «Data Analysis»','Retro BGM Chan')}${it('Partita · «Inconvenient Truth»','Retro BGM Chan')}${it('Vittoria dei Terrestri · «8bit Warriors»','EchoBrainz')}${it('Vittoria degli Alieni · «8-bit Horror Noises»','Freesound Community')}${it('Nuy Tinck Runs!! · musica originale','Daniele Radavero')}</ul>
+<h3 class="mh3">Musiche</h3><ul class="crl">${it('Menù · «Data Analysis»','Retro BGM Chan')}${it('Partita · «Inconvenient Truth»','Retro BGM Chan')}${it('Vittoria dei Terrestri · «8bit Warriors»','EchoBrainz')}${it('Vittoria degli Alieni · «8-bit Horror Noises»','Freesound Community')}${it('Nuy Tinck Runs!! · musica originale','Daniele Radavero')}${it('Tema di Mark Platt · musica originale','Daniele Radavero')}</ul>
 <p class="meta">Le altre musiche sono royalty free, da Pixabay.</p>
 <h3 class="mh3">Ringraziamenti</h3><ul class="crl">${it('Allo scrittore','Marco Platia')}<li><span class="cr-r">per aver prestato il volto al Capitano Mark Platt</span></li><li><span class="cr-n">Simone Colombo</span></li><li><span class="cr-r">per aver creduto nel gioco</span></li></ul>
 <h3 class="mh3">Caratteri</h3><ul class="crl">${it('Pixelify Sans','Stefie Justprince')}${it('Press Start 2P','CodeMan38')}${it('IBM Plex Sans','Mike Abbink, IBM')}</ul>
@@ -1745,7 +1750,7 @@ function drain(){if(S.q&&S.q.length){if(S.q.some(x=>x.k==='reboot'))sfx('reboot'
 function advance(){if(S&&S.tut&&S.over&&!S.rec){S.rec=true;tutMark('1');sfx('win');}
  if(S&&S.over&&!S.rec){S.rec=true;recordStats();sfx(S.winner===H?'win':S.winner===-1?'draw':'lose');if(unl().length)setTimeout(()=>sfx('unlock'),1300);}
  if(S&&!S.over&&S.pend&&S.pend.ctx.then==='ack'&&UI.ackRd!==S.rd){UI.ackRd=S.rd;sfx('round');}
- UI.sel=null;UI.grp=null;UI.tsel=null;UI.vsel=null;
+ UI.sel=null;UI.grp=null;UI.tsel=null;UI.swapA=null;UI.vsel=null;
  drain();tutFilter();spCheck();
  const pd=S.pend,humanNow=S.over||!pd||pd.p===H;
  if(humanNow&&UI.acc.length){sfx('pop');UI.pops.unshift({k:'tech',title:UI.accCont?'Esito':'Mossa dell\'avversario',lines:UI.acc});UI.acc=[];
@@ -1827,7 +1832,7 @@ const HD={
  credits:()=>{UI.sheet={k:'credits'};render();},
  spOk:()=>{const c=document.getElementById('sp-no');try{if(c&&c.checked)localStorage.setItem(SPK,'1');}catch(e){}UI.sheet=null;render();},
  sbopen:()=>{UI.sheet={k:'sb'};render();},
- undo:()=>{if(!canUndo())return;S=UI.undo;UI.undo=null;UI.sheet=null;UI.tsel=null;UI.grp=null;UI.sel=null;UI.pops=[];UI.acc=[];UI.accOn=false;render();},
+ undo:()=>{if(!canUndo())return;UI.swapA=null;S=UI.undo;UI.undo=null;UI.sheet=null;UI.tsel=null;UI.grp=null;UI.sel=null;UI.pops=[];UI.acc=[];UI.accOn=false;render();},
  leaveYes:()=>{UI.sheet=null;if(S&&S.tut){HD.tutQuit();return;}HD.new();},
  comp:()=>{UI.sheet={k:'comp',tab:'T'};render();},
  ctab:v=>{UI.sheet={k:'comp',tab:v||'T'};render();},
@@ -1844,9 +1849,16 @@ const HD={
  nameEdit:()=>{UI.sheet={k:'name',first:false};render();},
  nameOk:()=>{const el=document.getElementById('name-in');const v=el?el.value.trim():'';if(!v){if(el)el.focus();return;}setName(v);UI.sheet=null;render();},
  nameSkip:()=>{if(UI.sheet&&UI.sheet.first)setName('');UI.sheet=null;render();},
- pick:v=>act(v),pickc:v=>act(v,true),homeq:()=>{UI.sheet={k:'home'};render();},tdie:v=>{UI.tsel=v;render();},tback:()=>{UI.tsel=null;render();},pop:()=>{UI.pops.shift();render();kick();saveGame();},
+ pick:v=>act(v),pickc:v=>act(v,true),homeq:()=>{UI.sheet={k:'home'};render();},tdie:v=>{
+  if(S.pend&&S.pend.p===H&&S.pend.ctx.then==='techSwap'){const[o,i]=v.split(':').map(Number);
+   if(UI.swapA==null){if(o===H)UI.swapA=i;render();return;}
+   if(o===H){UI.swapA=null;render();return;}
+   const k=S.pend.opts.findIndex(x=>x.v.a===UI.swapA&&x.v.b===i);UI.swapA=null;
+   if(k>=0){act(k);return;}render();return;}
+  UI.tsel=v;render();},
+ swback:()=>{UI.swapA=null;render();},tback:()=>{UI.tsel=null;render();},pop:()=>{UI.pops.shift();render();kick();saveGame();},
  grp:v=>{UI.grp=v;render();},back:()=>{UI.grp=null;render();}};
-const CLICKS={tutNext:1,sbopen:1,undo:1,leaveYes:1,comp:1,ctab:1,cview:1,tutGo:1,tutSkip:1,tutQuit:1,tutAgain:1,tutPlay:1,book:1,capact:1,capPick:1,nameEdit:1,nameOk:1,nameSkip:1,credits:1,tro:1,capv:1,optT:1,setup:1,go:1,gonew:1,hf:1,df:1,story:1,storyLocked:1,tut0:1,tutn:1,help:1,poster:1,stats:1,homeback:1,new:1,endnew:1,recap:1,resume:1,close:1,homeq:1,die:1,card:1,hand:1,vsel:1,tdie:1,ev:1};
+const CLICKS={tutNext:1,sbopen:1,undo:1,leaveYes:1,comp:1,ctab:1,cview:1,tutGo:1,tutSkip:1,tutQuit:1,tutAgain:1,tutPlay:1,book:1,capact:1,capPick:1,nameEdit:1,nameOk:1,nameSkip:1,credits:1,tro:1,capv:1,optT:1,setup:1,go:1,gonew:1,hf:1,df:1,story:1,storyLocked:1,tut0:1,tutn:1,help:1,poster:1,stats:1,homeback:1,new:1,endnew:1,recap:1,resume:1,close:1,homeq:1,die:1,card:1,hand:1,vsel:1,tdie:1,swback:1,ev:1};
 /* tasto indietro del telefono */
 try{history.replaceState({inv:0},'');history.pushState({inv:1},'');}catch(e){}
 window.addEventListener('popstate',()=>{if(NUYON){closeNuy();return;}let stay=true;

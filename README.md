@@ -25,6 +25,7 @@ Si gioca contro un automa di livello Normale o Difficile, anche da smartphone.
 | `nuy.html` | Nuy Tinck Runs!!: il platform che si sblocca con 10 vittorie (si apre dal gioco). |
 | `ritr-nuy.png`, `ritr-dani.png`, `ritr-silvya.png` | Ritratti dei dialoghi del platform. |
 | `musica-nuy.mp3` | Musica del platform, di Daniele Radavero. |
+| `tema-platt.mp3` | Tema di Mark Platt, musica originale di Daniele Radavero (parte col messaggio dal ponte). |
 | `anteprima.jpg` | Immagine mostrata quando si condivide il link. |
 | `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `favicon-32.png` | Icone dell'app. |
 | `manifest.webmanifest` | Fa aprire il gioco come app quando lo si salva nella schermata Home. |
