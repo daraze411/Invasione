@@ -537,7 +537,7 @@ async function cloudSync(){const c=CL.cl;if(!c||!CL.user)return;
   if(d&&typeof d.wins==='number'&&d.wins>lw){CL.noPush=true;const ok=importCode(d.code);CL.noPush=false;CL.msg=ok?'Fatto: ho ripristinato i tuoi progressi dall\'account.':'Il salvataggio online non è leggibile.';}
   else{await cloudPush(true);CL.msg=d?'Progressi salvati online.':'Account collegato. Da ora i progressi si salvano da soli.';}
   CL.ok=true;}catch(e){CL.noPush=false;CL.ok=false;CL.msg='Non riesco a raggiungere il salvataggio online. Riprova più tardi.';}
- if(CL.fromLink){CL.fromLink=false;UI.sheet={k:'stats'};UI.codeMsg=null;UI.codeIn='';UI.rst=false;try{history.replaceState(null,'',location.pathname);}catch(e){}}
+ if(CL.fromLink){CL.fromLink=false;UI.sheet={k:'acct'};try{history.replaceState(null,'',location.pathname);}catch(e){}}
  render();}
 function cloudPush(now){if(!cloudOn()||!CL.cl||!CL.user||CL.noPush)return Promise.resolve();clearTimeout(CLT);
  const go=async()=>{try{await CL.cl.from('saves').upsert({user_id:CL.user.id,code:exportCode(),wins:winsOf(loadStats()),updated_at:new Date().toISOString()});}catch(e){}};
@@ -747,7 +747,7 @@ function homeHTML(){const st=totSt(loadStats()),sv=loadSave(),ng=games(st);
 ${nm()?`<p class="hello">Ciao, ${esc(nm())}! I Fronti ti aspettano.</p>`:''}<nav class="menu" aria-label="Menù">${resumeHTML()}<button class="mi main" data-a="setup">${sv?'NUOVA PARTITA':'GIOCA'}</button>
 ${storyOpen()?'<button class="mi" data-a="story">Storia</button>':''}${has('books')?'<button class="mi" data-a="book">Libro del giorno</button>':''}<button class="mi" data-a="tro">Trofei</button><button class="mi" data-a="comp">Carte</button><button class="mi" data-a="tut0">Tutorial</button>
 <button class="mi" data-a="help">Regolamento</button><button class="mi" data-a="credits">Crediti</button>
-<button class="mi ${(storyOpen()?1:0)+(has('books')?1:0)===1?'wide':''}" data-a="stats">Le tue partite<small>${sub}</small></button><a class="mi wide" id="apk" href="invasione.apk" download hidden>Scarica l'app<small>Android · file APK</small></a></nav></div>`;}
+<button class="mi ${(storyOpen()?1:0)+(has('books')?1:0)===1?'wide':''}" data-a="stats">Le tue partite<small>${sub}</small></button>${cloudOn()?`<button class="mi wide" data-a="acct">${CL.user?'Account online':'Accedi con la email'}<small>${CL.user?esc(CL.user.email||''):'Facoltativo, ma consigliato'}</small></button>`:''}<a class="mi wide" id="apk" href="invasione.apk" download hidden>Scarica l'app<small>Android · file APK</small></a></nav></div>`;}
 function setupHTML(){
  const side=(f,name)=>`<button class="side ${f} ${hf===f?'on':''}" data-a="hf" data-v="${f}" aria-pressed="${hf===f}"><b>${name}</b>${hf===f?'<span class="you">La tua fazione</span>':''}</button>`;
  return `<div class="setup"><div class="bar"><button class="back" data-a="homeback" aria-label="Torna alla home" title="Home"><svg class="ico" viewBox="0 0 8 8" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="M3 0h2v1h1v1h1v1h1v1H7v4H5V5H3v3H1V4H0V3h1V2h1V1h1z"/></svg></button><h1>Nuova partita</h1>${sndBtn()}</div>
@@ -1136,6 +1136,7 @@ function sheetHTML(){
  else if(UI.sheet&&UI.sheet.k==='storyLocked'){const st=loadStats();ttl='Storia da sbloccare';cancel=true;
   const r=(f,n)=>`<li class="${st[f].w?'done':''}"><span class="ck">${st[f].w?'✓':'○'}</span><span>Vinci una partita con <b class="f${f}">${n}</b>${st[f].w?' — fatto':''}</span></li>`;
   body=`<p class="lead">Come sono iniziati i guai fra Terrestri e Alieni? Per scoprirlo devi aver combattuto da entrambe le parti.</p><ul class="goals">${r('T','i Terrestri')}${r('A','gli Alieni')}</ul><p>Vale qualsiasi difficoltà. Le vittorie restano anche nel codice di salvataggio.</p>`+btn('setup','','Gioca una partita','hi');}
+ else if(UI.sheet&&UI.sheet.k==='acct'){ttl='Account online';tall=true;cancel=true;body=`<p class="lead">Salva i tuoi progressi con la tua email: sono al sicuro anche se cambi telefono o cancelli i dati del browser. Non è obbligatorio, puoi sempre usare il codice di salvataggio.</p>${cloudHTML()}`;}
  else if(UI.sheet&&UI.sheet.k==='stats'){ttl='Le tue partite';tall=true;cancel=true;const code=exportCode(),ng=games(totSt(loadStats()));
   const canShare=typeof navigator!=='undefined'&&!!navigator.share;
   const wa='https://wa.me/?text='+encodeURIComponent('INVASIONE, il mio codice di salvataggio: '+code);
@@ -1217,7 +1218,7 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
 <p class="meta">Caratteri con licenza SIL Open Font License, da Google Fonts.</p>
 <p class="cr-c">© 2026 Daniele Radavero · Tutti i diritti riservati</p></div>`;}
  else if(UI.sheet&&UI.sheet.k==='tro'){ttl='Trofei';tall=true;cancel=true;const st=loadStats(),u=trophies();
-  const row=t=>{const ok=u.includes(t.id);return `<li class="tro ${ok?'ok':'lk'}"><span class="ti" aria-hidden="true">${ok?'★':LOCK}</span><span class="tb"><b>${esc(t.name)}</b>${ok?`<small>${esc(t.desc)}</small>${t.id==='story'?btn('story','','Leggi la Storia','hi'):t.id==='cap'?`<span class="tcaps">${btn('capv','mark','Mark Platt')}${btn('capv','kar','Kar Am Oh')}</span>${plattGet()!==null?btn('pmsg','','Rivedi il messaggio di Platt'):btn('quizgo','','Fai il quiz di Platt')}`:t.id==='cap2'?`<span class="tcaps">${btn('capv','dani','Dani e Silvya')}${btn('capv','nuy','Nuy Tinck')}</span>${btn('nuyplay','','Gioca a Nuy Tinck Runs!!')}${nuyBestHTML()}`:t.id==='books'?btn('book','','Libro del giorno','hi'):''}`:`<small>${esc(t.req)} · ${t.prog(st)}</small>`}</span></li>`;};
+  const row=t=>{const ok=u.includes(t.id);return `<li class="tro ${ok?'ok':'lk'}"><span class="ti" aria-hidden="true">${ok?'★':LOCK}</span><span class="tb"><b>${esc(t.name)}</b>${ok?`<small>${esc(t.desc)}</small>${t.id==='story'?btn('story','','Leggi la Storia','hi'):t.id==='cap'?`<span class="tcaps">${btn('capv','mark','Mark Platt')}${btn('capv','kar','Kar Am Oh')}</span>${plattGet()!==null?btn('pmsg','','Rivedi il messaggio di Platt')+btn('quizgo','','Rifai il quiz di Platt'):btn('quizgo','','Fai il quiz di Platt')}`:t.id==='cap2'?`<span class="tcaps">${btn('capv','dani','Dani e Silvya')}${btn('capv','nuy','Nuy Tinck')}</span>${btn('nuyplay','','Gioca a Nuy Tinck Runs!!')}${nuyBestHTML()}`:t.id==='books'?btn('book','','Libro del giorno','hi'):''}`:`<small>${esc(t.req)} · ${t.prog(st)}</small>`}</span></li>`;};
   const hid=`<li class="tro lk"><span class="ti" aria-hidden="true">${LOCK}</span><span class="tb"><b>????</b><small>????</small></span></li>`,vis=3+u.length;
   const rows=TROPHIES.map((t,i)=>u.includes(t.id)||i<vis?row(t):hid).join('')+(TROPHIES.length<vis?`<li class="tro lk"><span class="ti" aria-hidden="true">${LOCK}</span><span class="tb"><b>????</b><small>Requisito: in arrivo con un prossimo aggiornamento</small></span></li>`:hid);
   body=`<p class="lead">Vinci contro il computer per sbloccare nuovi contenuti. Vale qualsiasi fazione e difficoltà, e i trofei restano anche se azzeri le statistiche.</p><ul class="trol">${rows}</ul><p class="meta">I trofei viaggiano nel codice di salvataggio: dopo uno sblocco aggiornalo da «Le tue partite».</p>`;}
@@ -1247,9 +1248,9 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
  else if(UI.sheet&&UI.sheet.k==='quiz'){const q=UI.sheet,Q=PQ[q.i];ttl='Quiz di Platt';tall=true;lead='Domanda '+(q.i+1)+' di '+PQ.length;
   body=`<p class="tx qtx">${esc(Q.q)}</p>`+Q.a.map((t,j)=>`<button class="b qo ${q.sel===j?(j===Q.ok?'qok':'qbad'):''}" data-a="qa" data-v="${j}"${q.sel>=0?' disabled':''}>${esc(t)}</button>`).join('');}
  else if(UI.sheet&&UI.sheet.k==='quizres'){ttl='Quiz di Platt';tall=true;
-  body=`<p class="tx qtx">Hai risposto giusto a <b>${UI.sheet.score}</b> domande su ${PQ.length}.</p>`+songCue()+btn('pmsg','','Guarda il messaggio di Platt','hi qo');}
+  body=`<p class="tx qtx">Hai risposto giusto a <b>${UI.sheet.score}</b> domande su ${PQ.length}.</p>`+songCue()+btn('pmsg',UI.sheet.score,'Guarda il messaggio di Platt','hi qo');}
  else if(UI.sheet&&UI.sheet.k==='platt'){ttl='Messaggio dal ponte';tall=true;cancel=true;
-  body=`<div class="pscr"><p class="ptag">COLLEGAMENTO · PONTE DI COMANDO</p><canvas id="pcv" width="256" height="192" aria-label="Il Capitano Mark Platt"></canvas><p class="pline" id="pt"></p><p class="pline pw" id="pw"></p></div>`+songCue()+btn('pmsg','','Rivedi','sec')+btn('plPrize','','Riscuoti il premio','hi');}
+  body=`<div class="pscr"><p class="ptag">COLLEGAMENTO · PONTE DI COMANDO</p><canvas id="pcv" width="256" height="192" aria-label="Il Capitano Mark Platt"></canvas><p class="pline" id="pt"></p><p class="pline pw" id="pw"></p></div>`+songCue()+btn('pmsg',UI.sheet.score,'Rivedi','sec')+btn('plPrize','','Riscuoti il premio','hi');}
  else if(UI.sheet&&UI.sheet.k==='prize'){ttl='Premio: i Capitani';tall=true;cancel=true;const pids=UI.sheet.ids||['mark','kar'];lead=pids[0]==='dani'?'Dani e Silvya guidano i Terrestri, Nuy Tinck gli Alieni. Li attivi in Nuova partita.':'Mark Platt guida i Terrestri, Kar Am Oh gli Alieni. Li attivi in Nuova partita.';
   body=pids.map(id=>{const c=CAPS[id];return cardFace({fac:c.f,art:c.img,title:c.n,text:c.ab,tag:c.f==='T'?'Capitano dei Terrestri':'Capitano degli Alieni',wide:true})+`<h3 class="mh3">Come funziona</h3><ul class="capl">${c.long.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;}).join('');}
  else return '';
@@ -1309,6 +1310,7 @@ const HD={
  new:()=>{clearTimeout(tm);UI=mkUI('start');S=null;render();},
  setup:()=>{UI=mkUI('setup');render();},homeback:()=>{UI=mkUI('start');render();},
  endnew:()=>{clearTimeout(tm);S=null;UI=mkUI('setup');render();},recap:()=>{UI.sheet={k:'recap'};render();},
+ acct:()=>{UI.sheet={k:'acct'};CL.msg='';render();if(cloudOn())cloudLoad();},
  stats:()=>{UI.sheet={k:'stats'};UI.codeMsg=null;UI.codeIn='';UI.rst=false;CL.msg='';render();if(cloudOn())cloudLoad();},
  cl_send:()=>{cloudSend();},cl_verify:()=>{cloudVerify();},cl_push:()=>{cloudPush(true).then(()=>{CL.msg='Progressi salvati online.';CL.ok=true;render();});},cl_out:()=>{cloudOut();},cl_del:()=>{cloudDel();},
  rst:()=>{UI.rst=true;render();},rstNo:()=>{UI.rst=false;render();},rstYes:()=>{syncTro();saveStats(zst());UI.rst=false;UI.codeMsg='Statistiche azzerate.';UI.codeOk=true;render();},
@@ -1322,8 +1324,8 @@ const HD={
  capv:v=>{UI.sheet={k:'capv',id:CAPS[v]?v:(v==='A'?'kar':'mark')};render();},
  quizgo:()=>{UI.sheet={k:'quiz',i:0,ok:0,sel:-1};render();},
  qa:v=>{const q=UI.sheet;if(!q||q.k!=='quiz'||q.sel>=0)return;const j=+v;q.sel=j;if(j===PQ[q.i].ok)q.ok++;sfx(j===PQ[q.i].ok?'qok':'qno');render();
-  setTimeout(()=>{if(UI.sheet!==q)return;if(q.i+1<PQ.length)UI.sheet={k:'quiz',i:q.i+1,ok:q.ok,sel:-1};else{plattSet(q.ok);QDONE=true;UI.sheet={k:'quizres',score:q.ok};}render();},900);},
- pmsg:()=>{const sc=plattGet();UI.sheet={k:'platt',score:sc===null?0:sc};render();},
+  setTimeout(()=>{if(UI.sheet!==q)return;if(q.i+1<PQ.length)UI.sheet={k:'quiz',i:q.i+1,ok:q.ok,sel:-1};else{plattSet(Math.max(q.ok,plattGet()===null?0:plattGet()));QDONE=true;UI.sheet={k:'quizres',score:q.ok};}render();},900);},
+ pmsg:v=>{const sc=plattGet();UI.sheet={k:'platt',score:(v!==undefined&&v!=='')?+v:(sc===null?0:sc)};render();},
  plPrize:()=>{UI.sheet={k:'prize'};render();},
  nuyplay:()=>{UI.sheet=null;render();openNuy(true);},
  optT:v=>{const o=loadOpt();if(v==='bonus'||v==='cap')o[v]=!o[v];saveOpt(o);render();},
