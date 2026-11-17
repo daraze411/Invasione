@@ -197,6 +197,7 @@ button.chip{cursor:pointer}
 .pscr::after{content:"";position:absolute;inset:8px;border-radius:5px;pointer-events:none;background:repeating-linear-gradient(to bottom,rgba(0,0,0,.22) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.45) 100%)}
 .sheet.tall .pscr p.ptag{font-size:12px;letter-spacing:.12em;color:#9ff0e4;opacity:.7;margin:0 0 4px}
 .sheet.tall .pscr p.pline{font-size:22px;line-height:1.5;color:#9ff0e4;min-height:4.5em;margin:10px 0 0;text-shadow:0 0 6px rgba(159,240,228,.35)}
+.cue{margin:12px 0 4px;padding:10px;border:2px solid var(--line);background:var(--panel)}.cue .cuet{margin:0 0 8px;font-family:var(--disp);font-size:14px;line-height:1.5;color:#9ff0e4}
 .sheet.tall .pscr p.pw{font-style:italic;opacity:.75;min-height:0}
 .sheet.tall p{color:var(--fg)}
 .sheet.tall p.step{color:var(--mute);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
@@ -1392,6 +1393,8 @@ const SFX={
  combat:c=>{const t=c.currentTime;noise(c,t,.16,.09);tone(c,240,t,.16,{to:70,v:.06});},
  shield:c=>seq(c,[84,88,91],.04,{v:.04,w:'triangle'}),
  pop:c=>seq(c,[69,64],.05,{v:.04}),
+ qok:c=>seq(c,[72,76,79,84],.07,{v:.05}),
+ qno:c=>seq(c,[52,48,43],.13,{v:.05}),
  round:c=>seq(c,[67,72,76],.09,{v:.05}),
  win:c=>{seq(c,[72,76,79,84,null,79,84],.11,{v:.06});seq(c,[48,52,55,60,null,55,60],.11,{v:.07,w:'triangle'});},
  lose:c=>{seq(c,[67,66,65,64,null,52],.19,{v:.055});seq(c,[43,42,41,40,null,28],.19,{v:.07,w:'triangle'});},
@@ -1574,6 +1577,7 @@ const PMSG={
 let PL={sh:null,tm:0,img:null};
 function plattChunk(text,max){const sent=text.match(/[^.!?]+[.!?]+\s*/g)||[text],out=[];let cur='';
  sent.forEach(x=>{if(cur&&(cur+x).length>max){out.push(cur.trim());cur=x;}else cur+=x;});if(cur)out.push(cur.trim());return out;}
+function songCue(){return `<div class="cue"><p class="cuet">${SND.on?'♪ Nuova canzone: «Tema di Mark Platt», in sottofondo.':'♪ Nuova canzone: «Tema di Mark Platt». Con l\'audio spento non la senti.'}</p>${btn('snd','',SND.on?'Spegni l\'audio':'Attiva l\'audio','sec')}</div>`;}
 function plattKick(){if(UI&&UI.sheet&&UI.sheet.k==='platt'&&PL.sh!==UI.sheet)plattStart();}
 function plattStart(){
  clearTimeout(PL.tm);const sh=UI.sheet,sc=sh.score,m=sc>=10?PMSG.hi:sc>=7?PMSG.mid:PMSG.lo;
@@ -1691,7 +1695,7 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
  else if(UI.sheet&&UI.sheet.k==='name'){const first=UI.sheet.first;ttl=first?'Benvenuto, comandante':'Il tuo nome';
   body=`<p class="lead">${first?'Prima di cominciare: come ti chiami? Il gioco ti chiamerà per nome quando vinci o sblocchi qualcosa.':'Il nome con cui il gioco ti chiama.'}</p><input id="name-in" class="code nm" maxlength="20" autocomplete="given-name" placeholder="Il tuo nome" value="${esc(nm())}" aria-label="Il tuo nome">${btn('nameOk','','Conferma','hi')}${btn('nameSkip','',first?'Preferisco di no':'Annulla','sec')}`;}
  else if(UI.sheet&&UI.sheet.k==='book'&&has('books')){const b=bookOfDay();ttl='Libro del giorno';cancel=true;
-  body=`<p class="lead">${nm()?esc(nm())+', ecco':'Ecco'} il consiglio di oggi:</p><div class="bookc"><span class="bk-t">${esc(b[0])}</span><span class="bk-a">${esc(b[1])}</span></div><a class="b hi" href="${esc(grUrl(b))}" target="_blank" rel="noopener">Scopri il libro su Goodreads</a><p class="meta">Domani un altro romanzo di fantascienza. Si apre in una nuova scheda.</p>`;}
+  body=`<p class="lead">${nm()?esc(nm())+', ecco':'Ecco'} il consiglio di oggi:</p><div class="bookc"><span class="bk-t">${esc(b[0])}</span><span class="bk-a">${esc(b[1])}</span></div><a class="b hi" href="${esc(grUrl(b))}" target="_blank" rel="noopener">Scopri il libro su Goodreads</a><p class="meta">Domani un altro romanzo di fantascienza.</p>`;}
  else if(UI.sheet&&UI.sheet.k==='credits'){ttl='Crediti';tall=true;cancel=true;
   const it=(r,n)=>`<li><span class="cr-r">${r}</span><span class="cr-n">${n}</span></li>`;
   body=`<div class="credits"><p class="cr-t">INVASIONE</p><p class="cr-s">Terrestri contro Alieni</p>
@@ -1733,9 +1737,9 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
  else if(UI.sheet&&UI.sheet.k==='quiz'){const q=UI.sheet,Q=PQ[q.i];ttl='Quiz di Platt';tall=true;lead='Domanda '+(q.i+1)+' di '+PQ.length;
   body=`<p class="tx qtx">${esc(Q.q)}</p>`+Q.a.map((t,j)=>`<button class="b qo ${q.sel===j?(j===Q.ok?'qok':'qbad'):''}" data-a="qa" data-v="${j}"${q.sel>=0?' disabled':''}>${esc(t)}</button>`).join('');}
  else if(UI.sheet&&UI.sheet.k==='quizres'){ttl='Quiz di Platt';tall=true;
-  body=`<p class="tx qtx">Hai risposto giusto a <b>${UI.sheet.score}</b> domande su ${PQ.length}.</p>`+btn('pmsg','','Guarda il messaggio di Platt','hi qo');}
+  body=`<p class="tx qtx">Hai risposto giusto a <b>${UI.sheet.score}</b> domande su ${PQ.length}.</p>`+songCue()+btn('pmsg','','Guarda il messaggio di Platt','hi qo');}
  else if(UI.sheet&&UI.sheet.k==='platt'){ttl='Messaggio dal ponte';tall=true;cancel=true;
-  body=`<div class="pscr"><p class="ptag">COLLEGAMENTO · PONTE DI COMANDO</p><canvas id="pcv" width="256" height="192" aria-label="Il Capitano Mark Platt"></canvas><p class="pline" id="pt"></p><p class="pline pw" id="pw"></p></div>`+btn('pmsg','','Rivedi','sec')+btn('plPrize','','Riscuoti il premio','hi');}
+  body=`<div class="pscr"><p class="ptag">COLLEGAMENTO · PONTE DI COMANDO</p><canvas id="pcv" width="256" height="192" aria-label="Il Capitano Mark Platt"></canvas><p class="pline" id="pt"></p><p class="pline pw" id="pw"></p></div>`+songCue()+btn('pmsg','','Rivedi','sec')+btn('plPrize','','Riscuoti il premio','hi');}
  else if(UI.sheet&&UI.sheet.k==='prize'){ttl='Premio: i Capitani';tall=true;cancel=true;const pids=UI.sheet.ids||['mark','kar'];lead=pids[0]==='dani'?'Dani e Silvya guidano i Terrestri, Nuy Tinck gli Alieni. Li attivi in Nuova partita.':'Mark Platt guida i Terrestri, Kar Am Oh gli Alieni. Li attivi in Nuova partita.';
   body=pids.map(id=>{const c=CAPS[id];return cardFace({fac:c.f,art:c.img,title:c.n,text:c.ab,tag:c.f==='T'?'Capitano dei Terrestri':'Capitano degli Alieni',wide:true})+`<h3 class="mh3">Come funziona</h3><ul class="capl">${c.long.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;}).join('');}
  else return '';
@@ -1806,7 +1810,7 @@ const HD={
  storyLocked:()=>{UI.sheet={k:'tro'};render();},tro:()=>{UI.sheet={k:'tro'};render();},
  capv:v=>{UI.sheet={k:'capv',id:CAPS[v]?v:(v==='A'?'kar':'mark')};render();},
  quizgo:()=>{UI.sheet={k:'quiz',i:0,ok:0,sel:-1};render();},
- qa:v=>{const q=UI.sheet;if(!q||q.k!=='quiz'||q.sel>=0)return;const j=+v;q.sel=j;if(j===PQ[q.i].ok)q.ok++;sfx('pop');render();
+ qa:v=>{const q=UI.sheet;if(!q||q.k!=='quiz'||q.sel>=0)return;const j=+v;q.sel=j;if(j===PQ[q.i].ok)q.ok++;sfx(j===PQ[q.i].ok?'qok':'qno');render();
   setTimeout(()=>{if(UI.sheet!==q)return;if(q.i+1<PQ.length)UI.sheet={k:'quiz',i:q.i+1,ok:q.ok,sel:-1};else{plattSet(q.ok);QDONE=true;UI.sheet={k:'quizres',score:q.ok};}render();},900);},
  pmsg:()=>{const sc=plattGet();UI.sheet={k:'platt',score:sc===null?0:sc};render();},
  plPrize:()=>{UI.sheet={k:'prize'};render();},
