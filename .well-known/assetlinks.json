@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.netlify.invasione.twa",
+        "sha256_cert_fingerprints": ["49:0D:19:0A:1B:93:C8:E7:AF:B5:FB:2B:D6:50:0B:13:97:EA:D0:0C:0D:D8:57:C5:37:72:00:71:A1:79:7D:F9"]
+      }
+    }]
