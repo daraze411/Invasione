@@ -102,6 +102,11 @@ button.die.sel{transform:translateY(-4px);box-shadow:0 0 0 2px var(--bg),0 0 0 4
 button.die:not(.can){filter:saturate(.6)}
 /* fronts */
 .front{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.front.f0,.front.f1,.front.f2{background-size:cover;image-rendering:pixelated}
+.front.f0{background-image:linear-gradient(rgba(9,14,24,.62),rgba(9,14,24,.74)),url(fr-0.png);background-position:center}
+.front.f1{background-image:linear-gradient(rgba(9,14,24,.62),rgba(9,14,24,.74)),url(fr-1.png);background-position:center}
+.front.f2{background-image:linear-gradient(rgba(9,14,24,.62),rgba(9,14,24,.74)),url(fr-2.png);background-position:center}
+.vart{margin:0 auto 10px;max-width:260px;border:3px solid #070b10}.vart img{width:100%;display:block;image-rendering:pixelated}
 .fh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .fh b{font-family:var(--disp);font-size:18px;letter-spacing:.04em;font-weight:700}
 .chip{font-size:11px;border:1px solid var(--line);border-radius:99px;padding:2px 9px;background:var(--panel2);color:var(--fg)}
@@ -255,6 +260,12 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 .cmini .rcard .dv{width:16px;height:16px;bottom:6px}.cmini .rcard .dv.l{left:6px}.cmini .rcard .dv.r{right:6px}
 .cmini .rcard .dvs{bottom:6px;gap:1px}.cmini .rcard .dvs svg{width:12px;height:12px}.cmini .rcard .dvs.l{left:5px}.cmini .rcard .dvs.r{right:5px}
 .cmini .rcard.noart{min-height:120px}
+.cmini .rcard:not(.noart){aspect-ratio:2/3!important;overflow:hidden;min-height:0!important}
+.cmini .rcard:not(.noart) .txt{min-height:0;overflow:hidden;padding:5px 6px 26px!important;gap:2px!important;justify-content:center}
+.cmini .rcard:not(.noart).nodice .txt{padding-bottom:6px!important}
+.cmini .rcard:not(.noart).nodice .art{aspect-ratio:16/9}
+.cmini .rcard .txt b{font-size:12px!important;line-height:1.1!important}
+.cmini .rcard .txt p{font-size:10px!important;line-height:1.15!important}
 .cmini .cn{font-family:var(--disp);font-size:13px;color:var(--paper);min-height:16px;display:flex;flex-direction:column;align-items:center}
 .cmini.lk{display:grid;place-items:center;border:2px dashed var(--line);min-height:150px;font-family:var(--pix);color:var(--mute)}
 /* addestramento */
@@ -516,7 +527,7 @@ function okRec(x){return !!x&&['w','l','d'].every(k=>Number.isInteger(x[k])&&x[k
 /* ===== Account online facoltativo (Supabase, link via email) =====
    Compila url e key (chiavi pubbliche) per attivarlo. Vuoti = la sezione non compare. */
 const SB=Object.assign({url:'',key:''},window.INV_SB||{});
-const CL={cl:null,user:null,msg:'',ok:false,sent:false,email:'',load:null,booted:false,noPush:false,fromLink:false,busy:false};
+const CL={cl:null,user:null,msg:'',ok:false,sent:false,email:'',load:null,booted:false,noPush:false,fromLink:false,busy:false,chk:false};
 var CLT=null;
 const cloudOn=()=>!!(SB.url&&SB.key);
 function cloudLoad(){if(!cloudOn())return Promise.resolve(null);if(CL.cl)return Promise.resolve(CL.cl);if(CL.load)return CL.load;
@@ -524,14 +535,14 @@ function cloudLoad(){if(!cloudOn())return Promise.resolve(null);if(CL.cl)return 
   CL.cl=window.supabase.createClient(SB.url,SB.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   CL.cl.auth.onAuthStateChange((ev,ses)=>{const u=ses&&ses.user||null,was=CL.user;CL.user=u;
    if(u&&(!was||was.id!==u.id))setTimeout(cloudSync,0);else render();});
-  CL.cl.auth.getSession().then(r=>{const u=r&&r.data&&r.data.session?r.data.session.user:null;if(u&&!CL.user){CL.user=u;setTimeout(cloudSync,0);}else render();});
+  CL.cl.auth.getSession().then(r=>{CL.chk=false;const u=r&&r.data&&r.data.session?r.data.session.user:null;if(u&&!CL.user){CL.user=u;setTimeout(cloudSync,0);}else render();});
   res(CL.cl);}catch(e){CL.load=null;CL.cl=null;res(null);}};
   if(window.supabase)return go();
   const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.1/dist/umd/supabase.js';sc.onload=go;sc.onerror=()=>{CL.load=null;res(null);};document.head.appendChild(sc);});
  return CL.load;}
 function cloudBoot(){if(CL.booted||!cloudOn())return;CL.booted=true;let has=false;try{for(let i=0;i<localStorage.length;i++){if(/^sb-.*-auth-token$/.test(localStorage.key(i))){has=true;break;}}}catch(e){}
  if(/access_token=|[?&]code=|type=magiclink/.test(location.hash+location.search)){has=true;CL.fromLink=true;}
- if(has)cloudLoad();}
+ if(has){CL.chk=true;cloudLoad().then(c=>{if(!c){CL.chk=false;render();}});}}
 async function cloudSync(){const c=CL.cl;if(!c||!CL.user)return;
  try{const r=await c.from('saves').select('code,wins').eq('user_id',CL.user.id).maybeSingle();if(r.error)throw r.error;const d=r.data,lw=winsOf(loadStats());
   if(d&&typeof d.wins==='number'&&d.wins>lw){CL.noPush=true;const ok=importCode(d.code);CL.noPush=false;CL.msg=ok?'Fatto: ho ripristinato i tuoi progressi dall\'account.':'Il salvataggio online non è leggibile.';}
@@ -716,16 +727,16 @@ function compTech(f){const ids=[];for(let i=1;i<=24;i++)ids.push(i);if(has('bonu
 function compHTML(tab){
  const mini=(a,face,n,sub)=>`<button class="cmini" data-a="cview" data-v="${a}">${face}<span class="cn">${n>1?'×'+n:''}${sub?`<small>${esc(sub)}</small>`:''}</span></button>`;
  if(tab==='T'||tab==='A')return `<p class="meta">${tab==='T'?'Il mazzo dei Terrestri':'Il mazzo degli Alieni'}: prima le univoche (ne ricevi una a caso), poi le esclusive della fazione, poi le comuni. ×2 indica le copie nel mazzo.</p><div class="cgrid">${compTech(tab).map(x=>mini('t'+x.id,techFace(x.id),x.n)).join('')}</div>`;
- if(tab==='E')return `<p class="meta">Ogni round ogni Fronte riceve un Evento e una Condizione.</p><div class="cgrid">${[1,2,3,4,5,7,8,9,10,11,12].map(e=>mini('e'+e,cardFace({noart:true,tag:'Evento',title:EVN[e],text:EVD[e]}),1)).join('')}${['M','B','DH','DL'].map(c=>mini('c'+c,cardFace({noart:true,tag:'Condizione',title:CN[c],text:CD[c]}),{M:4,B:4,DH:2,DL:2}[c])).join('')}</div>`;
- if(tab==='V')return `<p class="meta">Quando prendi un Virus peschi una di queste carte. Alcune colpiscono te, altre aiutano l\'avversario.</p><div class="cgrid">${[1,2,3,4,5,6,7].map(v=>mini('v'+v,cardFace({noart:true,tag:'Virus',title:INV.VIRN[v],text:VT[v][0]}),VCOPIES[v])).join('')}</div>`;
+ if(tab==='E')return `<p class="meta">Ogni round ogni Fronte riceve un Evento e una Condizione.</p><div class="cgrid">${[1,2,3,4,5,7,8,9,10,11,12].map(e=>mini('e'+e,cardFace({art:'art-ev.png',tag:'Evento',title:EVN[e],text:EVD[e]}),1)).join('')}${['M','B','DH','DL'].map(c=>mini('c'+c,cardFace({noart:true,tag:'Condizione',title:CN[c],text:CD[c]}),{M:4,B:4,DH:2,DL:2}[c])).join('')}</div>`;
+ if(tab==='V')return `<p class="meta">Quando prendi un Virus peschi una di queste carte. Alcune colpiscono te, altre aiutano l\'avversario.</p><div class="cgrid">${[1,2,3,4,5,6,7].map(v=>mini('v'+v,cardFace({art:'art-vi.png',tag:'Virus',title:INV.VIRN[v],text:VT[v][0]}),VCOPIES[v])).join('')}</div>`;
  if(tab==='C'){const ids=[...(has('cap')?['mark','kar']:[]),...(has('cap2')?['dani','nuy']:[])];
   return ids.length?`<div class="cgrid">${ids.map(id=>mini('k'+id,cardFace({fac:CAPS[id].f,art:CAPS[id].img,title:CAPS[id].n,text:CAPS[id].ab,tag:'Capitano',wide:true}),1)).join('')}${has('cap2')?'':'<div class="cmini lk"><span>????</span></div>'}</div>`:'<p class="lead">I Capitani si sbloccano con i Trofei. Per ora restano un mistero: ????</p>';}
  return '';}
 function cviewFace(a){const k=a.charAt(0),v=a.slice(1);
  if(k==='t')return techFace(+v)+`<p class="ctip">${esc(techTip(+v).split('\n\n').slice(1).join(' '))}</p>`;
- if(k==='e')return cardFace({noart:true,tag:'Evento',title:EVN[+v],text:EVD[+v]});
+ if(k==='e')return cardFace({art:'art-ev.png',tag:'Evento',title:EVN[+v],text:EVD[+v]});
  if(k==='c')return cardFace({noart:true,tag:'Condizione',title:CN[v],text:CD[v]});
- if(k==='v')return cardFace({noart:true,tag:'Virus',title:INV.VIRN[+v],text:VT[+v][0]})+`<p class="ctip">Se è l\'avversario a prenderlo: ${esc(VT[+v][1])}</p>`;
+ if(k==='v')return cardFace({art:'art-vi.png',tag:'Virus',title:INV.VIRN[+v],text:VT[+v][0]})+`<p class="ctip">Se è l\'avversario a prenderlo: ${esc(VT[+v][1])}</p>`;
  if(k==='k'&&CAPS[v])return cardFace({fac:CAPS[v].f,art:CAPS[v].img,title:CAPS[v].n,text:CAPS[v].ab,tag:'Capitano',wide:true})+`<ul class="capl">${CAPS[v].long.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
  return '';}
 function capOf(p){return S&&S.cap&&S.caps?S.caps[p]:null;}
@@ -747,7 +758,7 @@ function homeHTML(){const st=totSt(loadStats()),sv=loadSave(),ng=games(st);
 ${nm()?`<p class="hello">Ciao, ${esc(nm())}! I Fronti ti aspettano.</p>`:''}<nav class="menu" aria-label="Menù">${resumeHTML()}<button class="mi main" data-a="setup">${sv?'NUOVA PARTITA':'GIOCA'}</button>
 ${storyOpen()?'<button class="mi" data-a="story">Storia</button>':''}${has('books')?'<button class="mi" data-a="book">Libro del giorno</button>':''}<button class="mi" data-a="tro">Trofei</button><button class="mi" data-a="comp">Carte</button><button class="mi" data-a="tut0">Tutorial</button>
 <button class="mi" data-a="help">Regolamento</button><button class="mi" data-a="credits">Crediti</button>
-<button class="mi ${(storyOpen()?1:0)+(has('books')?1:0)===1?'wide':''}" data-a="stats">Le tue partite<small>${sub}</small></button>${cloudOn()?`<button class="mi wide" data-a="acct">${CL.user?'Account online':'Accedi con la email'}<small>${CL.user?esc(CL.user.email||''):'Facoltativo, ma consigliato'}</small></button>`:''}<a class="mi wide" id="apk" href="invasione.apk" download hidden>Scarica l'app<small>Android · file APK</small></a></nav></div>`;}
+<button class="mi ${(storyOpen()?1:0)+(has('books')?1:0)===1?'wide':''}" data-a="stats">Le tue partite<small>${sub}</small></button>${cloudOn()?`<button class="mi wide" data-a="acct">${CL.user?'● Collegato':CL.chk?'Controllo accesso…':'○ Non collegato'}<small>${CL.user?esc(CL.user.email||''):CL.chk?'Un attimo':'Tocca per accedere con la email (facoltativo, consigliato)'}</small></button>`:''}<a class="mi wide" id="apk" href="invasione.apk" download hidden>Scarica l'app<small>Android · file APK</small></a></nav></div>`;}
 function setupHTML(){
  const side=(f,name)=>`<button class="side ${f} ${hf===f?'on':''}" data-a="hf" data-v="${f}" aria-pressed="${hf===f}"><b>${name}</b>${hf===f?'<span class="you">La tua fazione</span>':''}</button>`;
  return `<div class="setup"><div class="bar"><button class="back" data-a="homeback" aria-label="Torna alla home" title="Home"><svg class="ico" viewBox="0 0 8 8" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="M3 0h2v1h1v1h1v1h1v1H7v4H5V5H3v3H1V4H0V3h1V2h1V1h1z"/></svg></button><h1>Nuova partita</h1>${sndBtn()}</div>
@@ -800,7 +811,7 @@ function spReason(f,x){const co=S.co[H],hn=S.hand[H].length,on=S.dice[H].some(d=
  if(x===2)return co<1?'Ti serve 1 €':'Nessuna tua nave da modificare';
  if(x===3)return co<2?'Ti servono 2 €':'Nessuna nave avversaria da modificare';return 'Non disponibile';}
 function frontHTML(f,inf){const fr=S.fr[f],q=1-H;
- let h=`<section class="front"><div class="fh"><b>${FR[f]}</b><span style="display:flex;gap:6px;flex-wrap:wrap"><button class="chip ev" data-a="ev" data-v="${f}" data-tip="${esc(EVN[fr.ev]+'\n'+EVD[fr.ev])}">${esc(EVS[fr.ev])}</button>${fr.cond?`<button class="chip" data-a="ev" data-v="${f}" data-tip="${esc(CN[fr.cond]+'\n'+CD[fr.cond])}">${CNS[fr.cond]}</button>`:''}</span></div>`;
+ let h=`<section class="front f${f}"><div class="fh"><b>${FR[f]}</b><span style="display:flex;gap:6px;flex-wrap:wrap"><button class="chip ev" data-a="ev" data-v="${f}" data-tip="${esc(EVN[fr.ev]+'\n'+EVD[fr.ev])}">${esc(EVS[fr.ev])}</button>${fr.cond?`<button class="chip" data-a="ev" data-v="${f}" data-tip="${esc(CN[fr.cond]+'\n'+CD[fr.cond])}">${CNS[fr.cond]}</button>`:''}</span></div>`;
  const place=inf&&UI.sel?inf.place[UI.sel]:null;
  if(fr.flip){h+='<div class="spaces">';for(let x=0;x<4;x++){const o=fr.sp[x],pl=place&&place.find(e=>e.f===f&&e.x===x);
   const d=o?S.dice[o.o][o.i]:null;
@@ -830,7 +841,8 @@ function handHTML(){const h=S.hand[H];if(!h.length)return '<div class="nohand">N
 function logHTML(){const L=S.log.filter(e=>e.to===null||e.to===H).slice(-40).reverse();
  return `<details class="log"><summary>Registro della partita</summary><ol>${L.map(e=>`<li class="${e.t.charAt(0)==='—'?'h':''}">${esc(e.t)}</li>`).join('')}</ol></details>`;}
 let APKOK=null,APKN='invasione.apk';
-function apkShow(){const el=document.getElementById('apk');if(!el)return;if(APKOK===false)return;try{if((window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone||/iPhone|iPad|iPod/.test(navigator.userAgent)){APKOK=false;return;}}catch(e){}
+const APK_ON=false;/* metti true quando l'app Android è pronta */
+function apkShow(){if(!APK_ON)return;const el=document.getElementById('apk');if(!el)return;if(APKOK===false)return;try{if((window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone||/iPhone|iPad|iPod/.test(navigator.userAgent)){APKOK=false;return;}}catch(e){}
  if(APKOK===true){el.href=APKN;el.hidden=false;return;}
  const names=['invasione.apk','Invasione.apk'];const tryN=i=>{if(i>=names.length){APKOK=false;return;}fetch(names[i],{method:'HEAD',cache:'no-store'}).then(r=>{const t=r.headers.get('content-type')||'';if(r.ok&&!/text\/html/.test(t)){APKOK=true;APKN=names[i];const e=document.getElementById('apk');if(e){e.href=APKN;e.hidden=false;}}else tryN(i+1);}).catch(()=>tryN(i+1));};try{tryN(0);}catch(e){APKOK=false;}}
 function render(){hideTip();setTimeout(syncMusic,0);setTimeout(apkShow,0);setTimeout(cloudBoot,0);setTimeout(plattKick,0);
@@ -1058,7 +1070,7 @@ function whyHTML(){const y=S.why;if(!y)return '';const pv=S.pv[H];let t='';
  else t=`Parità su tutto: Punti Vittoria (${pv} a ${pv}), monete + Tecnologie (${y.v[0]}) e segnalini Virus. Come da regolamento decide chi nasconde un alieno in cantina.`;
  return `<div class="rr"><b>Spareggio</b><span>${esc(t)}</span></div>`;}
 function popupHTML(){const p=UI.pops[0];let ttl,body;
- if(p.k==='virus'){const me=p.p===H;ttl='Virus';body=`<p>${me?'Hai pescato':'L\'avversario ha pescato'} questo Virus:</p><p class="vir">${esc(VT[p.c][me?0:1])}</p>`;}
+ if(p.k==='virus'){const me=p.p===H;ttl='Virus';body=`<p>${me?'Hai pescato':'L\'avversario ha pescato'} questo Virus:</p><div class="vart"><img src="art-vi.png" alt="Virus"></div><p class="vir">${esc(VT[p.c][me?0:1])}</p>`;}
  else if(p.k==='reboot'){ttl='Quarto Virus';body=`<p>${p.p===H?'Hai raggiunto':'L\'avversario ha raggiunto'} il quarto Virus: i segnalini tornano a 0 e si risolvono 2 carte Virus.</p>`;}
  else if(p.k==='startcard'){ttl='Tecnologia di partenza';body=`<p style="color:var(--fg)">Il comando l'ha pescata a caso per te fra le due Tecnologie univoche della tua fazione:</p>${techFace(p.c)}`;}
  else{ttl=p.title;body=p.lines.map(l=>`<p style="color:var(--fg)">${esc(l)}</p>`).join('');}
@@ -1136,7 +1148,7 @@ function sheetHTML(){
  else if(UI.sheet&&UI.sheet.k==='storyLocked'){const st=loadStats();ttl='Storia da sbloccare';cancel=true;
   const r=(f,n)=>`<li class="${st[f].w?'done':''}"><span class="ck">${st[f].w?'✓':'○'}</span><span>Vinci una partita con <b class="f${f}">${n}</b>${st[f].w?' — fatto':''}</span></li>`;
   body=`<p class="lead">Come sono iniziati i guai fra Terrestri e Alieni? Per scoprirlo devi aver combattuto da entrambe le parti.</p><ul class="goals">${r('T','i Terrestri')}${r('A','gli Alieni')}</ul><p>Vale qualsiasi difficoltà. Le vittorie restano anche nel codice di salvataggio.</p>`+btn('setup','','Gioca una partita','hi');}
- else if(UI.sheet&&UI.sheet.k==='acct'){ttl='Account online';tall=true;cancel=true;body=`<p class="lead">Salva i tuoi progressi con la tua email: sono al sicuro anche se cambi telefono o cancelli i dati del browser. Non è obbligatorio, puoi sempre usare il codice di salvataggio.</p>${cloudHTML()}`;}
+ else if(UI.sheet&&UI.sheet.k==='acct'){ttl='Account online';tall=true;cancel=true;body=`<p class="cm ${CL.user?'ok':'er'}" role="status"><b>${CL.user?'● Collegato come '+esc(CL.user.email||''):CL.chk?'Controllo accesso…':'○ Non sei collegato'}</b></p><p class="lead">Salva i tuoi progressi con la tua email: sono al sicuro anche se cambi telefono o cancelli i dati del browser. Non è obbligatorio, puoi sempre usare il codice di salvataggio.</p>${cloudHTML()}`;}
  else if(UI.sheet&&UI.sheet.k==='stats'){ttl='Le tue partite';tall=true;cancel=true;const code=exportCode(),ng=games(totSt(loadStats()));
   const canShare=typeof navigator!=='undefined'&&!!navigator.share;
   const wa='https://wa.me/?text='+encodeURIComponent('INVASIONE, il mio codice di salvataggio: '+code);
@@ -1157,7 +1169,7 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
  else if(UI.sheet&&UI.sheet.k==='help'){ttl='Regolamento';tall=true;body=btn('close','','Chiudi','sec')+rulesHTML();cancel=true;}
  else if(UI.sheet&&UI.sheet.k==='tut'){const n=UI.sheet.n,T=TUT[n];ttl=T.t;tall=true;
   body=`${n===0?btn('tutGo','','Gioca la partita guidata','hi'):''}<p class="step">Tutorial · passo ${n+1} di ${TUT.length}</p><div class="mock" aria-hidden="true">${T.v}</div>${T.h}<div class="nav">${n>0?btn('tutn',n-1,'Indietro','sec'):''}${n<TUT.length-1?btn('tutn',n+1,'Avanti','hi'):btn('close','','Ho capito, si gioca','hi')}</div>`;cancel=true;} else if(UI.sheet&&UI.sheet.k==='ev'){const fr=S.fr[UI.sheet.f];ttl=FR[UI.sheet.f];cancel=true;
-  body=`${cardFace({noart:true,tag:'Evento',title:EVN[fr.ev],text:EVD[fr.ev]})}${fr.cond?`<p><b style="color:var(--paper)">${CN[fr.cond]}</b></p><p>${CD[fr.cond]}</p>`:''}`;}
+  body=`${cardFace({art:'art-ev.png',tag:'Evento',title:EVN[fr.ev],text:EVD[fr.ev]})}${fr.cond?`<p><b style="color:var(--paper)">${CN[fr.cond]}</b></p><p>${CD[fr.cond]}</p>`:''}`;}
  else if(UI.sheet&&UI.sheet.k==='card'&&S&&S.hand[H].includes(UI.sheet.id)&&!(pd&&pd.p===H&&pd.ctx.then!=='main')){const id=UI.sheet.id,my=pd&&pd.p===H&&pd.ctx.then==='main',inf=my?info():{plays:{},sells:{},sb:{},ksb:{},vals:{}};cancel=true;ttl='Tecnologia';
   body=`${techFace(id)}<p class="ctip">${esc(techTip(id).split('\n\n').slice(1).join(' '))}</p>`;let n=0;
   if(inf.plays[id]!==undefined){body+=btn('pick',inf.plays[id],'Gioca la carta','hi');n++;}
