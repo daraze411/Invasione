@@ -64,3 +64,6 @@ Il gioco ha già tutto il necessario. Resta da creare il servizio, gratuito:
 5. Authentication > SMTP: il servizio di prova di Supabase manda poche mail all'ora. Per i playtester collega un SMTP gratuito (per esempio Brevo o Resend).
 6. Project Settings > API: copia "Project URL" e la chiave "anon public" dentro `config.js`, poi carica tutto su GitHub.
 Se `config.js` resta vuoto, la sezione email non compare e il gioco funziona come prima, solo con il codice.
+
+## Barra del browser nell'app Android
+La cartella `.well-known` contiene `assetlinks.json`, il file che collega il sito all'app. Va nella stessa cartella di `index.html`, con questo percorso: `.well-known/assetlinks.json`. Verifica: aprendo `https://invasione.netlify.app/.well-known/assetlinks.json` deve comparire il contenuto del file.
