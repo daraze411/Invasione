@@ -1373,10 +1373,10 @@ function handHTML(){const h=S.hand[H];if(!h.length)return '<div class="nohand">N
  return `<div class="hand">${h.map(id=>{return `<button class="card ${INV.cf(id)}" data-a="card" data-v="${id}" data-tip="${esc(techTip(id))}"><span>${esc(INV.tt(S,H,id))}</span></button>`;}).join('')}</div>`;}
 function logHTML(){const L=S.log.filter(e=>e.to===null||e.to===H).slice(-40).reverse();
  return `<details class="log"><summary>Registro della partita</summary><ol>${L.map(e=>`<li class="${e.t.charAt(0)==='—'?'h':''}">${esc(e.t)}</li>`).join('')}</ol></details>`;}
-let APKOK=null;
+let APKOK=null,APKN='invasione.apk';
 function apkShow(){const el=document.getElementById('apk');if(!el)return;if(APKOK===false)return;try{if((window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone||/iPhone|iPad|iPod/.test(navigator.userAgent)){APKOK=false;return;}}catch(e){}
- if(APKOK===true){el.hidden=false;return;}
- try{fetch('invasione.apk',{method:'HEAD',cache:'no-store'}).then(r=>{const t=r.headers.get('content-type')||'';APKOK=r.ok&&!/text\/html/.test(t);const e=document.getElementById('apk');if(e)e.hidden=!APKOK;}).catch(()=>{APKOK=false;});}catch(e){APKOK=false;}}
+ if(APKOK===true){el.href=APKN;el.hidden=false;return;}
+ const names=['invasione.apk','Invasione.apk'];const tryN=i=>{if(i>=names.length){APKOK=false;return;}fetch(names[i],{method:'HEAD',cache:'no-store'}).then(r=>{const t=r.headers.get('content-type')||'';if(r.ok&&!/text\/html/.test(t)){APKOK=true;APKN=names[i];const e=document.getElementById('apk');if(e){e.href=APKN;e.hidden=false;}}else tryN(i+1);}).catch(()=>tryN(i+1));};try{tryN(0);}catch(e){APKOK=false;}}
 function render(){hideTip();setTimeout(syncMusic,0);setTimeout(apkShow,0);setTimeout(cloudBoot,0);setTimeout(plattKick,0);
  const CREDIT='<div class="credit end">Gioco di Daniele Radavero · © 2026 Tutti i diritti riservati</div>';
  if(UI.screen==='start'&&getName()===null&&!UI.sheet&&!UI.story&&!UI.poster)UI.sheet={k:'name',first:true};
