@@ -552,6 +552,10 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
  .die.can:hover,button.die:hover{transform:translateY(-2px);filter:brightness(1.2)}
 }
 @media (min-width:1000px) and (max-width:1199px){#app.game{grid-template-columns:minmax(0,1fr) 300px}}
+
+.front.tgt{border-color:var(--paper);box-shadow:inset 0 0 0 3px var(--paper),0 0 16px 2px rgba(240,217,140,.55);cursor:pointer;animation:tgp 1s ease-in-out infinite}
+@keyframes tgp{50%{filter:brightness(1.35)}}
+@media (prefers-reduced-motion:reduce){.front.tgt{animation:none}}
 </style>
 <div id="app"></div>
 <div id="tip" hidden></div>
@@ -772,8 +776,8 @@ function compHTML(tab){
  if(tab==='T'||tab==='A')return `<p class="meta">${tab==='T'?'Il mazzo dei Terrestri':'Il mazzo degli Alieni'}: prima le univoche (ne ricevi una a caso), poi le esclusive della fazione, poi le comuni. ×2 indica le copie nel mazzo.</p><div class="cgrid">${compTech(tab).map(x=>mini('t'+x.id,techFace(x.id),x.n)).join('')}</div>`;
  if(tab==='E')return `<p class="meta">Ogni round ogni Fronte riceve un Evento e una Condizione.</p><div class="cgrid">${[1,2,3,4,5,7,8,9,10,11,12].map(e=>mini('e'+e,cardFace({noart:true,tag:'Evento',title:EVN[e],text:EVD[e]}),1)).join('')}${['M','B','DH','DL'].map(c=>mini('c'+c,cardFace({noart:true,tag:'Condizione',title:CN[c],text:CD[c]}),{M:4,B:4,DH:2,DL:2}[c])).join('')}</div>`;
  if(tab==='V')return `<p class="meta">Quando prendi un Virus peschi una di queste carte. Alcune colpiscono te, altre aiutano l\'avversario.</p><div class="cgrid">${[1,2,3,4,5,6,7].map(v=>mini('v'+v,cardFace({art:'art-vi.png',tag:'Virus',title:INV.VIRN[v],text:VT[v][0]}),VCOPIES[v])).join('')}</div>`;
- if(tab==='C'){const ids=[...(has('cap')?['mark','kar']:[]),...(has('cap2')?['dani','nuy']:[])];
-  return ids.length?`<div class="cgrid">${ids.map(id=>mini('k'+id,cardFace({fac:CAPS[id].f,art:CAPS[id].img,title:CAPS[id].n,text:CAPS[id].ab,tag:'Capitano',wide:true}),1)).join('')}${has('cap2')?'':'<div class="cmini lk"><span>????</span></div>'}</div>`:'<p class="lead">I Capitani si sbloccano con i Trofei. Per ora restano un mistero: ????</p>';}
+ if(tab==='C'){const ids=[...(has('cap')?['mark','kar']:[]),...(cap2()?['dani','nuy']:[])];
+  return ids.length?`<div class="cgrid">${ids.map(id=>mini('k'+id,cardFace({fac:CAPS[id].f,art:CAPS[id].img,title:CAPS[id].n,text:CAPS[id].ab,tag:'Capitano',wide:true}),1)).join('')}${cap2()?'':'<div class="cmini lk"><span>????</span></div>'}</div>`:'<p class="lead">I Capitani si sbloccano con i Trofei. Per ora restano un mistero: ????</p>';}
  return '';}
 function cviewFace(a){const k=a.charAt(0),v=a.slice(1);
  if(k==='t')return techFace(+v)+`<p class="ctip">${esc(techTip(+v).split('\n\n').slice(1).join(' '))}</p>`;
@@ -812,11 +816,11 @@ function setupHTML(){
 ${troOptsHTML()}<button class="go" data-a="go">INIZIA</button></div>`;}
 function troOptsHTML(){const hb=has('bonus'),hc=has('cap');if(!hb&&!hc)return '';const o=loadOpt();
  const tg=(k,t,d,ex)=>`<button class="tg ${o[k]?'on':''}" data-a="optT" data-v="${k}" aria-pressed="${o[k]}"><span class="ck" aria-hidden="true">${o[k]?'✓':''}</span>${ex||''}<span class="tx"><b>${t}</b><small>${d}</small></span></button>`;
- return `<div class="opt"><h3>Trofei sbloccati</h3><div class="tgs">${hb?tg('bonus','Carte «Salta il turno»','Due Tecnologie in più in entrambi i mazzi.'):''}${hc?tg('cap','Capitani',has('cap2')?'Un Capitano per parte. Il tuo lo scegli qui sotto, quello del computer è a caso.':'Mark Platt per i Terrestri, Kar Am Oh per gli Alieni. Valgono per entrambi.',`<span class="caps" aria-hidden="true"><img src="capitano-T.png" alt=""><img src="capitano-A.png" alt=""></span>`):''}</div>${hc&&o.cap&&has('cap2')?capPickHTML(o):''}<p class="tgn">Le opzioni attive valgono per te e per il computer.</p></div>`;}
-function capPickHTML(o){const k='cap'+hf,cur=o[k]||'rand',ids=CAPT[hf];
+ return `<div class="opt"><h3>Trofei sbloccati</h3><div class="tgs">${hb?tg('bonus','Carte «Salta il turno»','Due Tecnologie in più in entrambi i mazzi.'):''}${hc?tg('cap','Capitani',cap2()?'Un Capitano per parte. Il tuo lo scegli qui sotto, quello del computer è a caso.':'Mark Platt per i Terrestri, Kar Am Oh per gli Alieni. Valgono per entrambi.',`<span class="caps" aria-hidden="true"><img src="capitano-T.png" alt=""><img src="capitano-A.png" alt=""></span>`):''}</div>${hc&&o.cap&&cap2()?capPickHTML(o):''}<p class="tgn">Le opzioni attive valgono per te e per il computer.</p></div>`;}
+function capPickHTML(o){const k='cap'+hf,cur=o[k]||'rand',ids=cap2()?CAPT[hf]:[CAPT[hf][0]];
  const b=(v,lab,img)=>`<button class="seg2 ${cur===v?'on':''}" data-a="capPick" data-v="${v}" aria-pressed="${cur===v}">${img?`<img src="${img}" alt="">`:'<span class="dq">?</span>'}<span>${lab}</span></button>`;
  return `<div class="cpick"><p class="cpl">Il tuo Capitano (${hf==='T'?'Terrestri':'Alieni'})</p><div class="cpr">${b('rand','A caso')}${ids.map(id=>b(id,CAPS[id].short,CAPS[id].img)).join('')}</div></div>`;}
-function pickCaps(o,fac){const pool=f=>has('cap2')?CAPT[f]:[CAPT[f][0]];const rnd=a=>a[Math.floor(Math.random()*a.length)];
+function pickCaps(o,fac){const pool=f=>cap2()?CAPT[f]:[CAPT[f][0]];const rnd=a=>a[Math.floor(Math.random()*a.length)];
  return fac.map((f,p)=>{const pl=pool(f);if(p===H){const c=o['cap'+f];if(c&&c!=='rand'&&pl.includes(c))return c;}return rnd(pl);});}
 const STORY=['Un’antica razza aliena dal nome impronunciabile, ma dall’invidiabile forma fisica, vede nella Terra il luogo perfetto per costruire uno stadio dedicato a uno degli sport più amati nell’Universo — un gioco popolare, cruento e ovviamente impossibile da pronunciare. “Perché un’area così grande per uno stadio?” — risponde il responsabile del progetto degli Impronunciabili alla domanda di un podcaster di Kepler-1649, “ma naturalmente per i parcheggi.”',
 'I Terrestri, però, non ci stanno. Fosse stato per il calcio se ne sarebbe potuto parlare. Ma questo sport alieno è veramente noioso.',
@@ -907,19 +911,23 @@ function render(){hideTip();setTimeout(invBg,0);setTimeout(syncMusic,0);setTimeo
  if(swp){const aO=UI.swapA;
   TG=aO==null?pd.opts.map(x=>({v:{o:H,i:x.v.a}})):[{v:{o:H,i:aO}}].concat(pd.opts.filter(x=>x.v.a===aO).map(x=>({v:{o:1-H,i:x.v.b}})));
   if(!s.dice[0].concat(s.dice[1]).some(d=>(d.loc==='R'||d.loc==='F')&&tgtRep(d)!==null))TG=null;}
+ const tsOpts=TG&&!swp&&UI.tsel?pd.opts.map((x,i)=>({x,i})).filter(m=>m.x.v&&m.x.v.o+':'+m.x.v.i===UI.tsel):[];
+ const isMv=!!(pd&&(pd.ctx.then==='techMove'||pd.ctx.then==='spMove'));
+ const MV=isMv&&tsOpts.length?new Set(tsOpts.map(m=>m.x.v.to)):null;
  let h='<div class="board">'+topHTML();
  h+=`<div class="opp"><div class="pl"><span class="fac ${s.fac[q]}">${fname(s.fac[q])}<span class="lg"> · Avversario</span><span class="sh"> · Avv.</span></span>${sideInfo(q)}</div>`+reserveHTML(q)+'</div>';
- h+='<div class="fronts">';if(s.fr.length&&s.dice[0].length)for(let f=0;f<3;f++)h+=frontHTML(f,inf);h+='</div>';
+ h+='<div class="fronts">';if(s.fr.length&&s.dice[0].length)for(let f=0;f<3;f++){let fh=frontHTML(f,inf);if(MV&&MV.has(f))fh=fh.replace('<section class="front f'+f+'"','<section class="front f'+f+' tgt" data-a="mvto" data-v="'+f+'" role="button" tabindex="0"');h+=fh;}h+='</div>';
  h+=logHTML()+'<div class="credit">Gioco di Daniele Radavero · © 2026 Tutti i diritti riservati</div></div>';
  let st='';
  if(s.over)st='Partita conclusa.';
  else if(pd&&pd.p!==H)st=pd.ctx.then==='main'?'L\'avversario sta giocando…':'L\'avversario sta scegliendo…';
  else if(TG&&swp)st=UI.swapA==null?"Scambio: tocca una tua nave.":"Scambio: ora tocca una nave avversaria. Tocca di nuovo la tua per annullare.";
+ else if(TG&&tsOpts.length){const nm=tsOpts[0].x.l.split(' → ')[0];st=isMv?`Sposta ${nm}: tocca il Fronte di destinazione. Tocca di nuovo la nave per annullare.`:`${nm}: scegli il nuovo valore qui sotto. Tocca di nuovo la nave per annullare.`;}
  else if(TG)st=(pd.ctx.ttl||'Scegli una nave')+': tocca un dado illuminato.';
  else if(mine&&UI.vsel)st='Valore '+UI.vsel.v+': tocca un dado illuminato in riserva (prendi 1 Virus).';
  else if(mine)st=UI.sel?'Scegli dove schierare il dado.':(pd.ctx.extra?'Azione extra: scegli o rinuncia.':'Tocca a te: scegli un dado, una carta o un\'azione.');
  h+=`<div class="dock ${UI.handOpen?'hopen':''}"><div class="pl"><span class="fac ${s.fac[H]}">${fname(s.fac[H])} · Tu</span>${sideInfo(H)}<button class="handtog" data-a="hand" aria-expanded="${!!UI.handOpen}">Carte ${s.hand[H].length} ${UI.handOpen?'▴':'▾'}</button></div>`+(S.tut?tutHTML():'')+reserveHTML(H,inf)+handHTML()+`<div class="status ${mine?'me':''}">${st}</div>`;
- if(TG){const si=pd.opts.findIndex(x=>x.v===null);const swb=swp&&UI.swapA!=null;if(si>=0||canUndo()||swb)h+=`<div class="acts">${si>=0?`<button class="pass" data-a="pick" data-v="${si}">${esc(pd.opts[si].l)}</button>`:''}${swb?'<button data-a="swback">Scegli un\'altra nave</button>':''}${canUndo()?'<button data-a="undo">Annulla la carta</button>':''}</div>`;}
+ if(TG){const si=pd.opts.findIndex(x=>x.v===null);const swb=swp&&UI.swapA!=null;const inl=(!isMv?tsOpts.map(m=>`<button class="hi" data-a="pick" data-v="${m.i}">${esc((()=>{const k=m.x.l.indexOf(' → ');return k<0?m.x.l:'Nuovo valore: '+m.x.l.slice(k+3);})())}</button>`).join(''):'');if(si>=0||canUndo()||swb||inl)h+=`<div class="acts">${inl}${si>=0?`<button class="pass" data-a="pick" data-v="${si}">${esc(pd.opts[si].l)}</button>`:''}${swb?'<button data-a="swback">Scegli un\'altra nave</button>':''}${tsOpts.length?'<button data-a="tback">Scegli un\'altra nave</button>':''}${canUndo()?'<button data-a="undo">Annulla la carta</button>':''}</div>`;}
  if(mine){h+='<div class="acts">';
   if(inf.buy>=0)h+=`<button data-a="pick" data-v="${inf.buy}">Compra (−2 €)</button>`;
   if(Object.keys(inf.sb).length)h+=`<button data-a="sbopen">Vendi e compra</button>`;
@@ -1107,7 +1115,7 @@ function rulesHTML(){
  +sec('I Virus',`<p>Ogni Virus preso fa pescare una carta Virus, che si applica subito, e aggiunge un segnalino sulla tua plancia. Massimo 3 segnalini: al quarto i segnalini tornano a 0 e si risolvono 2 carte Virus. Il mazzo ha 2 copie di ogni effetto, tranne quello che chiude il round (1 copia).</p><ul>${VD.slice(1).map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`)
  +(has('bonus')?sec('Trofeo: carte «Salta il turno»',`<p>Se le attivi in Nuova partita, entrambi i mazzi ricevono 2 Tecnologie in più.</p><ul><li><b>${esc(INV.TECH[27].t)}</b> (valori ${INV.TECH[27].v.join(' / ')}) — ${esc(TDESC.skipG)}</li><li><b>${esc(INV.TECH[28].t)}</b> (valori ${INV.TECH[28].v.join(' / ')}) — ${esc(TDESC.skipV)}</li></ul>`):'')
  +sec('Consigli',`<ul>${TIPS.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`)
- +(has('cap')?sec('Trofeo: i Capitani',`<p>Se attivi i Capitani in Nuova partita, ognuno ne ha uno. Le azioni dei Capitani sono sempre <b>extra</b>: puoi farle prima o dopo la tua azione normale.</p><ul>${(has('cap2')?['mark','dani','kar','nuy']:['mark','kar']).map(id=>`<li><b class="f${CAPS[id].f}">${esc(CAPS[id].n)}</b> (${CAPS[id].f==='T'?'Terrestri':'Alieni'}) — ${esc(CAPS[id].ab)}<ul>${CAPS[id].long.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></li>`).join('')}</ul>`):'')
+ +(has('cap')?sec('Trofeo: i Capitani',`<p>Se attivi i Capitani in Nuova partita, ognuno ne ha uno. Le azioni dei Capitani sono sempre <b>extra</b>: puoi farle prima o dopo la tua azione normale.</p><ul>${(cap2()?['mark','dani','kar','nuy']:['mark','kar']).map(id=>`<li><b class="f${CAPS[id].f}">${esc(CAPS[id].n)}</b> (${CAPS[id].f==='T'?'Terrestri':'Alieni'}) — ${esc(CAPS[id].ab)}<ul>${CAPS[id].long.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></li>`).join('')}</ul>`):'')
  +sec('Fine partita e spareggi',`<p>Dopo il terzo round vince chi ha più PV. In caso di parità, in ordine:</p><ul><li>più monete + Tecnologie in mano;</li><li>meno segnalini Virus sulla plancia;</li><li>se è ancora parità, vince chi nasconde un alieno in cantina.</li></ul>`);}
 function resultsHTML(){return S.res.map(r=>{if(r.flip)return `<div class="rr"><b>${FR[r.f]}</b><small>Lato B: nessuna battaglia</small></div>`;
  const w=r.w<0?'Pareggio':r.w===H?'Vinci tu':'Vince l\'avversario';
@@ -1175,16 +1183,18 @@ function plattStart(){
 
 /* ---------- Nuy Tinck Runs!! (premio delle 10 vittorie) ---------- */
 const NUYK='invasione.nuy.v1';let NUYON=false,NUYTRY=false;
+const nuyClaimed=()=>{const o=nuyGet()||{};return !!(o.prize||(typeof o.best==='number'&&!o.v2));};
+const cap2=()=>has('cap2')&&nuyClaimed();
 function nuyGet(){try{const o=JSON.parse(localStorage.getItem(NUYK)||'null');return o&&typeof o==='object'?o:null;}catch(e){return null;}}
 function nuySet(o){try{localStorage.setItem(NUYK,JSON.stringify(o));}catch(e){}cloudPush();}
 function nuyBestHTML(){const o=nuyGet();if(!o||typeof o.best!=='number')return '';return `<small>Miglior risultato: ${o.best} colpi${o.best===0?' · ★ Senza un graffio':''}</small>`;}
-function openNuy(replay){if(NUYON)return;NUYON=true;NUYTRY=true;const o=nuyGet()||{};o.seen=1;nuySet(o);stopMusic();
+function openNuy(replay){if(NUYON)return;NUYON=true;NUYTRY=true;const o=nuyGet()||{};if(!nuyClaimed())o.v2=1;o.seen=1;nuySet(o);stopMusic();
  const d=document.createElement('div');d.id='nuyov';d.innerHTML='<iframe src="nuy.html'+(replay?'?r=1':'')+'" title="Nuy Tinck Runs!!" allow="autoplay"></iframe>';document.body.appendChild(d);
  try{history.pushState({nuy:1},'');}catch(e){}}
 function closeNuy(){const d=document.getElementById('nuyov');if(d)d.remove();NUYON=false;render();}
 window.addEventListener('message',e=>{const m=e.data;if(!m||!m.nuy)return;
  if(m.nuy==='close')closeNuy();
- else if(m.nuy==='prize'){closeNuy();UI.sheet={k:'prize',ids:['dani','nuy']};render();}});
+ else if(m.nuy==='prize'){const o=nuyGet()||{};o.prize=1;o.seen=1;nuySet(o);closeNuy();UI.sheet={k:'prize',ids:['dani','nuy']};render();}});
 function sheetHTML(){
  if(UI.pops.length)return popupHTML();
  let body='',ttl='',lead='',cancel=false,tall=false;
@@ -1279,7 +1289,7 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
 <p class="meta">Caratteri con licenza SIL Open Font License, da Google Fonts.</p>
 <p class="cr-c">© 2026 Daniele Radavero · Tutti i diritti riservati</p></div>`;}
  else if(UI.sheet&&UI.sheet.k==='tro'){ttl='Trofei';tall=true;cancel=true;const st=loadStats(),u=trophies();
-  const row=t=>{const ok=u.includes(t.id);return `<li class="tro ${ok?'ok':'lk'}"><span class="ti" aria-hidden="true">${ok?'★':LOCK}</span><span class="tb"><b>${esc(t.name)}</b>${ok?`<small>${esc(t.desc)}</small>${t.id==='story'?btn('story','','Leggi la Storia','hi'):t.id==='cap'?`<span class="tcaps">${btn('capv','mark','Mark Platt')}${btn('capv','kar','Kar Am Oh')}</span>${plattGet()!==null?btn('pmsg','','Rivedi il messaggio di Platt')+btn('quizgo','','Rifai il quiz di Platt'):btn('quizgo','','Fai il quiz di Platt')}`:t.id==='cap2'?`<span class="tcaps">${btn('capv','dani','Dani e Silvya')}${btn('capv','nuy','Nuy Tinck')}</span>${btn('nuyplay','','Gioca a Nuy Tinck Runs!!')}${nuyBestHTML()}`:t.id==='books'?btn('book','','Libro del giorno','hi'):''}`:`<small>${esc(t.req)} · ${t.prog(st)}</small>`}</span></li>`;};
+  const row=t=>{const ok=u.includes(t.id);return `<li class="tro ${ok?'ok':'lk'}"><span class="ti" aria-hidden="true">${ok?'★':LOCK}</span><span class="tb"><b>${esc(t.id==='cap2'&&ok&&!nuyClaimed()?'Un premio ti aspetta':t.name)}</b>${ok&&t.id==='cap2'&&!nuyClaimed()?`<small>Hai vinto 10 partite. Gioca a Nuy Tinck Runs!! per scoprire il premio.</small>${btn('nuyplay0','','Gioca a Nuy Tinck Runs!!','hi')}`:ok?`<small>${esc(t.desc)}</small>${t.id==='story'?btn('story','','Leggi la Storia','hi'):t.id==='cap'?`<span class="tcaps">${btn('capv','mark','Mark Platt')}${btn('capv','kar','Kar Am Oh')}</span>${plattGet()!==null?btn('pmsg','','Rivedi il messaggio di Platt')+btn('quizgo','','Rifai il quiz di Platt'):btn('quizgo','','Fai il quiz di Platt')}`:t.id==='cap2'?`<span class="tcaps">${btn('capv','dani','Dani e Silvya')}${btn('capv','nuy','Nuy Tinck')}</span>${btn('nuyplay','','Gioca a Nuy Tinck Runs!!')}${nuyBestHTML()}`:t.id==='books'?btn('book','','Libro del giorno','hi'):''}`:`<small>${esc(t.req)} · ${t.prog(st)}</small>`}</span></li>`;};
   const hid=`<li class="tro lk"><span class="ti" aria-hidden="true">${LOCK}</span><span class="tb"><b>????</b><small>????</small></span></li>`,vis=3+u.length;
   const rows=TROPHIES.map((t,i)=>u.includes(t.id)||i<vis?row(t):hid).join('')+(TROPHIES.length<vis?`<li class="tro lk"><span class="ti" aria-hidden="true">${LOCK}</span><span class="tb"><b>????</b><small>Requisito: in arrivo con un prossimo aggiornamento</small></span></li>`:hid);
   body=`<p class="lead">Vinci contro il computer per sbloccare nuovi contenuti. Vale qualsiasi fazione e difficoltà, e i trofei restano anche se azzeri le statistiche.</p><ul class="trol">${rows}</ul><p class="meta">I trofei viaggiano nel codice di salvataggio: dopo uno sblocco aggiornalo da «Le tue partite».</p>`;}
@@ -1291,12 +1301,7 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
   else{ttl=c.ttl||'Scegli';
    const recent=S.log.filter(e=>e.to===null||e.to===H).slice(-2).map(e=>e.t);
    if(c.then==='resp'||c.then==='first')lead=recent.join(' · ');
-   if(TG){if(!UI.tsel)return '';
-    const th=c.then,lab=l=>{const k=l.indexOf(' → ');if(k<0)return l;const r=l.slice(k+3);return th==='techMove'||th==='spMove'?'Sposta su '+r:'Nuovo valore: '+r;};
-    const o2=pd.opts;const first=o2.find(x=>x.v&&x.v.o+':'+x.v.i===UI.tsel);
-    lead=first?first.l.split(' → ')[0]:'';
-    body=o2.map((x,i)=>x.v&&x.v.o+':'+x.v.i===UI.tsel?btn('pick',i,th==='rr'?'Rilancia questa nave':lab(x.l)):'').join('')+btn('tback','','Scegli un\'altra nave','sec')+(canUndo()?btn('undo','','Annulla la carta','sec'):'');
-    return `<div class="ov"><div class="sheet" role="dialog"><h2>${esc(ttl)}</h2><p>${esc(lead)}</p>${body}</div></div>`;}
+   if(TG)return '';
    const o=pd.opts;let items=o.map((x,i)=>({i,l:x.l}));
    const grp=o.length>8&&o.every(x=>x.v&&x.v.o!==undefined&&x.v.i!==undefined&&x.l.indexOf(' → ')>0);
    if(grp&&UI.grp===null){const seen={},gs=[];o.forEach(x=>{const k=x.l.split(' → ')[0];if(!seen[k]){seen[k]=1;gs.push(k);}});
@@ -1427,7 +1432,7 @@ const HD={
   setTimeout(()=>{if(UI.sheet!==q)return;if(q.i+1<PQ.length)UI.sheet={k:'quiz',i:q.i+1,ok:q.ok,sel:-1};else{plattSet(Math.max(q.ok,plattGet()===null?0:plattGet()));QDONE=true;UI.sheet={k:'quizres',score:q.ok};}render();},900);},
  pmsg:v=>{const sc=plattGet();UI.sheet={k:'platt',score:(v!==undefined&&v!=='')?+v:(sc===null?0:sc)};render();},
  plPrize:()=>{UI.sheet={k:'prize'};render();},
- nuyplay:()=>{UI.sheet=null;render();openNuy(true);},
+ nuyplay0:()=>{UI.sheet=null;render();openNuy(false);},nuyplay:()=>{UI.sheet=null;render();openNuy(true);},
  optT:v=>{const o=loadOpt();if(v==='bonus'||v==='cap')o[v]=!o[v];saveOpt(o);render();},
  troEnd:()=>{clearTimeout(tm);S=null;UI=mkUI('start');UI.sheet={k:'tro'};render();},
  storyEnd:()=>{clearTimeout(tm);S=null;UI=mkUI('start');UI.story=reduceMotion()?'static':'crawl';render();},storyStatic:()=>{UI.story='static';render();},storyCrawl:()=>{UI.story='crawl';render();},storyClose:()=>{UI.story=null;render();},
@@ -1472,10 +1477,14 @@ const HD={
    if(o===H){UI.swapA=null;render();return;}
    const k=S.pend.opts.findIndex(x=>x.v.a===UI.swapA&&x.v.b===i);UI.swapA=null;
    if(k>=0){act(k);return;}render();return;}
+  if(UI.tsel===v){UI.tsel=null;render();return;}
+  const ks=S.pend.opts.map((x,i)=>({x,i})).filter(m=>m.x.v&&m.x.v.o+':'+m.x.v.i===v);
+  if(ks.length===1){UI.tsel=null;act(ks[0].i);return;}
   UI.tsel=v;render();},
+ mvto:v=>{const g=+v;const m=S.pend&&S.pend.opts.map((x,i)=>({x,i})).find(m=>m.x.v&&m.x.v.o+':'+m.x.v.i===UI.tsel&&m.x.v.to===g);if(m){UI.tsel=null;act(m.i);}},
  swback:()=>{UI.swapA=null;render();},tback:()=>{UI.tsel=null;render();},pop:()=>{UI.pops.shift();render();kick();saveGame();},
  grp:v=>{UI.grp=v;render();},back:()=>{UI.grp=null;render();}};
-const CLICKS={tutNext:1,sbopen:1,undo:1,leaveYes:1,comp:1,ctab:1,cview:1,tutGo:1,tutSkip:1,tutQuit:1,tutAgain:1,tutPlay:1,book:1,capact:1,capPick:1,nameEdit:1,nameOk:1,nameSkip:1,credits:1,tro:1,capv:1,optT:1,setup:1,go:1,gonew:1,hf:1,df:1,story:1,storyLocked:1,tut0:1,tutn:1,help:1,poster:1,stats:1,homeback:1,new:1,endnew:1,recap:1,resume:1,close:1,homeq:1,die:1,card:1,hand:1,vsel:1,tdie:1,swback:1,ev:1};
+const CLICKS={tutNext:1,sbopen:1,undo:1,leaveYes:1,comp:1,ctab:1,cview:1,tutGo:1,tutSkip:1,tutQuit:1,tutAgain:1,tutPlay:1,book:1,capact:1,capPick:1,nameEdit:1,nameOk:1,nameSkip:1,credits:1,tro:1,capv:1,nuyplay0:1,optT:1,setup:1,go:1,gonew:1,hf:1,df:1,story:1,storyLocked:1,tut0:1,tutn:1,help:1,poster:1,stats:1,homeback:1,new:1,endnew:1,recap:1,resume:1,close:1,homeq:1,die:1,card:1,hand:1,vsel:1,tdie:1,mvto:1,swback:1,ev:1};
 /* tasto indietro del telefono */
 try{history.replaceState({inv:0},'');history.pushState({inv:1},'');}catch(e){}
 window.addEventListener('popstate',()=>{if(NUYON){closeNuy();return;}let stay=true;

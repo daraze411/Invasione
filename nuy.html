@@ -40,6 +40,7 @@ button[hidden]{display:none}
 html,body{background:#0b1017;color:#f1ebdc}
 body{min-height:100vh;padding:12px;gap:10px;justify-content:center}
 canvas{border-color:#f1ebdc}
+#s{display:none!important}
 .top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
 .top .tt{font-size:20px;color:#f5b072;letter-spacing:.04em}
 button{background:#c9485a;color:#fffdf6}
@@ -60,7 +61,7 @@ button.big{display:block;width:100%;font-size:22px;padding:16px;margin:10px 0 0;
   <div class="hud"><span id="h1">Colpi: 0</span><span id="h3">Zona: Città in rovina</span><span id="h2">Distanza: 0 m</span></div>
   <div class="row" id="endrow" hidden><button id="pz" type="button">Riscuoti il premio</button><button id="rb" type="button" class="sec">Rigioca</button></div>
   <button id="jb" type="button" class="big">Salta</button>
-  <div class="foot"><button id="au" type="button" class="sec">Audio: sì</button></div>
+  <div class="foot"><button id="au" type="button" class="sec">Audio: sì</button><button id="sk" type="button" class="sec" hidden>Salta il gioco e scopri il premio</button></div>
 </div>
 <canvas id="s" width="1" height="1" hidden></canvas>
 <script>
@@ -240,7 +241,7 @@ button.big{display:block;width:100%;font-size:22px;padding:16px;margin:10px 0 0;
      far:towers('#1e1440','#ff4d5e','#2e2260'), mid:hangars('#140d2e','#3ff0d0'),
      gnd:'#120c24', edge:'#3ff0d0', dash:'#2a1f4a', pit:'#000000', pitb:'#5a1f8a',
      mix:[['ditch',28],['ditch',48],['laser'],['turret'],['turret'],['drone'],['stack']], throwGap:[2.2,3.4]}];
-  var ZLEN=500;
+  var ZLEN=350;
 
   /* ---------- dialoghi (non fermano il gioco) ---------- */
   var WHO={nuy:{n:'Nuy Tinck',img:'ritr-nuy.png'},dani:{n:'Dani Rada',img:'ritr-dani.png'},silvya:{n:'Silvya Singer',img:'ritr-silvya.png'}};
@@ -309,7 +310,7 @@ button.big{display:block;width:100%;font-size:22px;padding:16px;margin:10px 0 0;
     parts.push({x:x,y:y,vx:Math.cos(a)*v*(Math.random()<.5?-1:1),vy:-Math.abs(Math.sin(a)*v),life:0,max:life*(0.6+Math.random()*0.6),c:cols[Math.floor(Math.random()*cols.length)],s:sz}); } }
   function hurt(){ hits++; inv=1; shakeT=0.25; sfx('hit'); }
 
-  function restart(z){ state='run'; wall=null; et=0; smoke=[]; parts=[]; planes=[]; balloons=[]; balloonT=3; seen={}; endQ=false; brokeSnd=false; RX=4; fin.hidden=true; endrow.hidden=true;
+  function restart(z){ var skb=document.getElementById('sk'); if(skb) skb.hidden=true; state='run'; wall=null; et=0; smoke=[]; parts=[]; planes=[]; balloons=[]; balloonT=3; seen={}; endQ=false; brokeSnd=false; RX=4; fin.hidden=true; endrow.hidden=true;
     zone=(z===9)?3:(z||0); prevZone=zone; fadeT=0; bannerT=(z===9)?0:2.4; shakeT=0;
     dist=(z===9)?END-25:zone*ZLEN; ny=GY; vy=0; hits=0; inv=0; obs=[]; objs=[]; gapLeft=160; nextThrow=1.6; planeT=2;
     clearTimeout(dl.tm); dq=[]; dl.busy=false; dlg.hidden=true;
@@ -475,6 +476,7 @@ button.big{display:block;width:100%;font-size:22px;padding:16px;margin:10px 0 0;
     ['pointerup','pointercancel','pointerleave'].forEach(function(ev){ el.addEventListener(ev,release); }); });
   document.getElementById('rb').addEventListener('click',function(){ ac(); restart(0); });
   var au=document.getElementById('au'); au.addEventListener('click',function(){ SND=!SND; au.textContent='Audio: '+(SND?'sì':'no'); if(SND){ ac(); if(MUS.want) musPlay(); } else musHalt(0.2); });
+  var sk=document.getElementById('sk'); if(EMB && !REPLAY && !FINQ){ sk.hidden=false; sk.addEventListener('click',function(){ musStop(0); post('prize'); }); }
   state='wait'; requestAnimationFrame(step);
 })();
 </script>
