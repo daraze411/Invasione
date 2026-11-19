@@ -306,7 +306,7 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 /* carattere pixel per i comandi */
 .slot,.acts button,.sheet .b,.chip,.hint,.status,.seg button,.back,.endscr .b,.story .b,.resume,.tg .tx small,.mi small,.log summary,.dock .pl,.side,.sheet .ctip,.sheet .meta,.codemsg,.tro small{font-family:var(--disp)}
 .acts button,.sheet .b{font-size:15px;letter-spacing:.01em}
-.chip{font-size:12px}.hint{font-size:12.5px}.mi small{font-size:12px}
+.chip{font-size:12px}.hint{font-size:12.5px}.mi small{font-size:10.5px}
 .ico{width:16px;height:16px;display:block;image-rendering:pixelated}
 .menu .mi small,.credit,.front .who,.res-l{font-family:var(--disp)}
 .icon .ico{margin:auto}.back .ico{width:18px;height:18px}
@@ -445,11 +445,11 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 /* home */
 .home{display:flex;flex-direction:column;gap:14px;padding-top:4px}
 .poster{display:block;width:min(100%,44vh,440px);height:auto;aspect-ratio:1;margin:0 auto;border:2px solid var(--line);background:#000}
-.menu{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:8px}
-.mi{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;padding:11px 12px;background:var(--panel);border:2px solid var(--line);border-bottom:5px solid #070b10;color:var(--fg);font-size:19px;font-weight:600;min-height:54px}
-.mi small{font-family:var(--body);font-size:11px;font-weight:400;color:var(--mute)}
+.menu{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:auto;gap:6px}
+.mi{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;padding:6px 10px;background:var(--panel);border:2px solid var(--line);border-bottom:5px solid #070b10;color:var(--fg);font-size:16px;font-weight:600;min-height:40px}
+.mi small{font-family:var(--body);font-size:10px;font-weight:400;color:var(--mute)}
 .mi.wide{grid-column:1/-1}.cl{margin:0 0 14px;padding:12px;border:2px solid var(--line);background:var(--panel)}.cl p{margin:0 0 8px}.cl input.code{width:100%;box-sizing:border-box;margin:0 0 8px}.cl .cm.ok{color:#9ff0e4}.cl .cm.er{color:#ff9a8a}.mi[hidden]{display:none}a.mi{text-decoration:none}
-.mi.main{grid-column:1/-1;align-items:center;background:var(--paper);color:#1a1608;border-color:#a8955f;border-bottom-color:#6e5f35;font-size:24px;font-weight:700;letter-spacing:.08em}
+.mi.main{grid-column:1/-1;align-items:center;background:var(--paper);color:#1a1608;border-color:#a8955f;border-bottom-color:#6e5f35;font-size:19px;font-weight:700;letter-spacing:.08em;padding:6px 10px}
 .menu .resume{grid-column:1/-1;border:2px solid var(--paper);border-bottom:5px solid #6e5f35}
 .resume b{font-weight:700}
 /* scelta fazione */
@@ -509,6 +509,49 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
  .dock .card>span{-webkit-line-clamp:4}
 }
 @media (min-width:760px){.ov{align-items:center}.sheet{max-height:86vh;border-width:2px}}
+
+.die.rolling{animation:dshake .13s linear infinite}
+@keyframes dshake{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(-2px,1px) rotate(-12deg)}50%{transform:translate(2px,-2px) rotate(10deg)}75%{transform:translate(-1px,-1px) rotate(-8deg)}100%{transform:translate(0,0) rotate(0)}}
+.die.chg{animation:dchg .7s ease-out}
+@keyframes dchg{0%{transform:scale(1.5);box-shadow:0 0 0 0 #f0d98c,0 0 14px 4px #f0d98c;filter:brightness(1.8)}60%{transform:scale(.92);box-shadow:0 0 0 6px rgba(240,217,140,0)}100%{transform:scale(1);box-shadow:none;filter:none}}
+.die.unr{color:var(--mute);letter-spacing:0}
+.rollov{position:fixed;left:0;right:0;bottom:0;top:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;background:rgba(5,9,16,.55);padding:16px}
+.rollbox{width:100%;max-width:420px;display:flex;flex-direction:column;gap:8px;align-items:stretch;text-align:center;background:var(--panel);border:2px solid var(--paper);border-bottom-width:5px;padding:14px;font-family:var(--disp)}
+.kbd{display:none;font-size:11px;font-weight:400;letter-spacing:0}@media (hover:hover) and (min-width:1000px){.kbd{display:block}}
+.rollbox b{font-size:20px;color:var(--paper)}.rollbox span{font-size:13px;color:var(--mute)}
+.rollauto{font-size:12px;color:var(--mute);display:flex;gap:6px;align-items:center;justify-content:center;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.die.rolling,.die.chg{animation:none}}
+
+#invbg{position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:0;pointer-events:none;image-rendering:pixelated;opacity:.34}
+#app,.rollov{position:relative;z-index:1}.rollov{position:fixed;z-index:40}
+
+@media (min-width:1000px){
+ #app.game{max-width:1320px;align-content:start;display:grid;grid-template-columns:minmax(0,1fr) 360px;column-gap:22px;row-gap:12px;align-items:start;padding-top:6px}
+ #app.game .board{display:contents}
+ #app.game .top{grid-column:1/-1;grid-row:1;padding-bottom:10px}
+ #app.game .top .t{font-size:20px}
+ #app.game .opp{grid-column:1;grid-row:2}
+ #app.game .fronts{grid-column:1;grid-row:3;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch}
+ #app.game .front{padding:14px 16px;gap:10px;min-height:230px}
+ #app.game .dock{grid-column:1;grid-row:4;position:static;box-shadow:none;clip-path:none;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:12px 14px;gap:9px}
+ #app.game .dock .hand{flex-wrap:wrap;overflow:visible}
+ #app.game .dock:not(.hopen) .hand,#app.game .dock:not(.hopen) .nohand{display:flex}
+ #app.game .handtog{display:none}
+ #app.game .card{flex:0 0 150px;font-size:12px}
+ #app.game .log{grid-column:2;grid-row:2/5;position:sticky;top:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:12px 14px;max-height:calc(100vh - 28px);overflow:auto;font-size:13px}
+ #app.game .log summary{pointer-events:none;list-style:none;color:var(--paper);font-family:var(--disp);font-size:15px}
+ #app.game .log summary::-webkit-details-marker{display:none}
+ #app.game .log ol{max-height:none;overflow:visible;gap:5px}
+ #app.game .board>.credit{grid-column:1/-1;grid-row:5}
+ #app.game .die{width:40px;height:40px;font-size:19px}
+ .ov{align-items:center}
+ .sheet{border-radius:14px;max-width:600px;max-height:88vh}
+ .rollov{align-items:center}
+ .home .menu .mi,.home .mi{cursor:pointer}
+ .mi:hover,.go:hover,.acts button:hover,.card:hover{filter:brightness(1.12)}
+ .die.can:hover,button.die:hover{transform:translateY(-2px);filter:brightness(1.2)}
+}
+@media (min-width:1000px) and (max-width:1199px){#app.game{grid-template-columns:minmax(0,1fr) 300px}}
 </style>
 <div id="app"></div>
 <div id="tip" hidden></div>
@@ -567,7 +610,7 @@ async function cloudDel(){try{if(CL.cl&&CL.user)await CL.cl.from('saves').delete
 function cloudHTML(){if(!cloudOn())return '';
  const m=CL.msg?`<p class="cm ${CL.ok?'ok':'er'}" role="status">${esc(CL.msg)}</p>`:'';
  if(CL.user)return `<div class="cl"><p><b>Account online</b></p><p>Collegato come <b>${esc(CL.user.email||CL.email)}</b>. I progressi si salvano da soli e li ritrovi su qualsiasi telefono.</p>${m}<div class="opts">${btn('cl_push','','Salva ora','hi')}${btn('cl_out','','Esci','sec')}${btn('cl_del','','Cancella i dati online','sec')}</div></div>`;
- return `<div class="cl"><p><b>Iscriviti con la tua email</b> <span class="meta">Facoltativo, ma consigliato.</span></p><p>Così ritrovi trofei e statistiche su qualsiasi telefono, senza copiare il codice. Ti mandiamo un link di accesso, niente password.</p>
+ return `<div class="cl"><p style="margin-bottom:2px"><b>Iscriviti con la tua email</b></p><p class="meta">Facoltativo, ma consigliato.</p><p>Così ritrovi trofei e statistiche su qualsiasi telefono, senza copiare il codice. Ti mandiamo un link di accesso, niente password.</p>
 <input id="cl-mail" class="code" type="email" inputmode="email" autocomplete="email" placeholder="la.tua@email.it" value="${esc(CL.email)}" aria-label="La tua email">
 <div class="opts">${btn('cl_send','',CL.sent?'Rimanda il link':'Inviami il link','hi')}</div>${m}
 ${CL.sent?`<p class="meta">Tocca il link nella mail. Se nel messaggio c'è un codice a cifre, scrivilo qui.</p><input id="cl-code" class="code" inputmode="numeric" autocomplete="one-time-code" placeholder="Codice a cifre" aria-label="Codice ricevuto per email"><div class="opts">${btn('cl_verify','','Conferma codice','sec')}</div>`:''}
@@ -727,14 +770,14 @@ function compTech(f){const ids=[];for(let i=1;i<=24;i++)ids.push(i);if(has('bonu
 function compHTML(tab){
  const mini=(a,face,n,sub)=>`<button class="cmini" data-a="cview" data-v="${a}">${face}<span class="cn">${n>1?'×'+n:''}${sub?`<small>${esc(sub)}</small>`:''}</span></button>`;
  if(tab==='T'||tab==='A')return `<p class="meta">${tab==='T'?'Il mazzo dei Terrestri':'Il mazzo degli Alieni'}: prima le univoche (ne ricevi una a caso), poi le esclusive della fazione, poi le comuni. ×2 indica le copie nel mazzo.</p><div class="cgrid">${compTech(tab).map(x=>mini('t'+x.id,techFace(x.id),x.n)).join('')}</div>`;
- if(tab==='E')return `<p class="meta">Ogni round ogni Fronte riceve un Evento e una Condizione.</p><div class="cgrid">${[1,2,3,4,5,7,8,9,10,11,12].map(e=>mini('e'+e,cardFace({art:'art-ev.png',tag:'Evento',title:EVN[e],text:EVD[e]}),1)).join('')}${['M','B','DH','DL'].map(c=>mini('c'+c,cardFace({noart:true,tag:'Condizione',title:CN[c],text:CD[c]}),{M:4,B:4,DH:2,DL:2}[c])).join('')}</div>`;
+ if(tab==='E')return `<p class="meta">Ogni round ogni Fronte riceve un Evento e una Condizione.</p><div class="cgrid">${[1,2,3,4,5,7,8,9,10,11,12].map(e=>mini('e'+e,cardFace({noart:true,tag:'Evento',title:EVN[e],text:EVD[e]}),1)).join('')}${['M','B','DH','DL'].map(c=>mini('c'+c,cardFace({noart:true,tag:'Condizione',title:CN[c],text:CD[c]}),{M:4,B:4,DH:2,DL:2}[c])).join('')}</div>`;
  if(tab==='V')return `<p class="meta">Quando prendi un Virus peschi una di queste carte. Alcune colpiscono te, altre aiutano l\'avversario.</p><div class="cgrid">${[1,2,3,4,5,6,7].map(v=>mini('v'+v,cardFace({art:'art-vi.png',tag:'Virus',title:INV.VIRN[v],text:VT[v][0]}),VCOPIES[v])).join('')}</div>`;
  if(tab==='C'){const ids=[...(has('cap')?['mark','kar']:[]),...(has('cap2')?['dani','nuy']:[])];
   return ids.length?`<div class="cgrid">${ids.map(id=>mini('k'+id,cardFace({fac:CAPS[id].f,art:CAPS[id].img,title:CAPS[id].n,text:CAPS[id].ab,tag:'Capitano',wide:true}),1)).join('')}${has('cap2')?'':'<div class="cmini lk"><span>????</span></div>'}</div>`:'<p class="lead">I Capitani si sbloccano con i Trofei. Per ora restano un mistero: ????</p>';}
  return '';}
 function cviewFace(a){const k=a.charAt(0),v=a.slice(1);
  if(k==='t')return techFace(+v)+`<p class="ctip">${esc(techTip(+v).split('\n\n').slice(1).join(' '))}</p>`;
- if(k==='e')return cardFace({art:'art-ev.png',tag:'Evento',title:EVN[+v],text:EVD[+v]});
+ if(k==='e')return cardFace({noart:true,tag:'Evento',title:EVN[+v],text:EVD[+v]});
  if(k==='c')return cardFace({noart:true,tag:'Condizione',title:CN[v],text:CD[v]});
  if(k==='v')return cardFace({art:'art-vi.png',tag:'Virus',title:INV.VIRN[+v],text:VT[+v][0]})+`<p class="ctip">Se è l\'avversario a prenderlo: ${esc(VT[+v][1])}</p>`;
  if(k==='k'&&CAPS[v])return cardFace({fac:CAPS[v].f,art:CAPS[v].img,title:CAPS[v].n,text:CAPS[v].ab,tag:'Capitano',wide:true})+`<ul class="capl">${CAPS[v].long.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
@@ -786,7 +829,7 @@ function tgtRep(d){if(!TG)return null;for(const x of TG){const v=x.v;if(v.o!==d.
 function dieHTML(d,cls,tag,extra){let t=tag||'i';cls=cls||'';extra=extra||'';
  const r=tgtRep(d);if(r!==null){t='button';cls=cls.replace('can','')+' can'+(UI.tsel===d.p+':'+r||(UI.swapA!=null&&d.p===H&&r===UI.swapA)?' sel':'');extra=`data-a="tdie" data-v="${d.p}:${r}"`;}
  const tp=cls.indexOf('nul')>=0?'Nave nulla: non rispetta l\'Evento del Fronte, quindi non conta per somma, numero di dadi e Bersaglio. Torna valida se il valore cambia.':(d.fz?'Nave congelata: non può essere spostata, rilanciata o modificata da effetti.':'');
- return `<${t} class="die ${S.fac[d.p]} ${cls}" ${extra}${tp?` data-tip="${esc(tp)}"`:''}>${d.v}</${t}>`;}
+ const wr=waitRoll();return `<${t} class="die ${S.fac[d.p]} ${cls}${wr?' unr':''}" ${extra} data-dk="${d.p}:${d.i}" data-t="${d.v}"${tp?` data-tip="${esc(tp)}"`:''}>${wr?'?':d.v}</${t}>`;}
 function info(){const o=S.pend.opts,r={place:{},plays:{},sells:{},sb:{},ksb:{},vals:{},vd:{},buy:-1,kar:-1,dani:[],sil:-1,nuy:[],vc:[],vx:-1,pass:-1};
  o.forEach((x,i)=>{const a=x.v;switch(a.t){
   case'place':{const k=dk(S.dice[H][a.d]);(r.place[k]=r.place[k]||[]).push({i,f:a.f,x:a.x});break;}
@@ -838,14 +881,16 @@ function techFace(id){const f=INV.cf(id),b=INV.cb(id),t=INV.tt(S,H,id),ci=t.inde
  return cardFace({fac:f,art:ART[f+'-'+b]?`art-${f}-${b}.png`:null,title:named?t.slice(0,ci):'',text:named?t.charAt(ci+2).toUpperCase()+t.slice(ci+3):t,v:INV.isStart(id)?null:INV.TECH[b].v,tag:INV.isStart(id)?'Univoca':INV.FX[b]?'Esclusiva':''});}
 function handHTML(){const h=S.hand[H];if(!h.length)return '<div class="nohand">Nessuna Tecnologia in mano.</div>';
  return `<div class="hand">${h.map(id=>{return `<button class="card ${INV.cf(id)}" data-a="card" data-v="${id}" data-tip="${esc(techTip(id))}"><span>${esc(INV.tt(S,H,id))}</span></button>`;}).join('')}</div>`;}
+const DESK=()=>{try{return window.matchMedia('(min-width:1000px)').matches;}catch(e){return false;}};
+try{let _d=DESK();window.matchMedia('(min-width:1000px)').addEventListener('change',()=>{const n=DESK();if(n!==_d){_d=n;if(typeof render==='function'&&S!==undefined)render();}});}catch(e){}
 function logHTML(){const L=S.log.filter(e=>e.to===null||e.to===H).slice(-40).reverse();
- return `<details class="log"><summary>Registro della partita</summary><ol>${L.map(e=>`<li class="${e.t.charAt(0)==='—'?'h':''}">${esc(e.t)}</li>`).join('')}</ol></details>`;}
+ return `<details class="log"${DESK()?' open':''}><summary>Registro della partita</summary><ol>${L.map(e=>`<li class="${e.t.charAt(0)==='—'?'h':''}">${esc(e.t)}</li>`).join('')}</ol></details>`;}
 let APKOK=null,APKN='invasione.apk';
 const APK_ON=false;/* metti true quando l'app Android è pronta */
 function apkShow(){if(!APK_ON)return;const el=document.getElementById('apk');if(!el)return;if(APKOK===false)return;try{if((window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone||/iPhone|iPad|iPod/.test(navigator.userAgent)){APKOK=false;return;}}catch(e){}
  if(APKOK===true){el.href=APKN;el.hidden=false;return;}
  const names=['invasione.apk','Invasione.apk'];const tryN=i=>{if(i>=names.length){APKOK=false;return;}fetch(names[i],{method:'HEAD',cache:'no-store'}).then(r=>{const t=r.headers.get('content-type')||'';if(r.ok&&!/text\/html/.test(t)){APKOK=true;APKN=names[i];const e=document.getElementById('apk');if(e){e.href=APKN;e.hidden=false;}}else tryN(i+1);}).catch(()=>tryN(i+1));};try{tryN(0);}catch(e){APKOK=false;}}
-function render(){hideTip();setTimeout(syncMusic,0);setTimeout(apkShow,0);setTimeout(cloudBoot,0);setTimeout(plattKick,0);
+function render(){hideTip();setTimeout(invBg,0);setTimeout(syncMusic,0);setTimeout(apkShow,0);setTimeout(cloudBoot,0);setTimeout(plattKick,0);
  const CREDIT='<div class="credit end">Gioco di Daniele Radavero · © 2026 Tutti i diritti riservati</div>';
  if(UI.screen==='start'&&getName()===null&&!UI.sheet&&!UI.story&&!UI.poster)UI.sheet={k:'name',first:true};
  else if(UI.screen==='start'&&!tutSeen()&&!games(totSt(loadStats()))&&!loadSave()&&!UI.sheet&&!UI.story&&!UI.poster)UI.sheet={k:'tutoffer'};
@@ -885,9 +930,11 @@ function render(){hideTip();setTimeout(syncMusic,0);setTimeout(apkShow,0);setTim
   if(inf.vc.length)h+=`<button class="vir" data-a="vc">Virus → €</button>`;
   if(inf.vx>=0)h+=`<button class="vir" data-a="pick" data-v="${inf.vx}">Virus → extra</button>`;
   h+=(UI.vsel?'<button data-a="vcancel">Annulla la scelta del valore</button>':'')+(inf.pass>=0?`<button class="pass" data-a="pick" data-v="${inf.pass}">${pd.ctx.extra?'Nessuna extra':'Passa'}</button>`:'')+'</div>';}
- h+='</div>'+(s.over?endHTML():'')+sheetHTML();
+ h+='</div>'+(s.over?endHTML():'')+(waitRoll()&&!UI.sheet&&!UI.pops.length?rollHTML():'')+sheetHTML();
  app.className='game';
  app.innerHTML=h;
+ dieFx();
+ if(needRoll()&&AUTOROLL&&!UI.pops.length&&!UI.sheet)setTimeout(rollgo,250);
  if(S.tut)tutHL();
  if(s.over)startEnd();}
 /* ---------- audio chiptune: suoni generati dal browser, spenti all'inizio ---------- */
@@ -914,6 +961,8 @@ const SFX={
  combat:c=>{const t=c.currentTime;noise(c,t,.16,.09);tone(c,240,t,.16,{to:70,v:.06});},
  shield:c=>seq(c,[84,88,91],.04,{v:.04,w:'triangle'}),
  pop:c=>seq(c,[69,64],.05,{v:.04}),
+ roll:c=>{for(let i=0;i<8;i++)tone(c,300+Math.random()*500,c.currentTime+i*.065,.04,{v:.04,w:'square'});},
+ dchg:c=>seq(c,[84,91],.06,{v:.05}),
  qok:c=>seq(c,[72,76,79,84],.07,{v:.05}),
  qno:c=>seq(c,[52,48,43],.13,{v:.05}),
  round:c=>seq(c,[67,72,76],.09,{v:.05}),
@@ -1148,7 +1197,7 @@ function sheetHTML(){
  else if(UI.sheet&&UI.sheet.k==='storyLocked'){const st=loadStats();ttl='Storia da sbloccare';cancel=true;
   const r=(f,n)=>`<li class="${st[f].w?'done':''}"><span class="ck">${st[f].w?'✓':'○'}</span><span>Vinci una partita con <b class="f${f}">${n}</b>${st[f].w?' — fatto':''}</span></li>`;
   body=`<p class="lead">Come sono iniziati i guai fra Terrestri e Alieni? Per scoprirlo devi aver combattuto da entrambe le parti.</p><ul class="goals">${r('T','i Terrestri')}${r('A','gli Alieni')}</ul><p>Vale qualsiasi difficoltà. Le vittorie restano anche nel codice di salvataggio.</p>`+btn('setup','','Gioca una partita','hi');}
- else if(UI.sheet&&UI.sheet.k==='acct'){ttl='Account online';tall=true;cancel=true;body=`<p class="cm ${CL.user?'ok':'er'}" role="status"><b>${CL.user?'● Collegato come '+esc(CL.user.email||''):CL.chk?'Controllo accesso…':'○ Non sei collegato'}</b></p><p class="lead">Salva i tuoi progressi con la tua email: sono al sicuro anche se cambi telefono o cancelli i dati del browser. Non è obbligatorio, puoi sempre usare il codice di salvataggio.</p>${cloudHTML()}`;}
+ else if(UI.sheet&&UI.sheet.k==='acct'){ttl='Account online';tall=true;cancel=true;body=`<p class="cm ${CL.user?'ok':'er'}" role="status"><b>${CL.user?'● Collegato come '+esc(CL.user.email||''):CL.chk?'Controllo accesso…':'○ Nessun account collegato a questo dispositivo'}</b></p><p class="lead">Salva i tuoi progressi con la tua email: sono al sicuro anche se cambi telefono o cancelli i dati del browser. Non è obbligatorio, puoi sempre usare il codice di salvataggio.</p>${cloudHTML()}`;}
  else if(UI.sheet&&UI.sheet.k==='stats'){ttl='Le tue partite';tall=true;cancel=true;const code=exportCode(),ng=games(totSt(loadStats()));
   const canShare=typeof navigator!=='undefined'&&!!navigator.share;
   const wa='https://wa.me/?text='+encodeURIComponent('INVASIONE, il mio codice di salvataggio: '+code);
@@ -1169,7 +1218,7 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
  else if(UI.sheet&&UI.sheet.k==='help'){ttl='Regolamento';tall=true;body=btn('close','','Chiudi','sec')+rulesHTML();cancel=true;}
  else if(UI.sheet&&UI.sheet.k==='tut'){const n=UI.sheet.n,T=TUT[n];ttl=T.t;tall=true;
   body=`${n===0?btn('tutGo','','Gioca la partita guidata','hi'):''}<p class="step">Tutorial · passo ${n+1} di ${TUT.length}</p><div class="mock" aria-hidden="true">${T.v}</div>${T.h}<div class="nav">${n>0?btn('tutn',n-1,'Indietro','sec'):''}${n<TUT.length-1?btn('tutn',n+1,'Avanti','hi'):btn('close','','Ho capito, si gioca','hi')}</div>`;cancel=true;} else if(UI.sheet&&UI.sheet.k==='ev'){const fr=S.fr[UI.sheet.f];ttl=FR[UI.sheet.f];cancel=true;
-  body=`${cardFace({art:'art-ev.png',tag:'Evento',title:EVN[fr.ev],text:EVD[fr.ev]})}${fr.cond?`<p><b style="color:var(--paper)">${CN[fr.cond]}</b></p><p>${CD[fr.cond]}</p>`:''}`;}
+  body=`${cardFace({noart:true,tag:'Evento',title:EVN[fr.ev],text:EVD[fr.ev]})}${fr.cond?`<p><b style="color:var(--paper)">${CN[fr.cond]}</b></p><p>${CD[fr.cond]}</p>`:''}`;}
  else if(UI.sheet&&UI.sheet.k==='card'&&S&&S.hand[H].includes(UI.sheet.id)&&!(pd&&pd.p===H&&pd.ctx.then!=='main')){const id=UI.sheet.id,my=pd&&pd.p===H&&pd.ctx.then==='main',inf=my?info():{plays:{},sells:{},sb:{},ksb:{},vals:{}};cancel=true;ttl='Tecnologia';
   body=`${techFace(id)}<p class="ctip">${esc(techTip(id).split('\n\n').slice(1).join(' '))}</p>`;let n=0;
   if(inf.plays[id]!==undefined){body+=btn('pick',inf.plays[id],'Gioca la carta','hi');n++;}
@@ -1274,6 +1323,45 @@ function drain(){if(S.q&&S.q.length){if(S.q.some(x=>x.k==='reboot'))sfx('reboot'
   UI.pops.push({k:'startcard',c:x.c});
   UI.pops.push({k:'msg',title:'La situazione è tosta…',lines:[T?'…ma gli arsenali della Terra sono aperti.':'…ma l\'Impero non bada a spese.','Pesca 3 Tecnologie: ne tieni una, una torna nel mazzo e l\'ultima viene eliminata.']});return;}
  UI.pops.push(x);});S.q=[];}}
+
+/* ---- Dadi: tiro manuale e animazioni ---- */
+let AUTOROLL=false;try{AUTOROLL=localStorage.getItem('invasione.autoroll')==='1';}catch(e){}
+const REDM=()=>{try{return window.matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}};
+function needRoll(){return !!(S&&!S.over&&!S.tut&&UI.screen==='game'&&S.setRd===S.rd&&UI.rollRd!==S.rd);}
+function waitRoll(){return needRoll()&&!AUTOROLL;}
+function rolling(){return (UI.rollUntil||0)>Date.now();}
+function rollHTML(){return `<div class="rollov" role="dialog" aria-label="Tira i dadi"><div class="rollbox"><b>Round ${S.rd}</b><span>Le tue navi e quelle avversarie sono pronte.</span><button class="go" data-a="rollgo">Tira i dadi<small class="kbd">Barra spaziatrice</small></button><label class="rollauto"><input type="checkbox" data-a="rollauto" ${AUTOROLL?'checked':''}> Tira sempre in automatico</label></div></div>`;}
+function rollSpin(){const els=[...document.querySelectorAll('#app .die[data-t]')].filter(e=>!e.classList.contains('nul')||1);
+ if(REDM()||!els.length)return;els.forEach(e=>e.classList.add('rolling'));
+ let n=0;const iv=setInterval(()=>{n++;els.forEach(e=>{if(e.isConnected)e.textContent=1+Math.floor(Math.random()*6);});if(n>=9||!rolling()){clearInterval(iv);els.forEach(e=>{if(e.isConnected){e.textContent=e.dataset.t;e.classList.remove('rolling');}});}},65);}
+function rollgo(){if(!needRoll())return;UI.rollRd=S.rd;UI.rollUntil=Date.now()+(REDM()?0:620);UI.dmap=null;sfx('roll');render();rollSpin();
+ setTimeout(()=>{UI.rollUntil=0;render();kick();},REDM()?0:660);}
+function dieFx(){if(!S)return;const m={};document.querySelectorAll('#app .die[data-dk]').forEach(e=>{const k=e.dataset.dk,v=e.dataset.t;m[k]=v;});
+ const pm=UI.dmap,rd=S.rd+':'+S.setRd;if(pm&&pm.rd===rd&&!rolling()){let any=false;document.querySelectorAll('#app .die[data-dk]').forEach(e=>{const o=pm.m[e.dataset.dk];if(o!==undefined&&o!==e.dataset.t&&!REDM()){e.classList.add('chg');any=true;}});if(any)sfx('dchg');}
+ UI.dmap={rd,m};}
+
+/* ---- Sfondo home: invasori pixel ---- */
+const INVS=[[
+'..#.....#..','...#...#...','..#######..','.##.###.##.','###########','#.#######.#','#.#.....#.#','...##.##...'],[
+'...####...','.########.','##########','###..##..##','##########','..##..##..','.##.##.##.','##......##'],[
+'..#####..','#########','##.###.##','#########','.##...##.','##.....##','#.......#','.#.....#.']];
+let IB=null;
+function invBg(){const on=UI.screen==='start'&&!REDM();
+ if(!on){if(IB){IB.run=false;if(IB.cv)IB.cv.style.display='none';}return;}
+ if(!IB){const cv=document.createElement('canvas');cv.id='invbg';cv.setAttribute('aria-hidden','true');document.body.insertBefore(cv,document.body.firstChild);IB={cv,x:cv.getContext('2d'),run:false,t:0,ox:0,dir:1,oy:0,shots:[],last:0,dead:{}};window.addEventListener('resize',invSize);}
+ IB.cv.style.display='block';invSize();if(IB.run)return;IB.run=true;IB.last=0;requestAnimationFrame(invTick);}
+function invSize(){if(!IB)return;const k=4,w=Math.ceil(innerWidth/k),h=Math.ceil(innerHeight/k);if(IB.cv.width!==w||IB.cv.height!==h){IB.cv.width=w;IB.cv.height=h;}IB.w=w;IB.h=h;}
+function invTick(t){if(!IB||!IB.run)return;if(document.hidden){requestAnimationFrame(invTick);return;}
+ if(t-IB.last>=420){IB.last=t;IB.t++;
+  const cols=Math.max(5,Math.min(14,Math.floor(IB.w/16))),rows=4,sp=15,fw=cols*sp,ml=IB.w-fw-2;
+  IB.ox+=IB.dir*2;if(IB.ox>ml||IB.ox<2){IB.dir*=-1;IB.ox=Math.max(2,Math.min(ml,IB.ox));IB.oy+=6;if(IB.oy>IB.h-60)IB.oy=0;}
+  if(IB.t%5===0&&!document.querySelector('.sheet')){const c=Math.floor(Math.random()*cols),r=rows-1;IB.shots.push({x:IB.ox+c*sp+5,y:IB.oy+r*13+8});}
+  IB.shots.forEach(q=>q.y+=7);IB.shots=IB.shots.filter(q=>q.y<IB.h);
+  const x=IB.x;x.clearRect(0,0,IB.w,IB.h);
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const sp0=INVS[r%3],fr=IB.t%2;x.fillStyle=r%2?'#2f6b5e':'#3f8f4a';const X=IB.ox+c*sp+(fr?1:0),Y=IB.oy+r*13;
+   sp0.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(row[i]==='#'){const jj=fr&&(j===6||j===7)?(i%2?0:1):0;x.fillRect(X+i,Y+j+jj*0,1,1);}});}
+  x.fillStyle='#c9b87a';IB.shots.forEach(q=>x.fillRect(q.x,q.y,1,3));}
+ requestAnimationFrame(invTick);}
 function advance(){if(S&&S.tut&&S.over&&!S.rec){S.rec=true;tutMark('1');sfx('win');}
  if(S&&S.over&&!S.rec){S.rec=true;recordStats();sfx(S.winner===H?'win':S.winner===-1?'draw':'lose');if(unl().length)setTimeout(()=>sfx('unlock'),1300);}
  if(S&&!S.over&&S.pend&&S.pend.ctx.then==='ack'&&UI.ackRd!==S.rd){UI.ackRd=S.rd;sfx('round');}
@@ -1284,7 +1372,7 @@ function advance(){if(S&&S.tut&&S.over&&!S.rec){S.rec=true;tutMark('1');sfx('win
   const cont=!S.over&&pd&&pd.ctx.then!=='main'&&pd.ctx.then!=='ack';UI.accCont=cont;UI.accOn=cont;}
  else if(humanNow&&!UI.acc.length&&UI.accOn&&!(pd&&pd.ctx.then!=='main')){UI.accOn=false;UI.accCont=false;}
  render();kick();saveGame();}
-function kick(){if(!S||S.over||!S.pend||S.pend.p===H||UI.pops.length)return;clearTimeout(tm);tm=setTimeout(botMove,diff==='hard'?80:420);}
+function kick(){if(!S||S.over||!S.pend||S.pend.p===H||UI.pops.length||waitRoll()||rolling())return;clearTimeout(tm);tm=setTimeout(botMove,diff==='hard'?80:420);}
 function canUndo(){const pd=S&&S.pend;if(!UI.undo||!pd||pd.p!==H||pd.ctx.then==='main')return false;
  if(S.rs!==UI.undoRs)return false;/* è intervenuta la sorte */
  if(S.log.slice(UI.undoLog).some(e=>e.t.indexOf(INV.fn(S,1-H))===0&&e.t.indexOf('gioca')<0))return false;
@@ -1305,7 +1393,7 @@ function botMove(){if(!S||!S.pend||S.pend.p===H||UI.pops.length)return;
 function virusN(o){const a=o&&o.v;if(!a)return 0;if(a.t==='vcoins')return a.n;if(a.t==='vextra'||a.t==='val')return 1;if(a.t==='play'){const k=INV.tk(S,H,a.c);if(k==='trade'||k==='wipe')return 1;}return 0;}
 function actSound(pd,v,from){let n='click';if(pd.ctx.then==='main'&&v){n={place:'place',play:'card',val:'card',sell:'coin',buy:'coin',sellbuy:'coin',vcoins:'coin'}[v.t]||'click';}
  for(const e of S.log.slice(from)){if(e.t.indexOf('Combattimento')===0)n='combat';if(e.t.indexOf('respinge')>=0)n='shield';}sfx(n);}
-function act(i,force){if(!S.pend||S.pend.p!==H)return;
+function act(i,force){if(!S.pend||S.pend.p!==H||waitRoll()||rolling())return;
  {const o=S.pend.opts[+i];if(!S.tut&&S.pend.ctx.then==='main'&&o&&o.v&&o.v.t==='play'){UI.undo=INV.clone(S);UI.undoRs=S.rs;UI.undoLog=S.log.length;}else if(S.pend.ctx.then==='main')UI.undo=null;}
  if(S.tut&&!(S.pend.ctx.then==='main'&&!force&&virusN(S.pend.opts[+i])>0)){const st=tutStep(),o=S.pend.opts[+i];if(st&&o&&st.ok(o)&&true)S.tutK=(S.tutK||0)+1;}
  if(!force&&S.pend.ctx.then==='main'){const n=virusN(S.pend.opts[+i]);if(n>0){UI.sheet={k:'vconf',i:+i,n,lab:S.pend.opts[+i].l};render();return;}}
@@ -1318,7 +1406,7 @@ const HD={
  hf:v=>{hf=v;render();},df:v=>{diff=v;render();},
  go:()=>{if(loadSave()){UI.sheet={k:'newconf'};render();return;}HD.gonew();},
  gonew:()=>{clearTimeout(tm);const o=loadOpt(),fac=[hf,hf==='T'?'A':'T'],cap=o.cap&&has('cap');S=INV.newGame({fac,hold:H,bonus:o.bonus&&has('bonus'),cap,caps:cap?pickCaps(o,fac):null});UI=mkUI('game');advance();},
- resume:()=>{const d=loadSave();if(!d){render();return;}clearTimeout(tm);S=d.S;diff=d.diff==='hard'?'hard':'normal';hf=S.fac[H];UI=mkUI('game');UI.pops=d.pops||[];UI.acc=d.acc||[];UI.accOn=!!d.accOn;UI.accCont=!!d.accCont;advance();},
+ resume:()=>{const d=loadSave();if(!d){render();return;}clearTimeout(tm);S=d.S;diff=d.diff==='hard'?'hard':'normal';hf=S.fac[H];UI=mkUI('game');UI.pops=d.pops||[];UI.acc=d.acc||[];UI.accOn=!!d.accOn;UI.accCont=!!d.accCont;UI.rollRd=S.rd;advance();},
  new:()=>{clearTimeout(tm);UI=mkUI('start');S=null;render();},
  setup:()=>{UI=mkUI('setup');render();},homeback:()=>{UI=mkUI('start');render();},
  endnew:()=>{clearTimeout(tm);S=null;UI=mkUI('setup');render();},recap:()=>{UI.sheet={k:'recap'};render();},
@@ -1378,7 +1466,7 @@ const HD={
  nameEdit:()=>{UI.sheet={k:'name',first:false};render();},
  nameOk:()=>{const el=document.getElementById('name-in');const v=el?el.value.trim():'';if(!v){if(el)el.focus();return;}setName(v);UI.sheet=null;render();},
  nameSkip:()=>{if(UI.sheet&&UI.sheet.first)setName('');UI.sheet=null;render();},
- pick:v=>act(v),pickc:v=>act(v,true),homeq:()=>{UI.sheet={k:'home'};render();},tdie:v=>{
+ rollgo:()=>rollgo(),rollauto:()=>{AUTOROLL=!AUTOROLL;try{localStorage.setItem('invasione.autoroll',AUTOROLL?'1':'0');}catch(e){}if(AUTOROLL)rollgo();else render();},pick:v=>act(v),pickc:v=>act(v,true),homeq:()=>{UI.sheet={k:'home'};render();},tdie:v=>{
   if(S.pend&&S.pend.p===H&&S.pend.ctx.then==='techSwap'){const[o,i]=v.split(':').map(Number);
    if(UI.swapA==null){if(o===H)UI.swapA=i;render();return;}
    if(o===H){UI.swapA=null;render();return;}
@@ -1401,6 +1489,9 @@ app.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t||t.d
 app.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse'){hideTip();return;}const t=e.target.closest&&e.target.closest('[data-tip]');if(t)showTip(t);else hideTip();});
 app.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse')hideTip();});
 app.addEventListener('mouseleave',hideTip);
+document.addEventListener('keydown',e=>{const t=e.target,tag=t&&t.tagName;if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(t&&t.isContentEditable))return;if(!S||UI.screen!=='game'||UI.sheet||UI.story||UI.poster||document.getElementById('nuyov'))return;
+ if(e.key===' '||e.code==='Space'){if(waitRoll()){e.preventDefault();rollgo();}}
+ else if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&(e.key==='z'||e.key==='Z')){if(canUndo()&&!rolling()){e.preventDefault();HD.undo();}}});
 document.addEventListener&&document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(UI.story){UI.story=null;render();}else if(UI.poster){UI.poster=false;render();}else if(UI.sheet){UI.sheet=null;render();}});
 window.addEventListener('scroll',hideTip,true);
 window.addEventListener('pagehide',saveGame);

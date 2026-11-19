@@ -167,7 +167,7 @@ TASK.roundStart=s=>{s.rd++;
  else{const dec=s.pv[0]<s.pv[1]?0:s.pv[1]<s.pv[0]?1:s.first;
   ask(s,dec,{then:'first',ttl:'Chi muove per primo nel round '+s.rd+'?'},[{l:'Muovo per primo',v:dec},{l:'Lascio la prima mossa all\'avversario',v:1-dec}]);}};
 FN.first=(s,c,v)=>{s.first=v;};
-TASK.setup=s=>{s.order=[s.first,1-s.first];s.turn=1;s.slot=0;s.pass=[false,false];s.skip=[false,false];s.dbl=[false,false];s.spore=[false,false];s.endNow=false;
+TASK.setup=s=>{s.setRd=s.rd;s.order=[s.first,1-s.first];s.turn=1;s.slot=0;s.pass=[false,false];s.skip=[false,false];s.dbl=[false,false];s.spore=[false,false];s.endNow=false;
  for(let p=0;p<2;p++){s.dice[p]=[];for(let i=0;i<7;i++){s.dice[p].push({i,p,v:s.tutDice?s.tutDice[p][i]:1+ri(s,6),loc:(i===6&&s.token&&s.token[p])?'K':'R',f:-1,x:-1,ord:0,fz:0});}}
  s.nuySold=[false,false];s.tseen={};
  if(!s.cdeck)s.cdeck=shuffle(s,['M','M','M','M','B','B','B','B','DH','DH','DL','DL']);
