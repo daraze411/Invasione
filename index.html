@@ -578,6 +578,10 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
  .die.can:hover,button.die:hover{transform:translateY(-2px);filter:brightness(1.2)}
 }
 @media (min-width:1000px) and (max-width:1199px){#app.game{grid-template-columns:minmax(0,1fr) 300px}}
+
+.front.tgt{border-color:var(--paper);box-shadow:inset 0 0 0 3px var(--paper),0 0 16px 2px rgba(240,217,140,.55);cursor:pointer;animation:tgp 1s ease-in-out infinite}
+@keyframes tgp{50%{filter:brightness(1.35)}}
+@media (prefers-reduced-motion:reduce){.front.tgt{animation:none}}
 </style>
 <script data-goatcounter="https://invasione.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -1451,19 +1455,23 @@ function render(){hideTip();setTimeout(invBg,0);setTimeout(syncMusic,0);setTimeo
  if(swp){const aO=UI.swapA;
   TG=aO==null?pd.opts.map(x=>({v:{o:H,i:x.v.a}})):[{v:{o:H,i:aO}}].concat(pd.opts.filter(x=>x.v.a===aO).map(x=>({v:{o:1-H,i:x.v.b}})));
   if(!s.dice[0].concat(s.dice[1]).some(d=>(d.loc==='R'||d.loc==='F')&&tgtRep(d)!==null))TG=null;}
+ const tsOpts=TG&&!swp&&UI.tsel?pd.opts.map((x,i)=>({x,i})).filter(m=>m.x.v&&m.x.v.o+':'+m.x.v.i===UI.tsel):[];
+ const isMv=!!(pd&&(pd.ctx.then==='techMove'||pd.ctx.then==='spMove'));
+ const MV=isMv&&tsOpts.length?new Set(tsOpts.map(m=>m.x.v.to)):null;
  let h='<div class="board">'+topHTML();
  h+=`<div class="opp"><div class="pl"><span class="fac ${s.fac[q]}">${fname(s.fac[q])}<span class="lg"> · Avversario</span><span class="sh"> · Avv.</span></span>${sideInfo(q)}</div>`+reserveHTML(q)+'</div>';
- h+='<div class="fronts">';if(s.fr.length&&s.dice[0].length)for(let f=0;f<3;f++)h+=frontHTML(f,inf);h+='</div>';
+ h+='<div class="fronts">';if(s.fr.length&&s.dice[0].length)for(let f=0;f<3;f++){let fh=frontHTML(f,inf);if(MV&&MV.has(f))fh=fh.replace('<section class="front f'+f+'"','<section class="front f'+f+' tgt" data-a="mvto" data-v="'+f+'" role="button" tabindex="0"');h+=fh;}h+='</div>';
  h+=logHTML()+'<div class="credit">Gioco di Daniele Radavero · © 2026 Tutti i diritti riservati</div></div>';
  let st='';
  if(s.over)st='Partita conclusa.';
  else if(pd&&pd.p!==H)st=pd.ctx.then==='main'?'L\'avversario sta giocando…':'L\'avversario sta scegliendo…';
  else if(TG&&swp)st=UI.swapA==null?"Scambio: tocca una tua nave.":"Scambio: ora tocca una nave avversaria. Tocca di nuovo la tua per annullare.";
+ else if(TG&&tsOpts.length){const nm=tsOpts[0].x.l.split(' → ')[0];st=isMv?`Sposta ${nm}: tocca il Fronte di destinazione. Tocca di nuovo la nave per annullare.`:`${nm}: scegli il nuovo valore qui sotto. Tocca di nuovo la nave per annullare.`;}
  else if(TG)st=(pd.ctx.ttl||'Scegli una nave')+': tocca un dado illuminato.';
  else if(mine&&UI.vsel)st='Valore '+UI.vsel.v+': tocca un dado illuminato in riserva (prendi 1 Virus).';
  else if(mine)st=UI.sel?'Scegli dove schierare il dado.':(pd.ctx.extra?'Azione extra: scegli o rinuncia.':'Tocca a te: scegli un dado, una carta o un\'azione.');
  h+=`<div class="dock ${UI.handOpen?'hopen':''}"><div class="pl"><span class="fac ${s.fac[H]}">${fname(s.fac[H])} · Tu</span>${sideInfo(H)}<button class="handtog" data-a="hand" aria-expanded="${!!UI.handOpen}">Carte ${s.hand[H].length} ${UI.handOpen?'▴':'▾'}</button></div>`+(S.tut?tutHTML():'')+reserveHTML(H,inf)+handHTML()+`<div class="status ${mine?'me':''}">${st}</div>`;
- if(TG){const si=pd.opts.findIndex(x=>x.v===null);const swb=swp&&UI.swapA!=null;if(si>=0||canUndo()||swb)h+=`<div class="acts">${si>=0?`<button class="pass" data-a="pick" data-v="${si}">${esc(pd.opts[si].l)}</button>`:''}${swb?'<button data-a="swback">Scegli un\'altra nave</button>':''}${canUndo()?'<button data-a="undo">Annulla la carta</button>':''}</div>`;}
+ if(TG){const si=pd.opts.findIndex(x=>x.v===null);const swb=swp&&UI.swapA!=null;const inl=(!isMv?tsOpts.map(m=>`<button class="hi" data-a="pick" data-v="${m.i}">${esc((()=>{const k=m.x.l.indexOf(' → ');return k<0?m.x.l:'Nuovo valore: '+m.x.l.slice(k+3);})())}</button>`).join(''):'');if(si>=0||canUndo()||swb||inl)h+=`<div class="acts">${inl}${si>=0?`<button class="pass" data-a="pick" data-v="${si}">${esc(pd.opts[si].l)}</button>`:''}${swb?'<button data-a="swback">Scegli un\'altra nave</button>':''}${tsOpts.length?'<button data-a="tback">Scegli un\'altra nave</button>':''}${canUndo()?'<button data-a="undo">Annulla la carta</button>':''}</div>`;}
  if(mine){h+='<div class="acts">';
   if(inf.buy>=0)h+=`<button data-a="pick" data-v="${inf.buy}">Compra (−2 €)</button>`;
   if(Object.keys(inf.sb).length)h+=`<button data-a="sbopen">Vendi e compra</button>`;
@@ -1835,12 +1843,7 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
   else{ttl=c.ttl||'Scegli';
    const recent=S.log.filter(e=>e.to===null||e.to===H).slice(-2).map(e=>e.t);
    if(c.then==='resp'||c.then==='first')lead=recent.join(' · ');
-   if(TG){if(!UI.tsel)return '';
-    const th=c.then,lab=l=>{const k=l.indexOf(' → ');if(k<0)return l;const r=l.slice(k+3);return th==='techMove'||th==='spMove'?'Sposta su '+r:'Nuovo valore: '+r;};
-    const o2=pd.opts;const first=o2.find(x=>x.v&&x.v.o+':'+x.v.i===UI.tsel);
-    lead=first?first.l.split(' → ')[0]:'';
-    body=o2.map((x,i)=>x.v&&x.v.o+':'+x.v.i===UI.tsel?btn('pick',i,th==='rr'?'Rilancia questa nave':lab(x.l)):'').join('')+btn('tback','','Scegli un\'altra nave','sec')+(canUndo()?btn('undo','','Annulla la carta','sec'):'');
-    return `<div class="ov"><div class="sheet" role="dialog"><h2>${esc(ttl)}</h2><p>${esc(lead)}</p>${body}</div></div>`;}
+   if(TG)return '';
    const o=pd.opts;let items=o.map((x,i)=>({i,l:x.l}));
    const grp=o.length>8&&o.every(x=>x.v&&x.v.o!==undefined&&x.v.i!==undefined&&x.l.indexOf(' → ')>0);
    if(grp&&UI.grp===null){const seen={},gs=[];o.forEach(x=>{const k=x.l.split(' → ')[0];if(!seen[k]){seen[k]=1;gs.push(k);}});
@@ -2016,10 +2019,14 @@ const HD={
    if(o===H){UI.swapA=null;render();return;}
    const k=S.pend.opts.findIndex(x=>x.v.a===UI.swapA&&x.v.b===i);UI.swapA=null;
    if(k>=0){act(k);return;}render();return;}
+  if(UI.tsel===v){UI.tsel=null;render();return;}
+  const ks=S.pend.opts.map((x,i)=>({x,i})).filter(m=>m.x.v&&m.x.v.o+':'+m.x.v.i===v);
+  if(ks.length===1){UI.tsel=null;act(ks[0].i);return;}
   UI.tsel=v;render();},
+ mvto:v=>{const g=+v;const m=S.pend&&S.pend.opts.map((x,i)=>({x,i})).find(m=>m.x.v&&m.x.v.o+':'+m.x.v.i===UI.tsel&&m.x.v.to===g);if(m){UI.tsel=null;act(m.i);}},
  swback:()=>{UI.swapA=null;render();},tback:()=>{UI.tsel=null;render();},pop:()=>{UI.pops.shift();render();kick();saveGame();},
  grp:v=>{UI.grp=v;render();},back:()=>{UI.grp=null;render();}};
-const CLICKS={tutNext:1,sbopen:1,undo:1,leaveYes:1,comp:1,ctab:1,cview:1,tutGo:1,tutSkip:1,tutQuit:1,tutAgain:1,tutPlay:1,book:1,capact:1,capPick:1,nameEdit:1,nameOk:1,nameSkip:1,credits:1,tro:1,capv:1,optT:1,setup:1,go:1,gonew:1,hf:1,df:1,story:1,storyLocked:1,tut0:1,tutn:1,help:1,poster:1,stats:1,homeback:1,new:1,endnew:1,recap:1,resume:1,close:1,homeq:1,die:1,card:1,hand:1,vsel:1,tdie:1,swback:1,ev:1};
+const CLICKS={tutNext:1,sbopen:1,undo:1,leaveYes:1,comp:1,ctab:1,cview:1,tutGo:1,tutSkip:1,tutQuit:1,tutAgain:1,tutPlay:1,book:1,capact:1,capPick:1,nameEdit:1,nameOk:1,nameSkip:1,credits:1,tro:1,capv:1,optT:1,setup:1,go:1,gonew:1,hf:1,df:1,story:1,storyLocked:1,tut0:1,tutn:1,help:1,poster:1,stats:1,homeback:1,new:1,endnew:1,recap:1,resume:1,close:1,homeq:1,die:1,card:1,hand:1,vsel:1,tdie:1,mvto:1,swback:1,ev:1};
 /* tasto indietro del telefono */
 try{history.replaceState({inv:0},'');history.pushState({inv:1},'');}catch(e){}
 window.addEventListener('popstate',()=>{if(NUYON){closeNuy();return;}let stay=true;
