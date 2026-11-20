@@ -425,8 +425,6 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
  .dock{gap:5px;padding-top:5px}
  .dock .pl{flex-wrap:wrap;gap:4px 8px;min-width:0}
  .dock .techst{display:none}
- .handtog{display:inline-block}
- .dock:not(.hopen) .hand,.dock:not(.hopen) .nohand{display:none}
  .status{padding:5px 8px;font-size:12px}
  .acts{gap:5px}.acts button{padding:7px 9px;font-size:12.5px}
 }
@@ -556,6 +554,21 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 .front.tgt{border-color:var(--paper);box-shadow:inset 0 0 0 3px var(--paper),0 0 16px 2px rgba(240,217,140,.55);cursor:pointer;animation:tgp 1s ease-in-out infinite}
 @keyframes tgp{50%{filter:brightness(1.35)}}
 @media (prefers-reduced-motion:reduce){.front.tgt{animation:none}}
+
+@media (max-width:999px){
+ .handtog{display:inline-block;margin-left:auto}
+ .dock:not(.hopen) .dpanel{display:none}
+ .dock .dpanel{display:flex;flex-direction:column;gap:6px;max-height:42vh;overflow:auto;border-top:1px dashed var(--line);padding-top:6px}
+ .dock .acts.bar button{flex:1 1 auto}
+}
+@media (min-width:1000px){.dpanel{display:flex;flex-direction:column;gap:9px}.handtog{display:none!important}}
+.dpanel{display:flex;flex-direction:column;gap:6px}
+
+.side.A,.side.T{background-color:#05080c;background-repeat:no-repeat;image-rendering:pixelated}
+.side.A{background-image:url(fac-A.png)}
+.side.T{background-image:url(fac-T.png)}
+.side.A,.side.T{background-size:auto 125%;background-position:right -70px center}
+.side b{font-size:38px!important}
 </style>
 <div id="app"></div>
 <div id="tip" hidden></div>
@@ -926,19 +939,20 @@ function render(){hideTip();setTimeout(invBg,0);setTimeout(syncMusic,0);setTimeo
  else if(TG)st=(pd.ctx.ttl||'Scegli una nave')+': tocca un dado illuminato.';
  else if(mine&&UI.vsel)st='Valore '+UI.vsel.v+': tocca un dado illuminato in riserva (prendi 1 Virus).';
  else if(mine)st=UI.sel?'Scegli dove schierare il dado.':(pd.ctx.extra?'Azione extra: scegli o rinuncia.':'Tocca a te: scegli un dado, una carta o un\'azione.');
- h+=`<div class="dock ${UI.handOpen?'hopen':''}"><div class="pl"><span class="fac ${s.fac[H]}">${fname(s.fac[H])} · Tu</span>${sideInfo(H)}<button class="handtog" data-a="hand" aria-expanded="${!!UI.handOpen}">Carte ${s.hand[H].length} ${UI.handOpen?'▴':'▾'}</button></div>`+(S.tut?tutHTML():'')+reserveHTML(H,inf)+handHTML()+`<div class="status ${mine?'me':''}">${st}</div>`;
+ const nact=(mine&&!TG)?(inf.buy>=0)+(Object.keys(inf.sb).length>0)+(inf.kar>=0)+(inf.dani.length>0)+(inf.sil>=0)+(inf.nuy.length>0)+(inf.vc.length>0)+(inf.vx>=0):0;
+ h+=`<div class="dock ${UI.handOpen?'hopen':''}"><div class="pl"><span class="fac ${s.fac[H]}">${fname(s.fac[H])} · Tu</span>${sideInfo(H)}<button class="handtog" data-a="hand" aria-expanded="${!!UI.handOpen}">Carte ${s.hand[H].length}${nact?' · Azioni '+nact:''} ${UI.handOpen?'▴':'▾'}</button></div>`+(S.tut?tutHTML():'')+reserveHTML(H,inf)+`<div class="status ${mine?'me':''}">${st}</div>`;let PN='';
  if(TG){const si=pd.opts.findIndex(x=>x.v===null);const swb=swp&&UI.swapA!=null;const inl=(!isMv?tsOpts.map(m=>`<button class="hi" data-a="pick" data-v="${m.i}">${esc((()=>{const k=m.x.l.indexOf(' → ');return k<0?m.x.l:'Nuovo valore: '+m.x.l.slice(k+3);})())}</button>`).join(''):'');if(si>=0||canUndo()||swb||inl)h+=`<div class="acts">${inl}${si>=0?`<button class="pass" data-a="pick" data-v="${si}">${esc(pd.opts[si].l)}</button>`:''}${swb?'<button data-a="swback">Scegli un\'altra nave</button>':''}${tsOpts.length?'<button data-a="tback">Scegli un\'altra nave</button>':''}${canUndo()?'<button data-a="undo">Annulla la carta</button>':''}</div>`;}
- if(mine){h+='<div class="acts">';
-  if(inf.buy>=0)h+=`<button data-a="pick" data-v="${inf.buy}">Compra (−2 €)</button>`;
-  if(Object.keys(inf.sb).length)h+=`<button data-a="sbopen">Vendi e compra</button>`;
-  if(inf.kar>=0)h+=`<button class="karb" data-a="pick" data-v="${inf.kar}">Compra con Kar Am Oh</button>`;
-  if(inf.dani.length)h+=`<button class="capb T" data-a="capact" data-v="dani">Dani: gioca il Parassita</button>`;
-  if(inf.sil>=0)h+=`<button class="capb T" data-a="pick" data-v="${inf.sil}">Silvya: rimuovi il Parassita</button>`;
-  if(inf.nuy.length)h+=`<button class="capb A" data-a="capact" data-v="nuysell">Nuy Tinck: vendi un dado</button>`;
-  if(inf.vc.length)h+=`<button class="vir" data-a="vc">Virus → €</button>`;
-  if(inf.vx>=0)h+=`<button class="vir" data-a="pick" data-v="${inf.vx}">Virus → extra</button>`;
-  h+=(UI.vsel?'<button data-a="vcancel">Annulla la scelta del valore</button>':'')+(inf.pass>=0?`<button class="pass" data-a="pick" data-v="${inf.pass}">${pd.ctx.extra?'Nessuna extra':'Passa'}</button>`:'')+'</div>';}
- h+='</div>'+(s.over?endHTML():'')+(waitRoll()&&!UI.sheet&&!UI.pops.length?rollHTML():'')+sheetHTML();
+ if(mine){
+  if(inf.buy>=0)PN+=`<button data-a="pick" data-v="${inf.buy}">Compra (−2 €)</button>`;
+  if(Object.keys(inf.sb).length)PN+=`<button data-a="sbopen">Vendi e compra</button>`;
+  if(inf.kar>=0)PN+=`<button class="karb" data-a="pick" data-v="${inf.kar}">Compra con Kar Am Oh</button>`;
+  if(inf.dani.length)PN+=`<button class="capb T" data-a="capact" data-v="dani">Dani: gioca il Parassita</button>`;
+  if(inf.sil>=0)PN+=`<button class="capb T" data-a="pick" data-v="${inf.sil}">Silvya: rimuovi il Parassita</button>`;
+  if(inf.nuy.length)PN+=`<button class="capb A" data-a="capact" data-v="nuysell">Nuy Tinck: vendi un dado</button>`;
+  if(inf.vc.length)PN+=`<button class="vir" data-a="vc">Virus → €</button>`;
+  if(inf.vx>=0)PN+=`<button class="vir" data-a="pick" data-v="${inf.vx}">Virus → extra</button>`;
+  {const pb=(UI.vsel?'<button data-a="vcancel">Annulla la scelta del valore</button>':'')+(inf.pass>=0?`<button class="pass" data-a="pick" data-v="${inf.pass}">${pd.ctx.extra?'Nessuna extra':'Passa'}</button>`:'');if(pb)h+=`<div class="acts bar">${pb}</div>`;}}
+ h+=`<div class="dpanel">${handHTML()}${PN?`<div class="acts">${PN}</div>`:''}</div></div>`+(s.over?endHTML():'')+(waitRoll()&&!UI.sheet&&!UI.pops.length?rollHTML():'')+sheetHTML();
  app.className='game';
  app.innerHTML=h;
  dieFx();
@@ -1398,7 +1412,7 @@ function botMove(){if(!S||!S.pend||S.pend.p===H||UI.pops.length)return;
 function virusN(o){const a=o&&o.v;if(!a)return 0;if(a.t==='vcoins')return a.n;if(a.t==='vextra'||a.t==='val')return 1;if(a.t==='play'){const k=INV.tk(S,H,a.c);if(k==='trade'||k==='wipe')return 1;}return 0;}
 function actSound(pd,v,from){let n='click';if(pd.ctx.then==='main'&&v){n={place:'place',play:'card',val:'card',sell:'coin',buy:'coin',sellbuy:'coin',vcoins:'coin'}[v.t]||'click';}
  for(const e of S.log.slice(from)){if(e.t.indexOf('Combattimento')===0)n='combat';if(e.t.indexOf('respinge')>=0)n='shield';}sfx(n);}
-function act(i,force){if(!S.pend||S.pend.p!==H||waitRoll()||rolling())return;
+function act(i,force){if(!S.pend||S.pend.p!==H||waitRoll()||rolling())return;UI.handOpen=false;
  {const o=S.pend.opts[+i];if(!S.tut&&S.pend.ctx.then==='main'&&o&&o.v&&o.v.t==='play'){UI.undo=INV.clone(S);UI.undoRs=S.rs;UI.undoLog=S.log.length;}else if(S.pend.ctx.then==='main')UI.undo=null;}
  if(S.tut&&!(S.pend.ctx.then==='main'&&!force&&virusN(S.pend.opts[+i])>0)){const st=tutStep(),o=S.pend.opts[+i];if(st&&o&&st.ok(o)&&true)S.tutK=(S.tutK||0)+1;}
  if(!force&&S.pend.ctx.then==='main'){const n=virusN(S.pend.opts[+i]);if(n>0){UI.sheet={k:'vconf',i:+i,n,lab:S.pend.opts[+i].l};render();return;}}
