@@ -818,7 +818,7 @@ function homeHTML(){const st=totSt(loadStats()),sv=loadSave(),ng=games(st);
 ${nm()?`<p class="hello">Ciao, ${esc(nm())}! I Fronti ti aspettano.</p>`:''}<nav class="menu" aria-label="Menù">${resumeHTML()}<button class="mi main" data-a="setup">${sv?'NUOVA PARTITA':'GIOCA'}</button>
 ${storyOpen()?'<button class="mi" data-a="story">Storia</button>':''}${has('books')?'<button class="mi" data-a="book">Libro del giorno</button>':''}<button class="mi" data-a="tro">Trofei</button><button class="mi" data-a="comp">Carte</button><button class="mi" data-a="tut0">Tutorial</button>
 <button class="mi" data-a="help">Regolamento</button><button class="mi" data-a="credits">Crediti</button>
-<button class="mi ${(storyOpen()?1:0)+(has('books')?1:0)===1?'wide':''}" data-a="stats">Le tue partite<small>${sub}</small></button>${cloudOn()?`<button class="mi wide" data-a="acct">${CL.user?'● Collegato':CL.chk?'Controllo accesso…':'○ Non collegato'}<small>${CL.user?esc(CL.user.email||''):CL.chk?'Un attimo':'Tocca per accedere con la email (facoltativo, consigliato)'}</small></button>`:''}<a class="mi wide" id="apk" href="invasione.apk" download hidden>Scarica l'app<small>Android · file APK</small></a></nav></div>`;}
+<button class="mi ${(storyOpen()?1:0)+(has('books')?1:0)===1?'wide':''}" data-a="stats">Le tue partite<small>${sub}</small></button>${cloudOn()?`<button class="mi wide" data-a="acct">${CL.user?'● Collegato':CL.chk?'Controllo accesso…':'○ Non collegato'}<small>${CL.user?esc(CL.user.email||''):CL.chk?'Un attimo':'Tocca per accedere con la email (facoltativo, consigliato)'}</small></button>`:''}${fsAvail()?`<button class="mi wide" data-a="fs">${isFs()?'Esci da schermo intero':'Schermo intero'}<small>${isFs()?'Torna alla finestra normale':'Gioca senza la barra del browser'}</small></button>`:''}<a class="mi wide" id="apk" href="invasione.apk" download hidden>Scarica l'app<small>Android · file APK</small></a></nav></div>`;}
 function setupHTML(){
  const side=(f,name)=>`<button class="side ${f} ${hf===f?'on':''}" data-a="hf" data-v="${f}" aria-pressed="${hf===f}"><b>${name}</b>${hf===f?'<span class="you">La tua fazione</span>':''}</button>`;
  return `<div class="setup"><div class="bar"><button class="back" data-a="homeback" aria-label="Torna alla home" title="Home"><svg class="ico" viewBox="0 0 8 8" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="M3 0h2v1h1v1h1v1h1v1H7v4H5V5H3v3H1V4H0V3h1V2h1V1h1z"/></svg></button><h1>Nuova partita</h1>${sndBtn()}</div>
@@ -885,7 +885,14 @@ function frontHTML(f,inf){const fr=S.fr[f],q=1-H;
   const pl=place&&place.find(e=>e.f===f);
   if(pl)h+=`<button class="drop" data-a="pick" data-v="${pl.i}">Schiera qui${fr.ev===8?' (−1 €)':''}</button>`;}
  return h+'</section>';}
-function topHTML(){const s=S;return `<div class="top"><div><div class="t">${s.tut?'Addestramento':'Round '+Math.min(s.rd,s.rounds||3)+'/'+(s.rounds||3)}</div><div class="m">${s.turn>10?'Turno 11 · Nuy Tinck':'Turno '+s.turn+'/10'}</div></div><div class="score"><span class="me">Tu ${s.pv[H]}</span> – <span class="op">${s.pv[1-H]} Avv.</span></div><span style="display:flex;gap:6px;align-items:center">${sndBtn()}<button class="icon" data-a="homeq" aria-label="Torna alla home" title="Home"><svg class="ico" viewBox="0 0 8 8" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="M3 0h2v1h1v1h1v1h1v1H7v4H5V5H3v3H1V4H0V3h1V2h1V1h1z"/></svg></button><button class="icon" data-a="help" aria-label="Regole">?</button></span></div>`;}
+/* ---- Schermo intero ---- */
+const FSE=()=>document.documentElement;
+function fsAvail(){try{if(navigator.standalone||window.matchMedia('(display-mode: standalone)').matches)return false;}catch(e){}return !!(FSE().requestFullscreen||FSE().webkitRequestFullscreen);}
+function isFs(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
+function fsToggle(){try{if(isFs()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);}else{const r=FSE().requestFullscreen||FSE().webkitRequestFullscreen;const pr=r.call(FSE());if(pr&&pr.catch)pr.catch(()=>{});}}catch(e){}}
+['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{try{render();}catch(e){}}));
+function fsBtn(){return fsAvail()?`<button class="icon" data-a="fs" aria-label="${isFs()?'Esci da schermo intero':'Schermo intero'}" title="${isFs()?'Esci da schermo intero':'Schermo intero'}"><svg class="ico" viewBox="0 0 8 8" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="${isFs()?'M2 0h1v3H0V2h2zM5 0h1v2h2v1H5zM0 5h3v3H2V6H0zM5 5h3v1H6v2H5z':'M0 0h3v1H1v2H0zM5 0h3v3H7V1H5zM0 5h1v2h2v1H0zM7 5h1v3H5V7h2z'}"/></svg></button>`:'';}
+function topHTML(){const s=S;return `<div class="top"><div><div class="t">${s.tut?'Addestramento':'Round '+Math.min(s.rd,s.rounds||3)+'/'+(s.rounds||3)}</div><div class="m">${s.turn>10?'Turno 11 · Nuy Tinck':'Turno '+s.turn+'/10'}</div></div><div class="score"><span class="me">Tu ${s.pv[H]}</span> – <span class="op">${s.pv[1-H]} Avv.</span></div><span style="display:flex;gap:6px;align-items:center">${sndBtn()}${fsBtn()}<button class="icon" data-a="homeq" aria-label="Torna alla home" title="Home"><svg class="ico" viewBox="0 0 8 8" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="M3 0h2v1h1v1h1v1h1v1H7v4H5V5H3v3H1V4H0V3h1V2h1V1h1z"/></svg></button><button class="icon" data-a="help" aria-label="Regole">?</button></span></div>`;}
 const ART={'A-1':1,'A-10':1,'A-11':1,'A-12':1,'A-13':1,'A-14':1,'A-15':1,'A-16':1,'A-17':1,'A-18':1,'A-19':1,'A-2':1,'A-20':1,'A-21':1,'A-22':1,'A-23':1,'A-24':1,'A-25':1,'A-26':1,'A-27':1,'A-28':1,'A-3':1,'A-4':1,'A-5':1,'A-6':1,'A-7':1,'A-8':1,'A-9':1,'T-1':1,'T-10':1,'T-11':1,'T-12':1,'T-13':1,'T-14':1,'T-15':1,'T-16':1,'T-17':1,'T-18':1,'T-19':1,'T-2':1,'T-20':1,'T-21':1,'T-22':1,'T-23':1,'T-24':1,'T-25':1,'T-26':1,'T-27':1,'T-28':1,'T-3':1,'T-4':1,'T-5':1,'T-6':1,'T-7':1,'T-8':1,'T-9':1};
 const PIPS={1:[[1,1]],2:[[0,0],[2,2]],3:[[0,0],[1,1],[2,2]],4:[[0,0],[2,0],[0,2],[2,2]],5:[[0,0],[2,0],[1,1],[0,2],[2,2]],6:[[0,0],[2,0],[0,1],[2,1],[0,2],[2,2]]};
 function pipSVG(v){return `<svg viewBox="0 0 13 13" aria-label="${v}"><rect x=".75" y=".75" width="11.5" height="11.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1"/>${(PIPS[v]||[]).map(([x,y])=>`<circle cx="${3.5+x*3}" cy="${3.5+y*3}" r="1.15" fill="currentColor"/>`).join('')}</svg>`;}
@@ -1485,7 +1492,7 @@ const HD={
  nameEdit:()=>{UI.sheet={k:'name',first:false};render();},
  nameOk:()=>{const el=document.getElementById('name-in');const v=el?el.value.trim():'';if(!v){if(el)el.focus();return;}setName(v);UI.sheet=null;render();},
  nameSkip:()=>{if(UI.sheet&&UI.sheet.first)setName('');UI.sheet=null;render();},
- rollgo:()=>rollgo(),rollauto:()=>{AUTOROLL=!AUTOROLL;try{localStorage.setItem('invasione.autoroll',AUTOROLL?'1':'0');}catch(e){}if(AUTOROLL)rollgo();else render();},pick:v=>act(v),pickc:v=>act(v,true),homeq:()=>{UI.sheet={k:'home'};render();},tdie:v=>{
+ fs:()=>fsToggle(),rollgo:()=>rollgo(),rollauto:()=>{AUTOROLL=!AUTOROLL;try{localStorage.setItem('invasione.autoroll',AUTOROLL?'1':'0');}catch(e){}if(AUTOROLL)rollgo();else render();},pick:v=>act(v),pickc:v=>act(v,true),homeq:()=>{UI.sheet={k:'home'};render();},tdie:v=>{
   if(S.pend&&S.pend.p===H&&S.pend.ctx.then==='techSwap'){const[o,i]=v.split(':').map(Number);
    if(UI.swapA==null){if(o===H)UI.swapA=i;render();return;}
    if(o===H){UI.swapA=null;render();return;}
@@ -1498,7 +1505,7 @@ const HD={
  mvto:v=>{const g=+v;const m=S.pend&&S.pend.opts.map((x,i)=>({x,i})).find(m=>m.x.v&&m.x.v.o+':'+m.x.v.i===UI.tsel&&m.x.v.to===g);if(m){UI.tsel=null;act(m.i);}},
  swback:()=>{UI.swapA=null;render();},tback:()=>{UI.tsel=null;render();},pop:()=>{UI.pops.shift();render();kick();saveGame();},
  grp:v=>{UI.grp=v;render();},back:()=>{UI.grp=null;render();}};
-const CLICKS={tutNext:1,sbopen:1,undo:1,leaveYes:1,comp:1,ctab:1,cview:1,tutGo:1,tutSkip:1,tutQuit:1,tutAgain:1,tutPlay:1,book:1,capact:1,capPick:1,nameEdit:1,nameOk:1,nameSkip:1,credits:1,tro:1,capv:1,nuyplay0:1,optT:1,setup:1,go:1,gonew:1,hf:1,df:1,story:1,storyLocked:1,tut0:1,tutn:1,help:1,poster:1,stats:1,homeback:1,new:1,endnew:1,recap:1,resume:1,close:1,homeq:1,die:1,card:1,hand:1,vsel:1,tdie:1,mvto:1,swback:1,ev:1};
+const CLICKS={tutNext:1,sbopen:1,undo:1,leaveYes:1,comp:1,ctab:1,cview:1,tutGo:1,tutSkip:1,tutQuit:1,tutAgain:1,tutPlay:1,book:1,capact:1,capPick:1,nameEdit:1,nameOk:1,nameSkip:1,credits:1,tro:1,capv:1,nuyplay0:1,optT:1,setup:1,go:1,gonew:1,hf:1,df:1,story:1,storyLocked:1,tut0:1,tutn:1,help:1,poster:1,stats:1,homeback:1,new:1,endnew:1,recap:1,resume:1,close:1,homeq:1,die:1,card:1,hand:1,vsel:1,tdie:1,mvto:1,fs:1,swback:1,ev:1};
 /* tasto indietro del telefono */
 try{history.replaceState({inv:0},'');history.pushState({inv:1},'');}catch(e){}
 window.addEventListener('popstate',()=>{if(NUYON){closeNuy();return;}let stay=true;
@@ -1513,7 +1520,8 @@ app.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse'){hideTip();ret
 app.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse')hideTip();});
 app.addEventListener('mouseleave',hideTip);
 document.addEventListener('keydown',e=>{const t=e.target,tag=t&&t.tagName;if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(t&&t.isContentEditable))return;if(!S||UI.screen!=='game'||UI.sheet||UI.story||UI.poster||document.getElementById('nuyov'))return;
- if(e.key===' '||e.code==='Space'){if(waitRoll()){e.preventDefault();rollgo();}}
+ if((e.key==='f'||e.key==='F')&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&fsAvail()){e.preventDefault();fsToggle();}
+ else if(e.key===' '||e.code==='Space'){if(waitRoll()){e.preventDefault();rollgo();}}
  else if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&(e.key==='z'||e.key==='Z')){if(canUndo()&&!rolling()){e.preventDefault();HD.undo();}}});
 document.addEventListener&&document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(UI.story){UI.story=null;render();}else if(UI.poster){UI.poster=false;render();}else if(UI.sheet){UI.sheet=null;render();}});
 window.addEventListener('scroll',hideTip,true);
