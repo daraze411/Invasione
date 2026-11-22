@@ -1584,11 +1584,13 @@ const PRK='invasione.ritratto.v1',PBK='invasione.profban.v1';
 const INK=[28,26,24],PAPER=[233,226,204];
 function ritrGet(){try{const v=localStorage.getItem(PRK);return v&&v.indexOf('data:image/png')===0?v:null;}catch(e){return null;}}
 function ritrSet(d){try{if(d)localStorage.setItem(PRK,d);else localStorage.removeItem(PRK);}catch(e){}}
-const B4=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
-function ritrDither(c){const g=c.getContext('2d'),id=g.getImageData(0,0,48,48),d=id.data,N=48*48,L=new Float32Array(N);
+const TONES=[[28,26,24],[92,86,74],[166,158,138],[233,226,204]],B2=[[0,2],[3,1]],RZ=64;
+function ritrDither(c){const n=RZ,g=c.getContext('2d'),id=g.getImageData(0,0,n,n),d=id.data,N=n*n,L=new Float32Array(N);
  for(let i=0;i<N;i++)L[i]=.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2];
- const so=Array.from(L).sort((a,b)=>a-b),lo=so[Math.floor(N*.03)],hi=so[Math.floor(N*.97)],rg=Math.max(20,hi-lo);
- for(let y=0;y<48;y++)for(let x=0;x<48;x++){const i=y*48+x;let v=(L[i]-lo)/rg;v=Math.max(0,Math.min(1,v));v=Math.pow(v,.9);const on=v>(B4[y%4][x%4]+.5)/16;const col=on?PAPER:INK;d[i*4]=col[0];d[i*4+1]=col[1];d[i*4+2]=col[2];d[i*4+3]=255;}
+ const M=new Float32Array(N);for(let y=0;y<n;y++)for(let x=0;x<n;x++){let a=0,k=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const xx=x+dx,yy=y+dy;if(xx>=0&&yy>=0&&xx<n&&yy<n){a+=L[yy*n+xx];k++;}}M[y*n+x]=a/k;}
+ for(let i=0;i<N;i++)L[i]=L[i]+.9*(L[i]-M[i]);
+ const so=Array.from(L).sort((a,b)=>a-b),lo=so[Math.floor(N*.02)],hi=so[Math.floor(N*.98)],rg=Math.max(30,hi-lo);
+ for(let y=0;y<n;y++)for(let x=0;x<n;x++){const i=y*n+x;let v=(L[i]-lo)/rg;v=Math.max(0,Math.min(1,v));v=Math.pow(v,.85);const t=v*3,b=Math.min(2,Math.floor(t)),fr=t-b;let lv=b+(fr>(B2[y%2][x%2]+.5)/4?1:0);lv=Math.min(3,lv);const col=TONES[lv];d[i*4]=col[0];d[i*4+1]=col[1];d[i*4+2]=col[2];d[i*4+3]=255;}
  g.putImageData(id,0,0);return c;}
 let SILH=null;
 function silhouette(){if(SILH)return SILH;const c=document.createElement('canvas');c.width=c.height=48;const g=c.getContext('2d');g.fillStyle='rgb('+PAPER+')';g.fillRect(0,0,48,48);
@@ -1605,19 +1607,19 @@ function newsHTML(){if(!S||S.tut)return '';const k=endKind();if(k!=='trees'&&k!=
  else{h=esc(N.toUpperCase())+' DISPERSO NELLO SPAZIO';t=`Ultimo avvistamento a bordo di un'astronave aliena, con un cartellino che recita "Not Penny's Boat".`;cap=`${esc(N)}, in una foto d'archivio`;}
  const dt=new Date().toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'});
  return `<article class="news" aria-label="Articolo di giornale"><div class="nhead"><span>CORRIERE DELLA TERRA</span><small>${esc(dt)} · Edizione straordinaria</small></div><h2 class="nh">${h}</h2><figure class="nfig"><img class="nph" src="${newsPhoto()}" alt="Ritratto"><figcaption>${cap}</figcaption></figure><p class="nt">${t}</p></article>`;}
-function profBanner(){let d=false;try{d=localStorage.getItem(PBK)==='1';}catch(e){}return(!ritrGet()&&!d&&getName()!==null)?`<div class="remind profban" role="note"><p><b>Completa il tuo profilo</b></p><p>Aggiungi il tuo ritratto: se vinci o perdi con i Terrestri finisci sul giornale.</p><div class="acts">${btn('prof','','Apri il profilo','hi')}${btn('profBanX','','Più tardi','sec')}</div></div>`:'';}
-function profSheetBody(){const r=ritrGet();return `<p class="lead">Il tuo nome</p><input id="name-in" class="code nm" maxlength="20" autocomplete="given-name" placeholder="Il tuo nome" value="${esc(nm())}" aria-label="Il tuo nome"><p class="lead">Ritratto per il giornale</p><div class="pprev"><img class="nph" src="${r||silhouette()}" alt="${r?'Il tuo ritratto':'Nessun ritratto'}"></div><p class="meta">Se vinci o perdi giocando con i Terrestri, finisci sul giornale con questa foto. Non viene caricata da nessuna parte: viene ridotta a pixel e salvata solo su questo dispositivo.</p>${btn('ritrCam','','Scatta una foto','hi')}${btn('ritrPick','','Scegli dalla galleria','sec')}${r?btn('ritrDel','','Rimuovi il ritratto','sec'):''}${btn('profOk','','Fatto','hi')}`;}
+function profBanner(){let d=false;try{d=localStorage.getItem(PBK)==='1';}catch(e){}return(!ritrGet()&&!d&&getName()!==null)?`<div class="remind profban" role="note"><p><b>Completa il tuo profilo</b></p><p>Aggiungi il tuo ritratto: chissà dove potrebbe comparire…</p><div class="acts">${btn('prof','','Apri il profilo','hi')}${btn('profBanX','','Più tardi','sec')}</div></div>`:'';}
+function profSheetBody(){const r=ritrGet();return `<p class="lead">Il tuo nome</p><input id="name-in" class="code nm" maxlength="20" autocomplete="given-name" placeholder="Il tuo nome" value="${esc(nm())}" aria-label="Il tuo nome"><p class="lead">Il tuo ritratto</p><div class="pprev"><img class="nph" src="${r||silhouette()}" alt="${r?'Il tuo ritratto':'Nessun ritratto'}"></div><p class="meta">Il gioco lo userà al momento giusto. Non viene caricato da nessuna parte: la foto viene ridotta a pixel e salvata solo su questo dispositivo.</p>${btn('ritrCam','','Scatta una foto','hi')}${btn('ritrPick','','Scegli dalla galleria','sec')}${r?btn('ritrDel','','Rimuovi il ritratto','sec'):''}${btn('profOk','','Fatto','hi')}`;}
 function profSaveName(){const el=document.getElementById('name-in');if(el)setName(el.value.trim());}
 function ritrFile(cam){profSaveName();const fi=document.createElement('input');fi.type='file';fi.accept='image/*';if(cam)fi.setAttribute('capture','user');fi.onchange=()=>{const f=fi.files&&fi.files[0];if(f)cropOpen(f);};fi.click();}
 function cropOpen(file){const url=URL.createObjectURL(file),img=new Image();
  img.onerror=()=>{URL.revokeObjectURL(url);alert('Non riesco a leggere questa immagine. Prova con un\'altra foto.');};
  img.onload=()=>{const Z=260,iw=img.naturalWidth,ih=img.naturalHeight,s0=Math.max(Z/iw,Z/ih);let zoom=1,ox=(Z-iw*s0)/2,oy=(Z-ih*s0)/2;
   const ov=document.createElement('div');ov.id='cropov';ov.setAttribute('role','dialog');ov.setAttribute('aria-label','Inquadra il viso');
-  ov.innerHTML=`<div class="cbox"><h3>Inquadra il viso</h3><canvas id="cc" width="${Z}" height="${Z}"></canvas><label class="czoom">Zoom <input id="cz" type="range" min="1" max="4" step="0.01" value="1"></label><div class="cprev"><canvas id="cp" width="48" height="48"></canvas><span>Anteprima sul giornale</span></div><div class="cbtn"><button class="go" id="cok" type="button">Usa questa foto</button><button class="mi" id="cno" type="button">Annulla</button></div></div>`;
+  ov.innerHTML=`<div class="cbox"><h3>Inquadra il viso</h3><canvas id="cc" width="${Z}" height="${Z}"></canvas><label class="czoom">Zoom <input id="cz" type="range" min="1" max="4" step="0.01" value="1"></label><div class="cprev"><canvas id="cp" width="64" height="64"></canvas><span>Anteprima</span></div><div class="cbtn"><button class="go" id="cok" type="button">Usa questa foto</button><button class="mi" id="cno" type="button">Annulla</button></div></div>`;
   document.body.appendChild(ov);
   const cc=ov.querySelector('#cc'),g=cc.getContext('2d'),cp=ov.querySelector('#cp'),cz=ov.querySelector('#cz');
   const clamp=()=>{const w=iw*s0*zoom,h=ih*s0*zoom;ox=Math.min(0,Math.max(Z-w,ox));oy=Math.min(0,Math.max(Z-h,oy));};
-  const out=()=>{const t1=document.createElement('canvas');t1.width=t1.height=96;const a=t1.getContext('2d');a.imageSmoothingQuality='high';a.drawImage(cc,0,0,96,96);const o=cp.getContext('2d');o.imageSmoothingQuality='high';o.drawImage(t1,0,0,48,48);return ritrDither(cp);};
+  const out=()=>{const t1=document.createElement('canvas');t1.width=t1.height=128;const a=t1.getContext('2d');a.imageSmoothingQuality='high';a.drawImage(cc,0,0,128,128);const o=cp.getContext('2d');o.imageSmoothingQuality='high';o.drawImage(t1,0,0,64,64);return ritrDither(cp);};
   const draw=()=>{clamp();g.imageSmoothingQuality='high';g.fillStyle='#000';g.fillRect(0,0,Z,Z);g.drawImage(img,ox,oy,iw*s0*zoom,ih*s0*zoom);out();};
   draw();
   let drag=null;cc.style.touchAction='none';
