@@ -536,8 +536,10 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 
 .die.rolling{animation:dshake .13s linear infinite}
 @keyframes dshake{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(-2px,1px) rotate(-12deg)}50%{transform:translate(2px,-2px) rotate(10deg)}75%{transform:translate(-1px,-1px) rotate(-8deg)}100%{transform:translate(0,0) rotate(0)}}
-.die.chg{animation:dchg .7s ease-out}
-@keyframes dchg{0%{transform:scale(1.5);box-shadow:0 0 0 0 #f0d98c,0 0 14px 4px #f0d98c;filter:brightness(1.8)}60%{transform:scale(.92);box-shadow:0 0 0 6px rgba(240,217,140,0)}100%{transform:scale(1);box-shadow:none;filter:none}}
+.die.chg{animation:dchg 1.5s ease-out;position:relative;z-index:3}
+.die.chg::after{content:attr(data-from) ' → ' attr(data-t);position:absolute;left:50%;top:-22px;transform:translateX(-50%);white-space:nowrap;font:700 11px/1 var(--pix);background:#f0d98c;color:#1a1a1a;padding:3px 5px;border-radius:3px;animation:dchgl 1.5s ease-out forwards;pointer-events:none}
+@keyframes dchgl{0%{opacity:0;transform:translate(-50%,6px)}15%{opacity:1;transform:translate(-50%,0)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-6px)}}
+@keyframes dchg{0%{transform:scale(1.8) rotate(-10deg);box-shadow:0 0 0 0 #f0d98c,0 0 22px 8px #f0d98c;filter:brightness(2)}20%{transform:scale(1.4) rotate(8deg)}40%{transform:scale(1.5) rotate(-5deg);box-shadow:0 0 0 8px rgba(240,217,140,.6),0 0 20px 6px #f0d98c;filter:brightness(1.8)}70%{transform:scale(.92);box-shadow:0 0 0 12px rgba(240,217,140,0)}100%{transform:scale(1);box-shadow:none;filter:none}}
 .die.unr{color:var(--mute);letter-spacing:0}
 .rollov{position:fixed;left:0;right:0;bottom:0;top:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;background:rgba(5,9,16,.55);padding:16px}
 .rollbox{width:100%;max-width:420px;display:flex;flex-direction:column;gap:8px;align-items:stretch;text-align:center;background:var(--panel);border:2px solid var(--paper);border-bottom-width:5px;padding:14px;font-family:var(--disp)}
@@ -618,6 +620,27 @@ button.die.sel{box-shadow:inset -3px -3px 0 rgba(0,0,0,.38),inset 3px 3px 0 rgba
 
 .mpcode{font-family:var(--pix);font-size:44px;letter-spacing:.3em;text-align:center;padding:10px 0 10px .3em;border:2px dashed var(--paper);color:var(--paper);margin:8px 0}
 .mpc{text-transform:uppercase;letter-spacing:.4em;text-align:center;font-size:26px}
+
+.tvn{width:100%;max-width:420px;margin:10px auto;background:#07140d;color:#b6f5c9;border:3px solid #2f7a4f;box-shadow:0 0 18px rgba(80,230,140,.25);text-align:left}
+.tvh{font-family:var(--pix);font-size:9px;line-height:1.5;padding:6px 8px;background:#12361f;border-bottom:2px solid #2f7a4f;letter-spacing:.04em}
+.tvh .live{color:#ff6b6b;animation:blink 1.2s steps(2) infinite;margin-right:6px}
+.tvw{position:relative;width:100%;aspect-ratio:1;overflow:hidden;background:#000}
+.tvan{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;object-fit:cover}
+.tvho{position:absolute;left:3%;top:22%;width:38%;aspect-ratio:1;animation:hofl 3.4s ease-in-out infinite}
+.tvph{width:100%;height:100%;display:block;image-rendering:pixelated;object-fit:cover;filter:invert(1) sepia(1) hue-rotate(75deg) saturate(3) brightness(1.15);mix-blend-mode:screen;opacity:.85;animation:hofk 2.6s steps(1) infinite;box-shadow:0 0 18px 3px rgba(90,255,160,.55)}
+.tvho::before{content:'';position:absolute;left:0;right:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,transparent 0,rgba(150,255,190,.55) 50%,transparent 100%);height:18%;animation:hosw 2.2s linear infinite;mix-blend-mode:screen}
+.tvho::after{content:'';position:absolute;left:-8%;right:-8%;bottom:-9%;height:11%;border-radius:50%;background:radial-gradient(ellipse,rgba(120,255,180,.75),rgba(120,255,180,0) 70%);animation:hofk 2.6s steps(1) infinite}
+.tvan{animation:tvb 3.2s steps(4) infinite}
+.tvw.talk .tvan{animation:tvtk .36s steps(2) infinite}
+@keyframes hofl{50%{transform:translateY(-4%)}}
+@keyframes hofk{0%,100%{opacity:.85}12%{opacity:.55}14%{opacity:.9}55%{opacity:.8}57%{opacity:.5}59%{opacity:.88}}
+@keyframes hosw{from{top:-18%}to{top:100%}}
+@keyframes tvb{50%{transform:scale(1.012) translateY(-.4%)}}
+@keyframes tvtk{50%{transform:translateY(.6%) scale(1.006)}}
+@media (prefers-reduced-motion:reduce){.tvho,.tvph,.tvho::before,.tvho::after,.tvan,.tvw.talk .tvan{animation:none}}
+.tvsc{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)}
+.tvt{margin:0;padding:10px 12px 12px;font-family:var(--disp);font-size:14px;line-height:1.35;min-height:7.5em;border-top:2px solid #2f7a4f}
+@media (prefers-reduced-motion:reduce){.tvh .live{animation:none}}
 </style>
 <script data-goatcounter="https://invasione.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
@@ -1382,10 +1405,10 @@ function statsHTML(){const st=loadStats(),t=totSt(st);
 function homeHTML(){const st=totSt(loadStats()),sv=loadSave(),ng=games(st);
  const sub=ng?`${ng} ${ng===1?'partita':'partite'} · ${st.w} ${st.w===1?'vittoria':'vittorie'}`:'Ancora nessuna partita';
  return `<div class="home"><div class="pwrap"><img class="poster" src="locandina-pixel.png" width="192" height="192" alt="Locandina di INVASIONE in pixel art: Terrestri contro Alieni">${sndBtn()}</div>
-${nm()?`<p class="hello">Ciao, ${esc(nm())}! I Fronti ti aspettano.</p>`:''}${profBanner()}<nav class="menu" aria-label="Menù">${resumeHTML()}<button class="mi main" data-a="setup">${sv?'NUOVA PARTITA':'GIOCA'}</button>
+${nm()?`<p class="hello">Ciao, ${esc(nm())}! I Fronti ti aspettano.</p>`:''}${profBanner()}<nav class="menu" aria-label="Menù">${resumeHTML()}<button class="mi main" data-a="setup">${sv?'NUOVA PARTITA':'GIOCA'}</button>${mpAvail()?`<button class="mi" data-a="mp">Partita online<small>Sfida un amico con un codice</small></button>`:''}
 ${storyOpen()?'<button class="mi" data-a="story">Storia</button>':''}${has('books')?'<button class="mi" data-a="book">Libro del giorno</button>':''}<button class="mi" data-a="tro">Trofei</button><button class="mi" data-a="comp">Carte</button><button class="mi" data-a="tut0">Tutorial</button>
 <button class="mi" data-a="help">Regolamento</button><button class="mi" data-a="credits">Crediti</button>
-<button class="mi ${(storyOpen()?1:0)+(has('books')?1:0)===1?'wide':''}" data-a="stats">Le tue partite<small>${sub}</small></button>${mpAvail()?`<button class="mi wide" data-a="mp">Partita online<small>Sfida un amico con un codice</small></button>`:''}<button class="mi wide" data-a="prof">Il tuo profilo<small>${nm()?esc(nm()):'Nome'} · ${ritrGet()?'ritratto caricato':'ritratto da aggiungere'}</small></button>${cloudOn()?`<button class="mi wide" data-a="acct">${CL.user?'● Collegato':CL.chk?'Controllo accesso…':'○ Non collegato'}<small>${CL.user?esc(CL.user.email||''):CL.chk?'Un attimo':'Tocca per accedere con la email (facoltativo, consigliato)'}</small></button>`:''}${fsAvail()?`<button class="mi wide" data-a="fs">${isFs()?'Esci da schermo intero':'Schermo intero'}<small>${isFs()?'Torna alla finestra normale':'Gioca senza la barra del browser'}</small></button>`:''}<a class="mi wide" id="apk" href="invasione.apk" download hidden>Scarica l'app<small>Android · file APK</small></a></nav></div>`;}
+<button class="mi ${(storyOpen()?1:0)+(has('books')?1:0)===1?'wide':''}" data-a="stats">Le tue partite<small>${sub}</small></button><button class="mi wide" data-a="prof">Il tuo profilo<small>${nm()?esc(nm()):'Nome'} · ${ritrGet()?'ritratto caricato':'ritratto da aggiungere'}</small></button>${cloudOn()?`<button class="mi wide" data-a="acct">${CL.user?'● Collegato':CL.chk?'Controllo accesso…':'○ Non collegato'}<small>${CL.user?esc(CL.user.email||''):CL.chk?'Un attimo':'Tocca per accedere con la email (facoltativo, consigliato)'}</small></button>`:''}${fsAvail()?`<button class="mi wide" data-a="fs">${isFs()?'Esci da schermo intero':'Schermo intero'}<small>${isFs()?'Torna alla finestra normale':'Gioca senza la barra del browser'}</small></button>`:''}<a class="mi wide" id="apk" href="invasione.apk" download hidden>Scarica l'app<small>Android · file APK</small></a></nav></div>`;}
 function setupHTML(){
  const side=(f,name)=>`<button class="side ${f} ${hf===f?'on':''}" data-a="hf" data-v="${f}" aria-pressed="${hf===f}"><b>${name}</b>${hf===f?'<span class="you">La tua fazione</span>':''}</button>`;
  return `<div class="setup"><div class="bar"><button class="back" data-a="homeback" aria-label="Torna alla home" title="Home"><svg class="ico" viewBox="0 0 8 8" aria-hidden="true" shape-rendering="crispEdges"><path fill="currentColor" d="M3 0h2v1h1v1h1v1h1v1H7v4H5V5H3v3H1V4H0V3h1V2h1V1h1z"/></svg></button><h1>Nuova partita</h1>${sndBtn()}</div>
@@ -1485,6 +1508,7 @@ function render(){hideTip();setTimeout(invBg,0);setTimeout(syncMusic,0);setTimeo
  const CREDIT='<div class="credit end">Gioco di Daniele Radavero · © 2026 Tutti i diritti riservati</div>';
  if(UI.screen==='start'&&getName()===null&&!UI.sheet&&!UI.story&&!UI.poster)UI.sheet={k:'name',first:true};
  else if(UI.screen==='start'&&!tutSeen()&&!games(totSt(loadStats()))&&!loadSave()&&!UI.sheet&&!UI.story&&!UI.poster)UI.sheet={k:'tutoffer'};
+ else if(UI.screen==='start'&&!RITASK&&getName()!==null&&!ritrGet()&&!UI.sheet&&!UI.story&&!UI.poster){RITASK=true;UI.sheet={k:'ritrask'};}
  else if(UI.screen==='start'&&has('cap')&&plattGet()===null&&!QDONE&&!UI.sheet&&!UI.story&&!UI.poster)UI.sheet={k:'quiz',i:0,ok:0,sel:-1};
  else if(UI.screen==='start'&&has('cap2')&&!NUYON&&!NUYTRY&&!(nuyGet()||{}).seen&&!UI.sheet&&!UI.story&&!UI.poster)setTimeout(()=>openNuy(false),0);
  if(UI.screen==='start'){app.className='home';app.innerHTML=homeHTML()+CREDIT+(UI.story?storyHTML():'')+(UI.poster?posterHTML():'')+sheetHTML();return;}
@@ -1527,14 +1551,14 @@ function render(){hideTip();setTimeout(invBg,0);setTimeout(syncMusic,0);setTimeo
   if(inf.nuy.length)PN+=`<button class="capb A" data-a="capact" data-v="nuysell">Nuy Tinck: vendi un dado</button>`;
   if(inf.vc.length)PN+=`<button class="vir" data-a="vc">Virus → €</button>`;
   if(inf.vx>=0)PN+=`<button class="vir" data-a="pick" data-v="${inf.vx}">Virus → extra</button>`;
-  {const pb=(UI.vsel?'<button data-a="vcancel">Annulla la scelta del valore</button>':'')+(inf.pass>=0?`<button class="pass" data-a="pick" data-v="${inf.pass}">${pd.ctx.extra?'Nessuna extra':'Passa'}</button>`:'');if(pb)h+=`<div class="acts bar">${pb}</div>`;}}
+  {const pb=(canUndo()?`<button data-a="undo">Annulla${MP?' (3 s)':''}</button>`:'')+(UI.vsel?'<button data-a="vcancel">Annulla la scelta del valore</button>':'')+(inf.pass>=0?`<button class="pass" data-a="pick" data-v="${inf.pass}">${pd.ctx.extra?'Nessuna extra':'Passa'}</button>`:'');if(pb)h+=`<div class="acts bar">${pb}</div>`;}}
  h+=`<div class="dpanel">${handHTML()}${PN?`<div class="acts">${PN}</div>`:''}</div></div>`+(s.over?endHTML():'')+(waitRoll()&&!UI.sheet&&!UI.pops.length?rollHTML():'')+sheetHTML();
  app.className='game';
  app.innerHTML=h;
  dieFx();
  if(needRoll()&&AUTOROLL&&!UI.pops.length&&!UI.sheet)setTimeout(rollgo,250);
  if(S.tut)tutHL();
- if(s.over)startEnd();}
+ if(s.over){startEnd();tgType();}}
 /* ---------- audio chiptune: suoni generati dal browser, spenti all'inizio ---------- */
 const SND={on:false,ctx:null,master:null};
 try{SND.on=localStorage.getItem('invasione.audio')==='1';}catch(e){}
@@ -1603,7 +1627,11 @@ function silhouette(){if(SILH)return SILH;const c=document.createElement('canvas
  for(let y=0;y<48;y++)for(let x=0;x<48;x++){const hd=((x-24)**2+(y-19)**2),head=hd<=100,body=(((x-24)/19)**2+((y-52)/17)**2)<=1;if((head||body)&&((x+y)%2===0||(head&&hd<=64)))g.fillRect(x,y,1,1);}
  SILH=c.toDataURL('image/png');return SILH;}
 function newsPhoto(){return ritrGet()||silhouette();}
-function newsHTML(){if(!S||S.tut)return '';const k=endKind();if(k!=='trees'&&k!=='earth')return '';
+const TGT={ruins:'«Buonasera, Triceros. La Terra è caduta e il merito è di {N}, qui alle mie spalle. Un applauso al primo terrestre che ha capito qual è la vera razza intelligente. La sua specie è delusa e si lecca le ferite, mentre noi ci godiamo le gesta di questo umano birichino. Benvenuto a bordo, {N}.»',fireworks:'«Buonasera, Triceros. Cattive nuove: l\'invasione è fallita e la colpa è di quel bischero di {N}, ritratto qui dietro. Aveva tradito la sua razza, ma in un modo, ahinoi, goffo e maldestro. La Terra lo disprezza, noi lo disprezziamo ancora di più. Si cerca un nuovo traditore, possibilmente competente.»'};
+function tgHTML(k){const N=nm()||'Comandante',full=TGT[k].split('{N}').join(N),done=S.tgDone;
+ return `<div class="tvn" role="region" aria-label="Telegiornale alieno"><div class="tvh"><span class="live">● LIVE</span> TG ALIENI MALVAGI · EDIZIONE STRAORDINARIA</div><div class="tvw"><img class="tvan" src="art-tg.png" alt="Un anchorman triceratopo alieno"><div class="tvho"><img class="tvph" src="${newsPhoto()}" alt="${esc(N)}"></div><i class="tvsc" aria-hidden="true"></i></div><p class="tvt" data-full="${esc(full)}">${esc(done?full:full.slice(0,S.tgI||0))}</p></div>`;}
+function tgType(){const e=document.querySelector('.tvt');if(!e||!S||S.tgDone)return;const f=e.dataset.full;if(e.dataset.on)return;e.dataset.on='1';let i=S.tgI||0;clearInterval(window.__tgi);window.__tgi=setInterval(()=>{const el=document.querySelector('.tvt');if(!el||REDM()){clearInterval(window.__tgi);if(S)S.tgDone=true;if(el)el.textContent=f;return;}i+=2;S.tgI=i;el.textContent=f.slice(0,i);const w=el.parentNode.querySelector('.tvw');if(w)w.classList.toggle('talk',i<f.length);if(i>=f.length){clearInterval(window.__tgi);S.tgDone=true;}},32);}
+function newsHTML(){if(!S||S.tut)return '';const k=endKind();if(k==='ruins'||k==='fireworks')return tgHTML(k);if(k!=='trees'&&k!=='earth')return '';
  const n=nm(),N=n||'Il comandante',tuo=S.pv[H],loro=S.pv[1-H],win=k==='trees';
  if(S.nv===undefined)S.nv=Math.random()<.5?0:1;
  let h,t,cap;
@@ -1638,13 +1666,17 @@ function cropOpen(file){const url=URL.createObjectURL(file),img=new Image();
  };img.src=url;}
 /* ---- Multiplayer online (partita a turni sincronizzata) ---- */
 const MPK='invasione.mp.v1',ONK='invasione.online.v1',MPL='ABCDEFGHJKLMNPQRSTUVWXYZ';
-let MP=null,MPU={mode:'menu',msg:''};
+let RITASK=false;let MP=null,MPU={mode:'menu',msg:''};
 const mpAvail=()=>!!(window.__MPTEST||cloudOn());
 const mpCode=()=>Array.from({length:4},()=>MPL[Math.floor(Math.random()*MPL.length)]).join('');
 const mpId=()=>Math.random().toString(36).slice(2,10);
 function mpNet(room,onmsg){
  if(window.__MPTEST){const bc=new BroadcastChannel('inv-'+room);bc.onmessage=e=>onmsg(e.data);return Promise.resolve({send:o=>bc.postMessage(o),close:()=>bc.close()});}
  return cloudLoad().then(cl=>{if(!cl)return null;const ch=cl.channel('inv-'+room,{config:{broadcast:{self:false}}});ch.on('broadcast',{event:'m'},pl=>onmsg(pl.payload)).subscribe();return {send:o=>{try{ch.send({type:'broadcast',event:'m',payload:o});}catch(e){}},close:()=>{try{cl.removeChannel(ch);}catch(e){}}};}).catch(()=>null);}
+function notifAsk(){try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('sw.js').catch(()=>{});}catch(e){}}
+function notifTurn(){if(!MP||document.visibilityState==='visible'||!S||S.over)return;const pd=S.pend;if(!pd||pd.p!==H)return;const k=S.log.length+':'+MP.log.length;if(MP.nk===k)return;MP.nk=k;
+ try{if(!('Notification' in window)||Notification.permission!=='granted')return;const o={body:'Tocca a te! '+peerName()+' ha giocato.',tag:'inv-turn',icon:'apple-touch-icon.png',renotify:true,vibrate:[200,100,200]};
+ if(navigator.serviceWorker&&navigator.serviceWorker.controller)navigator.serviceWorker.ready.then(r=>r.showNotification('INVASIONE',o)).catch(()=>{try{new Notification('INVASIONE',o);}catch(e){}});else new Notification('INVASIONE',o);}catch(e){}}
 function mpSend(o){if(MP&&MP.net)MP.net.send(Object.assign({r:MP.room,f:MP.id},o));}
 const peerOn=()=>!!(MP&&MP.peer&&Date.now()-MP.peer.seen<9000);
 const peerName=()=>(MP&&MP.peer&&MP.peer.name)||'l\'avversario';
@@ -1672,17 +1704,17 @@ function mpRecv(m){if(!MP||!m||m.r!==MP.room||m.f===MP.id)return;
  if(MP.peer)MP.peer.seen=Date.now();
  if(m.t==='act'){if(m.n===MP.log.length){if(!mpApply(m.i))mpSend({t:'need',from:MP.log.length});}else if(m.n>MP.log.length)mpSend({t:'need',from:MP.log.length});}
  else if(m.t==='need'){if(m.from<=MP.log.length)mpSend({t:'acts',from:m.from,a:MP.log.slice(m.from)});}
- else if(m.t==='acts'){if(m.from!==MP.log.length||!Array.isArray(m.a))return;for(const i of m.a){try{INV.answer(S,i);}catch(e){}MP.log.push(i);}UI.acc=[];UI.accOn=false;advance();mpSave();}
+ else if(m.t==='acts'){if(m.from!==MP.log.length||!Array.isArray(m.a))return;UI.undo=null;for(const i of m.a){try{INV.answer(S,i);}catch(e){}MP.log.push(i);}UI.acc=[];UI.accOn=false;advance();mpSave();}
  else if(m.t==='undo'){const n=Math.max(0,Math.min(+m.n||0,MP.log.length));MP.log.length=n;S=mpNew();for(const i of MP.log){try{INV.answer(S,i);}catch(e){}}UI.acc=[];UI.accOn=false;UI.pops.push({k:'msg',title:'Mossa annullata',lines:['L\'avversario ha annullato la sua ultima mossa.']});advance();mpSave();}
  else if(m.t==='bye'){if(S&&!S.over){MP.left=true;UI.pops.push({k:'msg',title:'Avversario uscito',lines:[peerName()+' ha lasciato la partita. Questa partita non conta.']});render();}}
 }
-function mpApply(i){if(!S||S.over||!S.pend||S.pend.p===H||!S.pend.opts[i])return false;oppApply(i);MP.log.push(i);mpSave();return true;}
+function mpApply(i){UI.undo=null;if(!S||S.over||!S.pend||S.pend.p===H||!S.pend.opts[i])return false;oppApply(i);MP.log.push(i);mpSave();return true;}
 function mpRecord(){S.unlock=[];try{const o=JSON.parse(localStorage.getItem(ONK)||'{}');const r=S.winner===H?'w':S.winner===1-H?'l':'d';o[r]=(o[r]||0)+1;localStorage.setItem(ONK,JSON.stringify(o));}catch(e){}try{localStorage.removeItem(MPK);}catch(e){}}
-function mpHost(fac){if(MP)mpStop(false);MP={room:mpCode(),id:mpId(),role:'host',seed:(Math.random()*2147483647)|0,fac:[fac,fac==='T'?'A':'T'],log:[],peer:null,started:false};MPU={mode:'hostwait',msg:''};mpOpen();UI.sheet={k:'mp'};render();}
-function mpJoin(){const el=document.getElementById('mp-code');const c=((el&&el.value)||'').toUpperCase().replace(/[^A-Z]/g,'');if(c.length!==4){MPU.msg='Il codice ha 4 lettere.';render();return;}
+function mpHost(fac){notifAsk();if(MP)mpStop(false);MP={room:mpCode(),id:mpId(),role:'host',seed:(Math.random()*2147483647)|0,fac:[fac,fac==='T'?'A':'T'],log:[],peer:null,started:false};MPU={mode:'hostwait',msg:''};mpOpen();UI.sheet={k:'mp'};render();}
+function mpJoin(){notifAsk();const el=document.getElementById('mp-code');const c=((el&&el.value)||'').toUpperCase().replace(/[^A-Z]/g,'');if(c.length!==4){MPU.msg='Il codice ha 4 lettere.';render();return;}
  if(MP)mpStop(false);MP={room:c,id:mpId(),role:'guest',seed:0,fac:null,log:[],peer:null,started:false};MPU={mode:'joinwait',msg:'Collegamento in corso…'};mpOpen();
  MP.jt=setTimeout(()=>{if(MP&&!MP.started&&!MP.peer)mpFail('Nessuna stanza trovata con il codice '+c+'.');},14000);UI.sheet={k:'mp'};render();}
-function mpResume(){const d=mpSaved();if(!d)return;if(MP)mpStop(false);MP={room:d.room,id:d.id,role:d.role,seed:d.seed,fac:d.fac,log:d.log.slice(),peer:d.name?{id:null,name:d.name,seen:0}:null,started:false};
+function mpResume(){notifAsk();const d=mpSaved();if(!d)return;if(MP)mpStop(false);MP={room:d.room,id:d.id,role:d.role,seed:d.seed,fac:d.fac,log:d.log.slice(),peer:d.name?{id:null,name:d.name,seen:0}:null,started:false};
  if(MP.peer&&!MP.peer.id)MP.peer=null;mpOpen();mpBegin();}
 function mpCopy(){const t=MP&&MP.room||'';try{navigator.clipboard.writeText(t);MPU.msg='Codice copiato.';}catch(e){MPU.msg='Copia il codice a mano.';}render();}
 function mpShare(){const t='Giochiamo a INVASIONE! Entra nella mia stanza online: codice '+(MP&&MP.room)+' su https://invasione.netlify.app';try{if(navigator.share){navigator.share({text:t}).catch(()=>{});return;}navigator.clipboard.writeText(t);MPU.msg='Invito copiato: incollalo dove vuoi.';}catch(e){MPU.msg='Condividi a voce il codice '+(MP&&MP.room)+'.';}render();}
@@ -1692,7 +1724,7 @@ function mpSheetBody(){const m=MPU,msg=m.msg?`<p class="cm er" role="status">${e
  if(m.mode==='hostwait')return `<p class="lead">Manda questo codice al tuo amico:</p><div class="mpcode" aria-label="Codice stanza">${esc(MP?MP.room:'')}</div>${msg}<p class="meta">${MP&&MP.peer?'Si è collegato '+esc(MP.peer.name)+'…':'In attesa dell\'avversario…'}</p>${btn('mpShare','','Invia l\'invito','hi')}${btn('mpCopy','','Copia il codice','sec')}${btn('mpBack','','Annulla','sec')}`;
  if(m.mode==='joinform')return `<p class="lead">Scrivi il codice della stanza che ti ha mandato l'amico.</p><input id="mp-code" class="code mpc" maxlength="4" autocapitalize="characters" autocomplete="off" placeholder="ABCD" aria-label="Codice stanza">${msg}${btn('mpJoin','','Entra','hi')}${btn('mpBack','','Indietro','sec')}`;
  if(m.mode==='joinwait')return `<p class="lead">Stanza <b>${esc(MP?MP.room:'')}</b></p>${msg}${btn('mpBack','','Annulla','sec')}`;
- return `<p class="lead">Gioca contro un amico, ognuno sul proprio telefono.</p>${msg}${btn('mpHostForm','','Crea una stanza','hi')}${btn('mpJoinForm','','Entra in una stanza','hi')}${sv?btn('mpResume','','Riprendi la partita online ('+esc(sv.room)+')','sec'):''}<p class="meta">Online si gioca con le regole base. Queste partite non contano per Trofei e premi.</p>${st}`;}
+ return `<p class="lead">Gioca contro un amico, ognuno sul proprio telefono.</p>${msg}${btn('mpHostForm','','Crea una stanza','hi')}${btn('mpJoinForm','','Entra in una stanza','hi')}${sv?btn('mpResume','','Riprendi la partita online ('+esc(sv.room)+')','sec'):''}<p class="meta">Online si gioca con le regole base. Consenti le notifiche per sapere quando tocca a te (funzionano finché il browser resta aperto in secondo piano). Queste partite non contano per Trofei e premi.</p>${st}`;}
 function endHTML(){if(S.tut)return `<div class="endscr" role="dialog" aria-label="Fine addestramento"><canvas id="endcv" width="160" height="100" aria-hidden="true"></canvas><h1 class="w">ADDESTRAMENTO COMPLETATO</h1><p class="msg">SEI PRONTO${nm()?', COMANDANTE '+esc(nm().toUpperCase()):', COMANDANTE'}: ORA SI FA SUL SERIO.</p><p class="sc">TU ${S.pv[H]} – ${S.pv[1-H]} AVV.</p><div class="remind tutrem"><p><b>Ricorda:</b></p><p>· Nella partita vera i round sono 3, e a ogni round Eventi e Condizioni cambiano. Ricontrolla sempre i Fronti prima di schierare.</p><p>· Non scordarti la compravendita: vendi una Tecnologia per 1 €, comprane una per 2 €, oppure fai tutte e due le cose con «Vendi e compra».</p><p>· I Virus hanno sempre una piccola penalità, ma sono una risorsa: monete, azioni extra, valori delle carte. E a ogni round uno se ne va.</p></div><div class="row">${btn('tutPlay','','Gioca la prima partita','hi')}${btn('tutAgain','','Rifai l\'addestramento')}${btn('new','','Home','sec')}</div></div>`;
  const t0=ENDTXT[endKind()],n=nm(),t=[n&&t0[2]==='w'?'HAI VINTO, '+n.toUpperCase()+'!':n&&t0[2]==='l'&&t0[0]==='HAI PERSO:'?'HAI PERSO, '+n.toUpperCase()+':':t0[0],t0[1],t0[2]];
  return `<div class="endscr" role="dialog" aria-label="Fine partita"><canvas id="endcv" width="160" height="100" aria-hidden="true"></canvas><h1 class="${t[2]}">${t[0]}</h1>${t[1]?`<p class="msg">${t[1]}</p>`:''}<p class="sc">TU ${S.pv[H]} – ${S.pv[1-H]} AVV.</p>${newsHTML()}${S.why?`<div class="why">${whyHTML()}</div>`:''}${(()=>{const u=unl();if(u.length)return u.map(x=>`<p class="unlock">TROFEO SBLOCCATO: ${esc(troName(x).toUpperCase())}</p>`).join('')+`<p class="cheer">Hai sbloccato un nuovo premio. Continua così${nm()?', '+esc(nm()):''}!</p>`;const st=loadStats(),h=trophies(),nx=TROPHIES.find(t=>!h.includes(t.id));if(!nx)return '';return `<p class="hint2">${LOCK} Prossimo trofeo, ${esc(nx.name)}: ${esc(nx.req.charAt(0).toLowerCase()+nx.req.slice(1))} (${nx.prog(st)}).</p>`;})()}<div class="remind ${unl().length?'hot':''}"><p>${unl().length?'Hai sbloccato un contenuto: salva il nuovo codice per non perderlo.':'Ricordati di aggiornare il codice di salvataggio.'}</p>${btn('endCopy','','Copia il nuovo codice',unl().length?'hi':'')}${UI.endMsg?`<p class="codemsg ${UI.endOk?'ok':'ko'}" role="status">${esc(UI.endMsg)}</p>`:''}</div><div class="row">${unl().includes('story')?btn('storyEnd','','Leggi la Storia','hi'):unl().length?btn('troEnd','','Vedi i trofei','hi'):''}${btn('recap','','Riepilogo')}${btn('endnew','','Nuova partita',unl().length?'':'hi')}${btn('new','','Home','sec')}</div></div>`;}
@@ -1973,6 +2005,7 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
   body=`<p class="lead">${S&&S.tut?'Se esci, l\'addestramento si interrompe: potrai rifarlo dal Tutorial.':'La partita resta salvata: potrai riprenderla dalla schermata iniziale.'}</p>${btn('leaveYes','','Sì, torna alla home','hi')}${btn('close','','Resta in partita','sec')}`;}
  else if(UI.sheet&&UI.sheet.k==='tutoffer'){ttl='Addestramento';
   body=`<p class="lead">${nm()?esc(nm())+', prima':'Prima'} della prima battaglia ti va una partita guidata? Un solo round, con le istruzioni passo passo: in cinque minuti impari tutto quello che serve.</p>${btn('tutGo','','Inizia l\'addestramento','hi')}${btn('tutSkip','','Salta, so già giocare','sec')}<p class="meta">Puoi rifarlo quando vuoi dal Tutorial.</p>`;}
+ else if(UI.sheet&&UI.sheet.k==='ritrask'){ttl='Manca il tuo ritratto';cancel=true;body=`<p>Non hai ancora caricato la tua foto. Aggiungila: verrà ridotta a pixel e resta solo su questo dispositivo. Chissà dove potrebbe comparire…</p>${btn('prof','','Apri il profilo','hi')}${btn('close','','Più tardi','sec')}`;}
  else if(UI.sheet&&UI.sheet.k==='mp'){ttl='Partita online';cancel=MPU.mode==='menu';body=mpSheetBody();}
  else if(UI.sheet&&UI.sheet.k==='prof'){ttl='Il tuo profilo';cancel=true;body=profSheetBody();}
  else if(UI.sheet&&UI.sheet.k==='name'){const first=UI.sheet.first;ttl=first?'Benvenuto, comandante':'Il tuo nome';
@@ -1996,6 +2029,7 @@ ${UI.codeMsg?`<p class="codemsg ${UI.codeOk?'ok':'ko'}" role="status">${esc(UI.c
   body=`<p class="lead">Vinci contro il computer per sbloccare nuovi contenuti. Vale qualsiasi fazione e difficoltà, e i trofei restano anche se azzeri le statistiche.</p><ul class="trol">${rows}</ul><p class="meta">I trofei viaggiano nel codice di salvataggio: dopo uno sblocco aggiornalo da «Le tue partite».</p>`;}
  else if(UI.sheet&&UI.sheet.k==='vc'&&pd&&pd.p===H&&pd.ctx.then==='main'){const inf=info();cancel=true;ttl='Virus in cambio di monete';
   body='<p>Ogni Virus pesca una carta Virus con effetto immediato.</p>'+inf.vc.map(x=>btn('pick',x.i,`Prendi ${x.n} Virus → +${x.n} €`)).join('');}
+ else if(UI.sheet&&UI.sheet.k==='rrep'&&S.res){ttl='Round '+S.resRd+' concluso';cancel=true;body=resultsHTML()+`<p>Punti Vittoria: tu ${S.pv[H]}, avversario ${S.pv[1-H]}.</p><p class="meta">Si riparte quando ${esc(peerName())} preme «Prosegui».</p>`;}
  else if(pd&&pd.p===H&&pd.ctx.then!=='main'){
   const c=pd.ctx;
   if(c.then==='ack'){ttl='Round '+S.resRd+' concluso';body=resultsHTML()+`<p>Punti Vittoria: tu ${S.pv[H]}, avversario ${S.pv[1-H]}.</p>`+btn('pick',0,'Prosegui','hi');}
@@ -2043,7 +2077,7 @@ function rollSpin(){const els=[...document.querySelectorAll('#app .die[data-t]')
 function rollgo(){if(!needRoll())return;UI.rollRd=S.rd;UI.rollUntil=Date.now()+(REDM()?0:620);UI.dmap=null;sfx('roll');render();rollSpin();
  setTimeout(()=>{UI.rollUntil=0;render();kick();},REDM()?0:660);}
 function dieFx(){if(!S)return;const m={};document.querySelectorAll('#app .die[data-dk]').forEach(e=>{const k=e.dataset.dk,v=e.dataset.t;m[k]=v;});
- const pm=UI.dmap,rd=S.rd+':'+S.setRd;if(pm&&pm.rd===rd&&!rolling()){let any=false;document.querySelectorAll('#app .die[data-dk]').forEach(e=>{const o=pm.m[e.dataset.dk];if(o!==undefined&&o!==e.dataset.t&&!REDM()){e.classList.add('chg');any=true;}});if(any)sfx('dchg');}
+ const pm=UI.dmap,rd=S.rd+':'+S.setRd;if(pm&&pm.rd===rd&&!rolling()){let any=false;document.querySelectorAll('#app .die[data-dk]').forEach(e=>{const o=pm.m[e.dataset.dk];if(o!==undefined&&o!==e.dataset.t&&!REDM()){e.dataset.from=o;e.classList.add('chg');any=true;}});if(any)sfx('dchg');}
  UI.dmap={rd,m};}
 
 /* ---- Sfondo home: invasori pixel ---- */
@@ -2072,16 +2106,18 @@ function advance(){if(S&&S.tut&&S.over&&!S.rec){S.rec=true;tutMark('1');sfx('win
  if(S&&S.over&&!S.rec){S.rec=true;(MP?mpRecord():recordStats());sfx(S.winner===H?'win':S.winner===-1?'draw':'lose');if(unl().length)setTimeout(()=>sfx('unlock'),1300);}
  if(S&&!S.over&&S.pend&&S.pend.ctx.then==='ack'&&UI.ackRd!==S.rd){UI.ackRd=S.rd;sfx('round');}
  UI.sel=null;UI.grp=null;UI.tsel=null;UI.swapA=null;UI.vsel=null;
+ if(MP&&S&&!S.over){const ak=S.pend&&S.pend.ctx.then==='ack'&&S.pend.p!==H;if(ak&&UI.rrRd!==S.rd&&!UI.sheet){UI.rrRd=S.rd;UI.sheet={k:'rrep'};}else if(!ak&&UI.sheet&&UI.sheet.k==='rrep')UI.sheet=null;}
  drain();tutFilter();spCheck();
  const pd=S.pend,humanNow=S.over||!pd||pd.p===H;
  if(humanNow&&UI.acc.length){sfx('pop');UI.pops.unshift({k:'tech',title:UI.accCont?'Esito':'Mossa dell\'avversario',lines:UI.acc});UI.acc=[];
   const cont=!S.over&&pd&&pd.ctx.then!=='main'&&pd.ctx.then!=='ack';UI.accCont=cont;UI.accOn=cont;}
  else if(humanNow&&!UI.acc.length&&UI.accOn&&!(pd&&pd.ctx.then!=='main')){UI.accOn=false;UI.accCont=false;}
- render();kick();if(!MP)saveGame();}
+ render();kick();if(!MP)saveGame();else notifTurn();}
 function kick(){if(MP||!S||S.over||!S.pend||S.pend.p===H||UI.pops.length||waitRoll()||rolling())return;clearTimeout(tm);tm=setTimeout(botMove,diff==='hard'?80:420);}
-function canUndo(){const pd=S&&S.pend;if(!UI.undo||!pd||pd.p!==H||pd.ctx.then==='main')return false;
+function canUndo(){const pd=S&&S.pend;if(!UI.undo||!pd||pd.p!==H||S.tut)return false;
+ if(MP&&Date.now()-(UI.undoAt||0)>3000)return false;
  if(S.rs!==UI.undoRs)return false;/* è intervenuta la sorte */
- if(S.log.slice(UI.undoLog).some(e=>e.t.indexOf(INV.fn(S,1-H))===0&&e.t.indexOf('gioca')<0))return false;
+ if(pd.ctx.then!=='main'&&S.log.slice(UI.undoLog).some(e=>e.t.indexOf(INV.fn(S,1-H))===0&&e.t.indexOf('gioca')<0))return false;
  return true;}
 function bustFronts(){if(!S||!S.fr)return [];const o=[];for(let f=0;f<3;f++){const fr=S.fr[f];if(fr&&fr.cond==='B'&&!fr.flip&&INV.sumv(INV.validShips(S,f,H))>12)o.push(f);}return o;}
 function botMove(){if(!S||!S.pend||S.pend.p===H||UI.pops.length)return;
@@ -2102,7 +2138,7 @@ function virusN(o){const a=o&&o.v;if(!a)return 0;if(a.t==='vcoins')return a.n;if
 function actSound(pd,v,from){let n='click';if(pd.ctx.then==='main'&&v){n={place:'place',play:'card',val:'card',sell:'coin',buy:'coin',sellbuy:'coin',vcoins:'coin'}[v.t]||'click';}
  for(const e of S.log.slice(from)){if(e.t.indexOf('Combattimento')===0)n='combat';if(e.t.indexOf('respinge')>=0)n='shield';}sfx(n);}
 function act(i,force){if(!S.pend||S.pend.p!==H||waitRoll()||rolling())return;UI.handOpen=false;
- {const o=S.pend.opts[+i];if(!S.tut&&S.pend.ctx.then==='main'&&o&&o.v&&o.v.t==='play'){UI.undo=INV.clone(S);UI.undoRs=S.rs;UI.undoLog=S.log.length;UI.undoN=MP?MP.log.length:0;}else if(S.pend.ctx.then==='main')UI.undo=null;}
+ {const o=S.pend.opts[+i];if(!S.tut&&S.pend.ctx.then==='main'&&o&&o.v&&o.v.t!=='pass'){UI.undo=INV.clone(S);UI.undoRs=S.rs;UI.undoLog=S.log.length;UI.undoN=MP?MP.log.length:0;UI.undoAt=Date.now();if(MP)setTimeout(()=>{if(UI.screen==='game')render();},3100);}else if(S.pend.ctx.then==='main')UI.undo=null;}
  if(S.tut&&!(S.pend.ctx.then==='main'&&!force&&virusN(S.pend.opts[+i])>0)){const st=tutStep(),o=S.pend.opts[+i];if(st&&o&&st.ok(o)&&true)S.tutK=(S.tutK||0)+1;}
  if(!force&&S.pend.ctx.then==='main'){const n=virusN(S.pend.opts[+i]);if(n>0){UI.sheet={k:'vconf',i:+i,n,lab:S.pend.opts[+i].l};render();return;}}
  UI.sheet=null;const from=S.log.length,pd0=S.pend,v0=pd0.opts[+i]&&pd0.opts[+i].v;
